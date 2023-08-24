@@ -1,5 +1,5 @@
 # Node Manager
-Manage and track Houdini HDAs and Nuke Widgets
+Manage and track Houdini HDAs and Nuke Gizmos/Snippets
 
 Design Points
 - Should feel like the user is just referencing node definitions from a directory on disk. Minimise extra steps.
