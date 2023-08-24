@@ -1,4 +1,4 @@
-# NodeManager
+# Node Manager
 Manage and track Houdini HDAs and Nuke Widgets
 
 Design Points
