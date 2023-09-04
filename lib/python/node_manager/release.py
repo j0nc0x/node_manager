@@ -4,6 +4,7 @@
 
 import logging
 import os
+import shutil
 
 from git import Repo
 
@@ -22,15 +23,15 @@ class HDARelease(object):
 
     # __config = get_config()
     # hda_repo = __config.get("hda_repo")
-    hda_repo = "git@github.com:j0nc0x/hda_repo.git"
-    # packages_root = __config.get("packages_root")
+    hda_repo = "git@github.com:j0nc0x/hda_repo.git" # Read this from repo config to allow multiple git repositories
+    # package_root = "/Users/jcox/source/hda_library" # Read this from repo config to allow multiple git repositories
 
     def __init__(
         self,
         release_dir,
         node_type_name,
         release_branch,
-        hda_name,
+        node_name,
         package,
         release_comment,
     ):
@@ -41,14 +42,14 @@ class HDARelease(object):
             release_dir(str): The working directory where the release will be run.
             node_type_name(str): The node type name of the HDA being released.
             release_branch(str): The branch to use for the release.
-            hda_name(str): The name of the HDA being released.
+            node_name(str): The name of the node being released.
             package(str): The name of the package being released.
             release_comment(str): The comment to use for the release.
         """
         self.release_dir = release_dir
         self.node_type_name = node_type_name
         self.release_branch = release_branch
-        self.hda_name = hda_name
+        self.node_name = node_name
         self.release_version = None
         self.package = package
         self.comment = release_comment
@@ -63,6 +64,24 @@ class HDARelease(object):
         """
         return os.path.join(self.release_dir, "git")
 
+    def expand_dir(self):
+        """
+        Get the path where the HDA will be expanded.
+
+        Returns:
+            (str): The HDA expand directory.
+        """
+        return os.path.join(self.release_dir, self.node_name)
+
+    def node_path(self):
+        """
+        Get the path to the node to be released.
+
+        Returns:
+            (str): The node path.
+        """
+        return os.path.join(self.git_dir(), "dcc", "houdini", "hda", self.node_name)
+
     def release(self):
         """
         Run the HDA release process.
@@ -74,38 +93,34 @@ class HDARelease(object):
             RuntimeError: The rez package released wasn't successful.
         """
         # Clone the repo
-        print(self.hda_repo)
-        print(self.git_dir())
-        print(self.release_branch)
         cloned_repo = Repo.clone_from(self.hda_repo, self.git_dir())
 
         current = cloned_repo.create_head(self.release_branch)
         current.checkout()
-        return
 
-    #     # Check if expanded HDA directory already exists, delete it if it does
-    #     hda_path = self.hda_path()
-    #     if os.path.exists(hda_path):
-    #         shutil.rmtree(hda_path)
-    #         logger.debug(
-    #             "Removed directory already exists, removing: {path}".format(
-    #                 path=hda_path
-    #             )
-    #         )
+        # Check if expanded node directory already exists, delete it if it does
+        hda_path = self.node_path()
+        if os.path.exists(hda_path):
+            shutil.rmtree(hda_path)
+            logger.debug(
+                "Removed directory already exists, removing: {path}".format(
+                    path=hda_path
+                )
+            )
 
-    #     # Copy the expanaded HDA into it's correct location
-    #     shutil.copytree(self.expand_dir(), hda_path)
+        # Copy the expanaded HDA into it's correct location
+        shutil.copytree(self.expand_dir(), hda_path)
 
-    #     # See if anything was updated
-    #     changes = [change.a_path for change in cloned_repo.index.diff(None)]
-    #     if not changes and not cloned_repo.untracked_files:
-    #         logger.debug("No changes have been made to this HDA, aborting.")
-    #         return None
+        # See if anything was updated
+        changes = [change.a_path for change in cloned_repo.index.diff(None)]
+        if not changes and not cloned_repo.untracked_files:
+            logger.debug("No changes have been made to this HDA, aborting.")
+            return None
 
-    #     # Add and commit
-    #     cloned_repo.git.add(A=True)
-    #     cloned_repo.git.commit(m=self.comment)
-    #     cloned_repo.git.push("--set-upstream", "origin", current)
+        # Add and commit
+        cloned_repo.git.add(A=True)
+        cloned_repo.git.commit(m=self.comment)
+        cloned_repo.git.push("--set-upstream", "origin", current)
 
     #     # Up the package version
     #     fh, abs_path = mkstemp()
@@ -182,21 +197,21 @@ class HDARelease(object):
     #             "{path}".format(path=release_path)
     #         )
 
-    #     # merge to master
-    #     cloned_repo.git.reset("--hard")
-    #     master = cloned_repo.heads.master
-    #     master.checkout()
-    #     cloned_repo.git.pull()
-    #     cloned_repo.git.merge(current, "--no-ff")
-    #     cloned_repo.git.push()
+        # merge to master
+        cloned_repo.git.reset("--hard")
+        main = cloned_repo.heads.main
+        main.checkout()
+        cloned_repo.git.pull()
+        cloned_repo.git.merge(current, "--no-ff")
+        cloned_repo.git.push()
 
-    #     # clean up release dir
-    #     shutil.rmtree(self.release_dir)
-    #     logger.debug(
-    #         "Cleaned up release directory {path}".format(path=self.release_dir)
-    #     )
+        # clean up release dir
+        #shutil.rmtree(self.release_dir)
+        logger.debug(
+            "(Would clean) up release directory {path}".format(path=self.release_dir)
+        )
 
-    #     # success
-    #     logger.info("Release successful for {hda}.".format(hda=self.hda_name))
+        # success
+        logger.info("Release successful for {hda}.".format(hda=self.node_name))
 
-    #     return self.release_hda_path()
+        return True

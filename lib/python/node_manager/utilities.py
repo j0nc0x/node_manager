@@ -75,7 +75,8 @@ def node_type_namespace(node_type_name, new_namespace=None):
 
     if valid_node_type_name(node_type_name):
         name_sections = node_type_name_components(node_type_name)
-        return name_sections[-3]
+        namespace_name_sections = name_sections[:-2]
+        return ".".join(namespace_name_sections)
 
     return None
 
@@ -211,6 +212,10 @@ def expanded_hda_name(definition):
     current_name = definition.nodeTypeName()
     name = node_type_name(current_name)
     namespace = node_type_namespace(current_name)
-    return "{category}_{namespace}_{name}.hda".format(
-        category=category, namespace=namespace, name=name
+    version = node_type_version(current_name)
+    return "{category}_{namespace}.{name}.{version}.hda".format(
+        category=category,
+        namespace=namespace,
+        name=name,
+        version=version,
     )
