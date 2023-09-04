@@ -3,6 +3,7 @@
 """Node manager utils."""
 
 import logging
+import time
 
 
 logger = logging.getLogger(__name__)
@@ -164,3 +165,52 @@ def cleanup_embedded_definitions(nodetype):
                     name=nodetype.name(),
                 )
             )
+
+
+def release_branch_name(definition):
+    """
+    Generate a legal git release branch name for the given definition.
+
+    Args:
+        definition(hou.HDADefinition): The HDA definition to get the release branch for.
+
+    Returns:
+        (str): The git release branch for the given definition.
+    """
+    category = definition.nodeTypeCategory().name()
+    current_name = definition.nodeTypeName()
+    namespace = node_type_namespace(current_name)
+    name = node_type_name(current_name)
+    version = node_type_version(current_name)
+    ts = time.gmtime()
+    release_time = time.strftime("%d-%m-%y-%H-%M-%S", ts)
+    return "release_{category}-{namespace}-{name}-{version}-{time}".format(
+        category=category,
+        namespace=namespace,
+        name=name,
+        version=version,
+        time=release_time,
+    )
+
+
+def expanded_hda_name(definition):
+    """Get the expanded HDA name.
+
+    This function is used by the HDA manager to set the name of the directory a
+    hou.HDADefinition is expanded to
+    hou.nodeTypeCategory.name()_hou.nodeTypeName(namespace)_hou.nodeTypeName(name).hda
+    ie. Lop_rebellion.pipeline_sgreference.hda.
+
+    Args:
+        definition(hou.HDADefinition): The HDA definition to get the expanded name for.
+
+    Returns:
+        (str): The expanded HDA name.
+    """
+    category = definition.nodeTypeCategory().name()
+    current_name = definition.nodeTypeName()
+    name = node_type_name(current_name)
+    namespace = node_type_namespace(current_name)
+    return "{category}_{namespace}_{name}.hda".format(
+        category=category, namespace=namespace, name=name
+    )

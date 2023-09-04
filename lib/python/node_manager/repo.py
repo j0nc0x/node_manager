@@ -50,6 +50,17 @@ class NodeRepo(object):
             )
         )
 
+    def repo_root(self):
+        """Get the root of the HDA repo on the filesystem.
+
+        Returns:
+            (str): The path to the HDA repo on disk.
+        """
+        if self.editable:
+            return self.repo_path
+
+        return os.path.dirname(self.repo_path)
+
     def get_name(self):
         """Get the repo name.
 
