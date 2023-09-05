@@ -191,6 +191,10 @@ class HDARelease(object):
         cloned_repo.git.commit(config_path, m="Version up")
         cloned_repo.git.push()
 
+        # Push tag to repo
+        new_tag = cloned_repo.create_tag(self.release_version, message="Release {version}".format(version=self.release_version))
+        cloned_repo.remotes.origin.push(new_tag)
+
         # merge to master
         cloned_repo.git.reset("--hard")
         main = cloned_repo.heads.main
