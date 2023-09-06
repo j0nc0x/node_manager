@@ -98,6 +98,53 @@ class HDARelease(object):
         """
         return os.path.join(self.git_dir(), "config", "config.json")
 
+    def generate_release_version(self, version, major, minor, patch):
+        """
+        """
+        if major + minor + patch != 1:
+            raise RuntimeError("Invalid version increment.")
+
+        release_version = None
+        parsed_version = parse(version)
+        if patch:
+            release_version = "{major}.{minor}.{patch}".format(
+                major=parsed_version.major,
+                minor=parsed_version.minor,
+                patch=parsed_version.micro + 1,
+            )
+        elif minor:
+            release_version = "{major}.{minor}.{patch}".format(
+                major=parsed_version.major,
+                minor=parsed_version.minor + 1,
+                patch=0,
+            )
+        elif major:
+            release_version = "{major}.{minor}.{patch}".format(
+                major=parsed_version.major + 1,
+                minor=0,
+                patch=0,
+            )
+
+        return release_version
+
+    def get_release_version(self, conf_version, major, minor, patch, release_tags):
+        """
+        """
+        limit = 10
+        i = 0
+        release_version = self.generate_release_version(conf_version, major, minor, patch)
+        while release_version in release_tags:
+            i += 1
+            release_version = self.generate_release_version(release_version, major, minor, patch)
+
+            if i > limit:
+                raise RuntimeError("Failed to generate release version after {iteration} iterations.".format(iteration=i))
+
+        if i:
+            logger.warning("Release version took {iteration} iterations to generate.".format(iteration=i + 1))
+
+        return release_version
+
     def release(self):
         """
         Run the HDA release process.
@@ -116,7 +163,6 @@ class HDARelease(object):
 
         # Clone the repo
         cloned_repo = Repo.clone_from(self.hda_repo, self.git_dir())
-
         current = cloned_repo.create_head(self.release_branch)
         current.checkout()
 
@@ -141,6 +187,14 @@ class HDARelease(object):
             else:
                 major = True
 
+        repo_conf_data = {}
+        with open(config_path, "r") as repo_conf:
+            repo_conf_data = json.load(repo_conf)
+
+        # Get the release version
+        release_tags = [str(tag) for tag in cloned_repo.tags]
+        self.release_version = self.get_release_version(repo_conf_data.get("version"), major, minor, patch, release_tags)
+
         # Copy the expanaded HDA into it's correct location
         shutil.copytree(self.expand_dir(), hda_path)
 
@@ -155,35 +209,8 @@ class HDARelease(object):
         cloned_repo.git.commit(m=self.comment)
         cloned_repo.git.push("--set-upstream", "origin", current)
 
-        repo_conf_data = {}
-        with open(config_path, "r") as repo_conf:
-            repo_conf_data = json.load(repo_conf)
-
-        if major + minor + patch != 1:
-            raise RuntimeError("Invalid version increment.")     
-
-        version = parse(repo_conf_data.get("version"))
-        if patch:
-            self.release_version = "{major}.{minor}.{patch}".format(
-                major=version.major,
-                minor=version.minor,
-                patch=version.micro + 1,
-            )
-        elif minor:
-            self.release_version = "{major}.{minor}.{patch}".format(
-                major=version.major,
-                minor=version.minor + 1,
-                patch=0,
-            )
-        elif major:
-            self.release_version = "{major}.{minor}.{patch}".format(
-                major=version.major + 1,
-                minor=0,
-                patch=0,
-            )
-
+        # Increment version in config
         repo_conf_data["version"] = self.release_version
-
         with open(config_path, "w") as repo_conf:
             json.dump(repo_conf_data, repo_conf)
 
@@ -202,6 +229,10 @@ class HDARelease(object):
         cloned_repo.git.pull()
         cloned_repo.git.merge(current, "--no-ff")
         cloned_repo.git.push()
+
+        # remove release branch
+        remote = cloned_repo.remote(name='origin')
+        remote.push(refspec=(':{branch}'.format(branch=self.release_branch)))
 
         # clean up release dir
         #shutil.rmtree(self.release_dir)
