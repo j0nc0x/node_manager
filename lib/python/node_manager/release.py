@@ -40,6 +40,7 @@ class HDARelease(object):
         node_name,
         package,
         release_comment,
+        repo,
     ):
         """
         Initialise HDARelease to prepare the release process.
@@ -59,6 +60,7 @@ class HDARelease(object):
         self.release_version = None
         self.package = package
         self.comment = release_comment
+        self.repo = repo
         logger.info("Initialised HDA Release process")
 
     def git_dir(self):
@@ -68,7 +70,7 @@ class HDARelease(object):
         Returns:
             (str): The path to the git repository.
         """
-        return os.path.join(self.release_dir, "git")
+        return self.repo.manager.git_dir
 
     def expand_dir(self):
         """
@@ -161,9 +163,8 @@ class HDARelease(object):
 
         config_path = self.config_path()
 
-        # Clone the repo
-        cloned_repo = Repo.clone_from(self.hda_repo, self.git_dir())
-        current = cloned_repo.create_head(self.release_branch)
+        # Create the branch
+        current = self.repo.git_repo.create_head(self.release_branch)
         current.checkout()
 
         # Check if expanded node directory already exists, delete it if it does
@@ -192,22 +193,22 @@ class HDARelease(object):
             repo_conf_data = json.load(repo_conf)
 
         # Get the release version
-        release_tags = [str(tag) for tag in cloned_repo.tags]
+        release_tags = [str(tag) for tag in self.repo.git_repo.tags]
         self.release_version = self.get_release_version(repo_conf_data.get("version"), major, minor, patch, release_tags)
 
         # Copy the expanaded HDA into it's correct location
         shutil.copytree(self.expand_dir(), hda_path)
 
         # See if anything was updated
-        changes = [change.a_path for change in cloned_repo.index.diff(None)]
-        if not changes and not cloned_repo.untracked_files:
+        changes = [change.a_path for change in self.repo.git_repo.index.diff(None)]
+        if not changes and not self.repo.git_repo.untracked_files:
             logger.debug("No changes have been made to this HDA, aborting.")
             return None
 
         # Add and commit
-        cloned_repo.git.add(A=True)
-        cloned_repo.git.commit(m=self.comment)
-        cloned_repo.git.push("--set-upstream", "origin", current)
+        self.repo.git_repo.git.add(A=True)
+        self.repo.git_repo.git.commit(m=self.comment)
+        self.repo.git_repo.git.push("--set-upstream", "origin", current)
 
         # Increment version in config
         repo_conf_data["version"] = self.release_version
@@ -215,23 +216,23 @@ class HDARelease(object):
             json.dump(repo_conf_data, repo_conf)
 
         # Commit and push
-        cloned_repo.git.commit(config_path, m="Version up")
-        cloned_repo.git.push()
+        self.repo.git_repo.git.commit(config_path, m="Version up")
+        self.repo.git_repo.git.push()
 
         # Push tag to repo
-        new_tag = cloned_repo.create_tag(self.release_version, message="Release {version}".format(version=self.release_version))
-        cloned_repo.remotes.origin.push(new_tag)
+        new_tag = self.repo.git_repo.create_tag(self.release_version, message="Release {version}".format(version=self.release_version))
+        self.repo.git_repo.remotes.origin.push(new_tag)
 
         # merge to master
-        cloned_repo.git.reset("--hard")
-        main = cloned_repo.heads.main
+        self.repo.git_repo.git.reset("--hard")
+        main = self.repo.git_repo.heads.main
         main.checkout()
-        cloned_repo.git.pull()
-        cloned_repo.git.merge(current, "--no-ff")
-        cloned_repo.git.push()
+        self.repo.git_repo.git.pull()
+        self.repo.git_repo.git.merge(current, "--no-ff")
+        self.repo.git_repo.git.push()
 
         # remove release branch
-        remote = cloned_repo.remote(name='origin')
+        remote = self.repo.git_repo.remote(name='origin')
         remote.push(refspec=(':{branch}'.format(branch=self.release_branch)))
 
         # clean up release dir

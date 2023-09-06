@@ -8,6 +8,8 @@ import os
 
 import hou
 
+from git import Repo
+
 from node_manager import nodetype
 from node_manager import utilities
 
@@ -35,8 +37,12 @@ class NodeRepo(object):
             editable(:obj:`bool`,optional): Are the HDAs in this repository editable?
         """
         self.manager = manager
-        self.editable = editable
         self.repo_path = repo_path
+
+        self.git_repo = self.clone_repo()
+        self.library_path = self.get_library_path()
+
+        self.editable = editable
         self.asset_subdirectory = "hda"
         self.node_types = dict()
         self.extensions = [".hda", ".hdanc"]
@@ -50,16 +56,32 @@ class NodeRepo(object):
             )
         )
 
+    def clone_repo(self):
+        return Repo.clone_from(self.repo_path, self.manager.git_dir)
+
+    def config_path(self):
+        """
+        """
+        return os.path.join(self.manager.git_dir, "config", "config.json")
+
+    def get_library_path(self):
+        config_path = self.config_path()
+        repo_conf_data = {}
+        with open(config_path, "r") as repo_conf:
+            repo_conf_data = json.load(repo_conf)
+
+        return repo_conf_data.get("library_path")
+
     def repo_root(self):
         """Get the root of the HDA repo on the filesystem.
 
         Returns:
             (str): The path to the HDA repo on disk.
         """
-        if self.editable:
-            return self.repo_path
+        # if self.editable:
+        #     return self.repo_path
 
-        return os.path.dirname(self.repo_path)
+        return os.path.dirname(self.library_path)
 
     def get_name(self):
         """Get the repo name.
@@ -67,7 +89,7 @@ class NodeRepo(object):
         Returns:
             (str): The name of the Node repo.
         """
-        repo_conf_path = os.path.join(self.repo_path, ".conf")
+        repo_conf_path = self.config_path()
         repo_conf_data = None
         with open(repo_conf_path, "r") as repo_conf:
             repo_conf_data = json.load(repo_conf)
@@ -129,14 +151,14 @@ class NodeRepo(object):
 
     def load(self):
         """Load all definitions contained by this repository."""
-        logger.debug("Reading from {directory}".format(directory=self.repo_path))
+        logger.debug("Reading from {directory}".format(directory=self.library_path))
 
-        if not os.path.exists(self.repo_path):
+        if not os.path.exists(self.library_path):
             raise RuntimeError(
-                "Couldn't load from: {directory}".format(directory=self.repo_path)
+                "Couldn't load from: {directory}".format(directory=self.library_path)
             )
 
-        for definition_file in os.listdir(self.repo_path):
+        for definition_file in os.listdir(self.library_path):
             if os.path.splitext(definition_file)[1].lower() in self.extensions:
-                full_path = os.path.join(self.repo_path, definition_file)
+                full_path = os.path.join(self.library_path, definition_file)
                 self.process_node_definition_file(full_path)

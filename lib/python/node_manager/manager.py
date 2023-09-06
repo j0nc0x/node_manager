@@ -47,7 +47,7 @@ class NodeManager(object):
         self.node_repos = dict()
         self.releases = list()
     #     self.depth = int(os.getenv("HDA_MANAGER_LOAD_DEPTH", 5))
-        self.edit_dir = self.edit_dir()
+        self.git_dir = self.git_dir()
 
     #     self.configure_window = None
 
@@ -64,14 +64,17 @@ class NodeManager(object):
         repo_paths = []
         node_manage_repos = os.getenv("NODE_MANAGER_HOUDINI")
         if node_manage_repos:
-            repo_paths = node_manage_repos.split(os.pathsep)
+            repo_paths = node_manage_repos.split(",")
 
         return repo_paths
 
-    def edit_dir(self):
+    def node_manager_temp_dir(self):
+        return mkdtemp(prefix="node-manager")
+
+    def git_dir(self):
         """
         """
-        return mkdtemp(prefix="node-manager-")
+        return os.path.join(self.node_manager_temp_dir(), "git")
 
     def release_dir(self):
         """
@@ -80,7 +83,7 @@ class NodeManager(object):
         Returns:
             (str): The release directory.
         """
-        return os.path.join(self.edit_dir, "release")
+        return os.path.join(self.node_manager_temp_dir(), "release")
 
     def initialise_repositories(self):
         """Initialise the HDA repoositories."""
@@ -257,9 +260,11 @@ class NodeManager(object):
         if not package:
             raise RuntimeError("No package found for definition")
 
+        repo = self.repo_from_definition(definition)
+
         # Create and run the release
         hda_release = release.HDARelease(
-            full_release_dir, node_type_name, branch, hda_name, package, release_comment
+            full_release_dir, node_type_name, branch, hda_name, package, release_comment, repo,
         )
         print(hda_release)
         self.releases.append(hda_release)
