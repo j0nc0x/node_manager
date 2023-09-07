@@ -1,15 +1,15 @@
 # Node Manager
 Manage and track Houdini HDAs and Nuke Gizmos/Snippets
 
-General Design Points
+### General Design Points
 - Should feel like the user is just referencing node definitions from a directory on disk. Minimise extra steps.
 - All node changes tracked through source control.
 - Use standard UIs and workflows where possible.
 
 
-## Storing / loading the HDAs
+### Storing / loading the HDAs
 
-### Versioned Directories
+#### Versioned Directories
 Pros:
 - HDAs stored on disk as binary for fast loading.
 - More storage due to duplication of data between versions.
@@ -21,7 +21,7 @@ Cons:
 - Updates into a live Houdini session cumbersome.
 
 
-### Local HDA dir / repo clone:
+#### Local HDA dir / repo clone:
 Pros:
 - HDAs pulled and built when required, small disk space wastage.
 - Updates into a live Houdini session relatively easy, pull / build the latest refresh HDAs.
@@ -31,7 +31,7 @@ HDAs pulled and built when required, this will add to load times
   - How to handle merge if heads have diverged on pull.
 
 
-### Central HDA dir / local repo clone:
+#### Central HDA dir / local repo clone:
 Pros:
 - Much more like working with a simple HDA folder on disk.
 - You will see all users HDAs as they are being developed.
@@ -40,7 +40,7 @@ Cons:
 - Technically you will be able to publish anyone's updates (maybe a pro?).
 - Difficult to lock changes for use on the farm. Maybe require publish and build from repo on farm.
 
-### Central HDA dir / auto publish:
+#### Central HDA dir / auto publish:
 Pros:
 - Basically a shared folder on disk.
 - Publishes happen automatically on certain events - save, submission to farm etc.
