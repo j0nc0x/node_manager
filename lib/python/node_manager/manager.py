@@ -36,7 +36,10 @@ class NodeManager(object):
             (HDAManager): The HDAManager instance.
         """
         if cls.instance is None:
+            start = time.time()
             cls.instance = cls()
+            cls.instance.stats["full_init"] = time.time() - start
+            print(cls.instance.stats)
         return cls.instance
 
     def __init__(
@@ -44,15 +47,27 @@ class NodeManager(object):
     ):
         """Initialise the NodeManager class."""
         logger.info("Initialising Node Manager")
+
+        self.base = os.getenv("NODE_MANAGER_BASE")
+        self.repos = self.get_repo_paths()
+        self.temp_dir = mkdtemp(prefix="node-manager")
+
+        self.stats = {}
         self.node_repos = dict()
         self.releases = list()
     #     self.depth = int(os.getenv("HDA_MANAGER_LOAD_DEPTH", 5))
-        self.git_dir = self.git_dir()
 
     #     self.configure_window = None
 
         self.initialise_repositories()
+        start = time.time()
         self.load_all()
+        self.stats["load_hdas"] = time.time() - start
+
+    def is_initialised(self):
+        """
+        """
+        return self.initialised
 
     def get_repo_paths(self):
         """
@@ -62,28 +77,20 @@ class NodeManager(object):
             (list): A list of Node Manager repositories in the current environment.
         """
         repo_paths = []
-        node_manage_repos = os.getenv("NODE_MANAGER_HOUDINI")
+        node_manage_repos = os.getenv("NODE_MANAGER_REPOS")
         if node_manage_repos:
             repo_paths = node_manage_repos.split(",")
 
         return repo_paths
 
-    def node_manager_temp_dir(self):
-        return mkdtemp(prefix="node-manager")
+    # def release_dir(self):
+    #     """
+    #     Get the path to the HDA edit release directory.
 
-    def git_dir(self):
-        """
-        """
-        return os.path.join(self.node_manager_temp_dir(), "git")
-
-    def release_dir(self):
-        """
-        Get the path to the HDA edit release directory.
-
-        Returns:
-            (str): The release directory.
-        """
-        return os.path.join(self.node_manager_temp_dir(), "release")
+    #     Returns:
+    #         (str): The release directory.
+    #     """
+    #     return os.path.join(self.node_manager_temp_dir(), "release")
 
     def initialise_repositories(self):
         """Initialise the HDA repoositories."""
@@ -93,9 +100,7 @@ class NodeManager(object):
         # # Add to repositories list
         # self.hda_repos[name] = editable_hda_repo
 
-        # Loop over all repositories by looking at NODE_MANAGER_HOUDINI env var
-        repo_paths = self.get_repo_paths()
-        for path in repo_paths:
+        for path in self.repos:
             # Create the repository object
             node_repo = repo.NodeRepo(self, path)
             name = node_repo.get_name()
@@ -166,7 +171,7 @@ class NodeManager(object):
         repo = self.repo_from_definition(definition)
 
         if repo:
-            return repo.package_name
+            return repo.name
 
         return None
 

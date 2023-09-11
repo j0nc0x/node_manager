@@ -5,10 +5,13 @@
 import json
 import logging
 import os
+import subprocess
+import time
 
 import hou
 
 from git import Repo
+from git.exc import NoSuchPathError, InvalidGitRepositoryError
 
 from node_manager import nodetype
 from node_manager import utilities
@@ -38,31 +41,65 @@ class NodeRepo(object):
         """
         self.manager = manager
         self.repo_path = repo_path
+        self.name = self.get_name()
 
+        start = time.time()
         self.git_repo = self.clone_repo()
+        self.manager.stats["repo_clone"] = time.time() - start
         self.library_path = self.get_library_path()
+
+        start = time.time()
+        self.build_repo()
+        self.manager.stats["build"] = time.time() - start
 
         self.editable = editable
         self.asset_subdirectory = "hda"
         self.node_types = dict()
         self.extensions = [".hda", ".hdanc"]
-        self.package_name = self.get_name()
-        self.package_version = None
+
+        self.version = self.get_version()
         self.commit_hash = None
 
         logger.info(
             "Initialised HDA Repo: {name} ({path})".format(
-                name=self.package_name, path=self.repo_path
+                name=self.name, path=self.repo_path
             )
         )
 
-    def clone_repo(self):
-        return Repo.clone_from(self.repo_path, self.manager.git_dir)
+    def local_repo_root(self):
+        return os.path.join(self.manager.base, self.name)
+
+    def repo_temp_dir(self):
+        return os.path.join(self.manager.temp_dir, self.name)
 
     def config_path(self):
         """
         """
-        return os.path.join(self.manager.git_dir, "config", "config.json")
+        return os.path.join(self.local_repo_root(), "config", "config.json")
+
+    def clone_repo(self):
+        cloned_repo = None
+        try:
+            cloned_repo =  Repo(self.local_repo_root())
+            cloned_repo.git.pull()
+        except (NoSuchPathError, InvalidGitRepositoryError) as error:
+            logger.debug("Couldn't load repo from {path}, clone instead.".format(path=self.local_repo_root()))
+
+        if not cloned_repo:
+            cloned_repo = Repo.clone_from(self.repo_path, self.local_repo_root(), depth=1)
+
+        return cloned_repo
+
+    def build_repo(self):
+        os.makedirs(self.repo_temp_dir())
+        expanded_hda_dir = os.path.join(self.local_repo_root(), "dcc", "houdini", "hda")
+        for hda in os.listdir(expanded_hda_dir):
+            path = os.path.join(expanded_hda_dir, hda)
+            hda_path = os.path.join(self.repo_temp_dir(), hda)
+            logger.info("Processing {source}".format(source=path))
+            hotl_cmd = ["hotl", "-C", path, hda_path]
+            logger.debug(hotl_cmd)
+            result = subprocess.call(hotl_cmd)
 
     def get_library_path(self):
         config_path = self.config_path()
@@ -89,6 +126,29 @@ class NodeRepo(object):
         Returns:
             (str): The name of the Node repo.
         """
+        # repo_conf_path = self.config_path()
+        # repo_conf_data = None
+        # with open(repo_conf_path, "r") as repo_conf:
+        #     repo_conf_data = json.load(repo_conf)
+
+        # if not repo_conf_data:
+        #     logger.warning(
+        #         "Repo conf failed to load from {path}".format(
+        #             path=repo_conf_path,
+        #         )
+        #     )
+        #     return
+
+        # name = repo_conf_data.get("name")
+    
+        return self.repo_path.split("/")[-1][:-4]
+
+    def get_version(self):
+        """Get the repo version.
+
+        Returns:
+            (str): The version of the Node repo.
+        """
         repo_conf_path = self.config_path()
         repo_conf_data = None
         with open(repo_conf_path, "r") as repo_conf:
@@ -102,9 +162,9 @@ class NodeRepo(object):
             )
             return
 
-        name = repo_conf_data.get("name")
+        version = repo_conf_data.get("version")
 
-        return name
+        return version
 
     def process_definition(self, definition, force=False):
         """Update the node_types dictionary usng the provided definition.
@@ -151,14 +211,14 @@ class NodeRepo(object):
 
     def load(self):
         """Load all definitions contained by this repository."""
-        logger.debug("Reading from {directory}".format(directory=self.library_path))
+        logger.debug("Reading from {directory}".format(directory=self.repo_temp_dir()))
 
         if not os.path.exists(self.library_path):
             raise RuntimeError(
-                "Couldn't load from: {directory}".format(directory=self.library_path)
+                "Couldn't load from: {directory}".format(directory=self.repo_temp_dir())
             )
 
-        for definition_file in os.listdir(self.library_path):
+        for definition_file in os.listdir(self.repo_temp_dir()):
             if os.path.splitext(definition_file)[1].lower() in self.extensions:
-                full_path = os.path.join(self.library_path, definition_file)
+                full_path = os.path.join(self.repo_temp_dir(), definition_file)
                 self.process_node_definition_file(full_path)
