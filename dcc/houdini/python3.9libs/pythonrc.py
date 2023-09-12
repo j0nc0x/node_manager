@@ -3,7 +3,9 @@
 import logging
 import sys
 
-from node_manager.manager import NodeManager
+import hou
+
+from node_manager import manager
 
 
 logging.basicConfig(
@@ -12,8 +14,7 @@ logging.basicConfig(
     stream=sys.stdout,
 )
 
-NodeManager.init()
-
+manager.initialise_node_manager(background=hou.isUIAvailable())
 
 # def houdini_startup():
 #     """Houdini startup script.

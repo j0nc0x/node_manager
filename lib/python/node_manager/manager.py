@@ -11,6 +11,11 @@ from tempfile import mkdtemp
 
 import hou
 
+if hou.isUIAvailable():
+    from hdefereval import do_work_in_background_thread
+else:
+    do_work_in_background_thread = None
+
 from node_manager import release
 from node_manager import repo
 from node_manager import utilities
@@ -294,3 +299,58 @@ class NodeManager(object):
         hou.ui.displayMessage(
             "HDA release successful!", title="HDA Manager: Publish HDA"
         )
+
+def null_decorator(function):
+    pass
+
+
+def deferred_decorator(callback_returning_decorator):
+    """ Borrowing this from SideFX -> $HFS/houdini/python3.9libs/sas/localassets.py
+    This decorator defers another decorator from being called until the
+    decorated function is actually called.
+    """
+    # We can't use the nonlocal keyword until Python 3, so use a mutable
+    # object to let inner functions modify items local to the closure's
+    # scope.
+    if callback_returning_decorator() is None:
+        return null_decorator
+
+    closure_vars = {"decorated_function": None}
+
+    def new_decorator(function):
+        def wrapper(*args, **kwargs):
+            decorated_function = closure_vars["decorated_function"]
+            if decorated_function is None:
+                # This is the first time the decorated function has been
+                # called, so compute the actual decorated function and cache
+                # it.
+                decorator = callback_returning_decorator()
+                decorated_function = decorator(function)
+                closure_vars["decorated_function"] = decorated_function
+
+            # Call the actual decorated function.
+            return decorated_function(*args, **kwargs)
+        return wrapper
+
+    return new_decorator
+
+
+@deferred_decorator(lambda: do_work_in_background_thread)
+def initialise_in_background():
+    logger.debug("Beginning initialisation using background thread.")
+    yield
+    NodeManager.init()
+    yield
+    logger.debug("Initialisation complete.")
+
+def initialise_in_foreground():
+    logger.debug("Beginning initialisation using main thread.")
+    NodeManager.init()
+
+def initialise_node_manager(background=True):
+    if background and not do_work_in_background_thread:
+        logger.warning("Attempted to use background thread but UI not available, reverting to main thread.")
+    if background and do_work_in_background_thread:
+        initialise_in_background()
+    else:
+        initialise_in_foreground()
