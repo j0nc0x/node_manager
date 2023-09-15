@@ -61,15 +61,22 @@ Cons:
 ### Plugin system
 Build plugin system for handling default HDA storage options split into plugin category for load and publish. Allow plugins to be selected using config file.
 
-Load:
+#### (Default) Folder on disk
 
-- (Default) Basic load from folder on disk.
-- Load directly from git with support to load specific commit.
-- Load from versioned directory with support for loading specific directory.
-- Load from rez package determined from rez environment.
+Load: Basic load from folder on disk.
+Publish: Basic write to folder on disk.
 
-Publish:
-- (Default) Basic write to folder on disk.
-- Write directly to git applying version tag.
-- Write to git and release to versioned directory.
-- Write to git and release to rez package.
+#### Git
+
+Load: Directly from git with support to load a specific commit.
+Publish: Write directly to git applying version tag.
+
+#### Git Versioned Directory
+
+Load: From versioned directory with support for loading specific directory.
+Publish: Write to git and release to versioned directory.
+
+#### Rez Package
+
+Load: From rez package determined from rez environment.
+Publish: Write to git and release to rez package.
