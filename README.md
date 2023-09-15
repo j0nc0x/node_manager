@@ -57,3 +57,19 @@ Cons:
 - Difficult / not possible to capture release comments.
 - No choices on when to publish, always include everything (maybe a pro).
 - Lock on farm by pulling a certain commit / tag.
+
+### Plugin system
+Build plugin system for handling default HDA storage options split into plugin category for load and publish. Allow plugins to be selected using config file.
+
+Load:
+
+- (Default) Basic load from folder on disk.
+- Load directly from git with support to load specific commit.
+- Load from versioned directory with support for loading specific directory.
+- Load from rez package determined from rez environment.
+
+Publish:
+- (Default) Basic write to folder on disk.
+- Write directly to git applying version tag.
+- Write to git and release to versioned directory.
+- Write to git and release to rez package.
