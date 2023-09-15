@@ -64,21 +64,25 @@ Build plugin system for handling default HDA storage options split into plugin c
 #### (Default) Folder on disk
 
 Load: Basic load from folder on disk.
+
 Publish: Basic write to folder on disk.
 
 #### Git
 
 Load: Directly from git with support to load a specific commit.
+
 Publish: Write directly to git applying version tag.
 
 #### Git Versioned Directory
 
 Load: From versioned directory with support for loading specific directory.
+
 Publish: Write to git and release to versioned directory.
 
 #### Rez Package
 
 Load: From rez package determined from rez environment.
+
 Publish: Write to git and release to rez package.
 
 ### Edit Directory
