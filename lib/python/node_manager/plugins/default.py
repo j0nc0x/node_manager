@@ -11,9 +11,9 @@ class NodeManagerPlugin(NodeManagerStore):
     def __init__(self):
         """ 
         """
-        logger.info("Initialsied DefaultStore")
-        logger.info(self.name)
-        logger.info(self.plugin_type)
+        logger.debug("Initialsied DefaultStore")
+        logger.debug(self.name)
+        logger.debug(self.plugin_type)
 
     def load(self):
         """

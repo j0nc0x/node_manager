@@ -80,23 +80,40 @@ class NodeManager(object):
         self.stats["load_hdas"] = time.time() - start
 
     @staticmethod
-    def path_import(absolute_path):
-        '''implementation taken from https://docs.python.org/3/library/importlib.html#importing-a-source-file-directly'''
-        spec = importlib.util.spec_from_file_location(absolute_path, absolute_path)
+    def path_import(plugin_path):
+        """See https://docs.python.org/3/library/importlib.html#importing-a-source-file-directly
+        
+        Args:
+            plugin_path(str): The path to the plugin file to import.
+
+        Returns:
+            object: The initialised plugin.
+        """
+        spec = importlib.util.spec_from_file_location(plugin_path, plugin_path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         return module
 
     def initialise_plugins(self):
+        """Discover all plugins found in self.node_manager_plugin_path, storing the
+        initialised plugins in self._plugins.
+        """
         for path in [
             os.path.join(self.node_manager_plugin_path, plugin_file)
             for plugin_file
             in os.listdir(self.node_manager_plugin_path)
             if not plugin_file.startswith("__") and plugin_file.endswith(".py")
         ]:
-            logger.info("Plugin discovered at: {path}".format(path=path))
             plugin_module = self.path_import(path)
-            self._plugins.append(plugin_module.NodeManagerPlugin())
+            plugin = plugin_module.NodeManagerPlugin()
+            logger.info(
+                "Plugin {plugin_name} (Type: {plugin_type}) initialised from: {plugin_path}".format(
+                    plugin_name=plugin.name,
+                    plugin_type=plugin.plugin_type,
+                    plugin_path=path,
+                )
+            )
+            self._plugins.append(plugin)
 
     def save(self, current_node):
         definition = current_node.type().definition()

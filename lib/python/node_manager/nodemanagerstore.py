@@ -9,3 +9,4 @@ class NodeManagerStore(object):
     def __init__(self):
         """ 
         """
+        logger.debug("Initialise NodeManagerStore.")
