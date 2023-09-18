@@ -3,8 +3,10 @@
 """HDA manager."""
 
 import getpass
+import importlib
 import logging
 import os
+import pkgutil
 import subprocess
 import time
 
@@ -30,6 +32,7 @@ class NodeManager(object):
     """Main HDA Manager Class."""
 
     instance = None
+    node_manager_plugin_path = "/Users/jcox/source/github/node_manager/lib/python/node_manager/plugins" # Read from env var
     # publish_node = None
     # validator_ui = None
 
@@ -54,6 +57,9 @@ class NodeManager(object):
         """Initialise the NodeManager class."""
         logger.info("Initialising Node Manager")
 
+        self._plugins = []
+        self.initialise_plugins()
+
         self.temp_dir = mkdtemp(prefix="node-manager-")
         self.base = self.get_base()
         self.repos = self.get_repo_paths()
@@ -72,6 +78,25 @@ class NodeManager(object):
         start = time.time()
         self.load_all()
         self.stats["load_hdas"] = time.time() - start
+
+    @staticmethod
+    def path_import(absolute_path):
+        '''implementation taken from https://docs.python.org/3/library/importlib.html#importing-a-source-file-directly'''
+        spec = importlib.util.spec_from_file_location(absolute_path, absolute_path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
+    def initialise_plugins(self):
+        for path in [
+            os.path.join(self.node_manager_plugin_path, plugin_file)
+            for plugin_file
+            in os.listdir(self.node_manager_plugin_path)
+            if not plugin_file.startswith("__") and plugin_file.endswith(".py")
+        ]:
+            logger.info("Plugin discovered at: {path}".format(path=path))
+            plugin_module = self.path_import(path)
+            self._plugins.append(plugin_module.NodeManagerPlugin())
 
     def save(self, current_node):
         definition = current_node.type().definition()
