@@ -1,33 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <menuDocument>
       <menu>
-            <subMenu id="opmenu.vhda_options">
-                  <separatorItem/>
-                  <titleItem>
-                        <expression>
+            <titleItem id="node_manager">
+                <insertAfter>opmenu.unsynchronize</insertAfter>
+                <expression>
 return True
 #current_node = kwargs.get("node", None)
 #from rbl_pipe_hdamanager import menu
 #return menu.display_main_menu(current_node)
-                        </expression>      
-                        <label>Node Manager</label>
-                  </titleItem>
-                  <scriptItem id="publish_hda">
-                        <expression>
+                </expression>      
+                <label>Node Manager</label>
+            </titleItem>
+            <scriptItem id="edit_hda">
+                <insertAfter>node_manager</insertAfter>
+                <expression>
 return True
 #current_node = kwargs.get("node", None)      
 #from rbl_pipe_hdamanager import menu
 #return menu.display_publish(current_node)
-                        </expression>    
-                        <label>Publish Definition</label>
-                        <scriptCode><![CDATA[
+                </expression>    
+                <label>Edit</label>
+                <scriptCode>
+print("edit")
+                </scriptCode>
+            </scriptItem>
+            <scriptItem id="edit_major_hda">
+                <insertAfter>edit_hda</insertAfter>
+                <expression>
+return True
+#current_node = kwargs.get("node", None)      
+#from rbl_pipe_hdamanager import menu
+#return menu.display_publish(current_node)
+                </expression>    
+                <label>Edit (New Major)</label>
+                <scriptCode>
+print("edit major")
+                </scriptCode>
+            </scriptItem>
+            <scriptItem id="edit_minor_hda">
+                <insertAfter>edit_major_hda</insertAfter>
+                <expression>
+return True
+#current_node = kwargs.get("node", None)      
+#from rbl_pipe_hdamanager import menu
+#return menu.display_publish(current_node)
+                </expression>    
+                <label>Edit (New Minor)</label>
+                <scriptCode>
+print("edit minor")
+                </scriptCode>
+            </scriptItem>
+            <scriptItem id="publish_hda">
+                <insertAfter>edit_minor_hda</insertAfter>
+                <expression>
+return True
+#current_node = kwargs.get("node", None)      
+#from rbl_pipe_hdamanager import menu
+#return menu.display_publish(current_node)
+                </expression>    
+                <label>Publish Definition</label>
+                <scriptCode>
 from node_manager import menu
-import hdefereval
 current_node = kwargs.get("node", None)
-hdefereval.executeDeferred(menu.publish, current_node)
-      ]]>
-                        </scriptCode>
-                  </scriptItem>
-            </subMenu>
+menu.run_menu_callback("prepare_publish", **kwargs)
+                </scriptCode>
+            </scriptItem>
+            <removeItem id="opmenu.vhda_options"/>            
+            <removeItem id="opmenu.saveoptype"/>
       </menu>
 </menuDocument>

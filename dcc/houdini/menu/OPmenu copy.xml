@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<menuDocument>
+      <menu>
+
+      
+            <subMenu id="opmenu.vhda_options">
+                  <separatorItem/>
+                  <titleItem>
+                        <expression>
+return True
+#current_node = kwargs.get("node", None)
+#from rbl_pipe_hdamanager import menu
+#return menu.display_main_menu(current_node)
+                        </expression>      
+                        <label>Node Manager</label>
+                  </titleItem>
+                  <scriptItem id="publish_hda">
+                        <expression>
+return True
+#current_node = kwargs.get("node", None)      
+#from rbl_pipe_hdamanager import menu
+#return menu.display_publish(current_node)
+                        </expression>    
+                        <label>Publish Definition</label>
+                        <scriptCode>
+from node_manager import menu
+current_node = kwargs.get("node", None)
+menu.run_menu_callback("prepare_publish", **kwargs)
+                        </scriptCode>
+                  </scriptItem>
+            </subMenu>
+            <removeItem id="opmenu.saveoptype"/>
+            <scriptItem id="save_hda">
+                <insertAfter>opmenu.vhda_options</insertAfter>
+                <expression>
+node = kwargs["node"]
+
+if node.matchesCurrentDefinition():
+    return False
+
+if not node.isNetwork():
+    return False
+
+hda_def = node.type().definition()
+
+if not hda_def:
+    return False
+    
+options = hda_def.options()
+
+if not options.lockContents():
+    return False
+
+if node.isInsideLockedHDA() and not node.isEditableInsideLockedHDA():
+    return False
+
+if hou.hda.safeguardHDAs():
+    return False
+
+return True
+                  </expression> 
+                  <label>Save Node Type</label>
+                  <scriptCode>
+from node_manager import menu
+current_node = kwargs.get("node", None)
+menu.run_menu_callback("save", **kwargs)
+                  </scriptCode>
+            </scriptItem>
+      </menu>
+</menuDocument>

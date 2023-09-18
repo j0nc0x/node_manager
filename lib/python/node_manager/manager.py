@@ -2,6 +2,7 @@
 
 """HDA manager."""
 
+import getpass
 import logging
 import os
 import subprocess
@@ -53,9 +54,12 @@ class NodeManager(object):
         """Initialise the NodeManager class."""
         logger.info("Initialising Node Manager")
 
-        self.base = os.getenv("NODE_MANAGER_BASE")
+        self.temp_dir = mkdtemp(prefix="node-manager-")
+        self.base = self.get_base()
         self.repos = self.get_repo_paths()
-        self.temp_dir = mkdtemp(prefix="node-manager")
+        self.edit_dir = self.setup_edit_dir()
+
+        self.setup_callbacks()
 
         self.stats = {}
         self.node_repos = dict()
@@ -69,10 +73,47 @@ class NodeManager(object):
         self.load_all()
         self.stats["load_hdas"] = time.time() - start
 
+    def save(self, current_node):
+        definition = current_node.type().definition()
+        save_path = definition.libraryFilePath()
+        install = False
+        if save_path.startswith(self.temp_dir):
+            logger.info("Saving HDA to node manager edit directory.")
+            hda_filename = os.path.basename(save_path)
+            save_path = os.path.join(self.edit_dir, hda_filename)
+            install = True
+
+        definition.updateFromNode(current_node)
+        definition.save(save_path)
+
+        if install:
+            hou.hda.installFile(
+                save_path,
+                oplibraries_file="Scanned Asset Library Directories",
+                force_use_assets=True,
+            )
+
+    def save_hda_callback(self, asset_definition, **kwargs):
+        print("before save HDA")
+        print(asset_definition)
+        print(kwargs)
+
+    def setup_callbacks(self):
+        """
+        """
+        hou.hda.addEventCallback((hou.hdaEventType.BeforeAssetSaved, ), self.save_hda_callback)
+
     def is_initialised(self):
         """
         """
         return self.initialised
+
+    def get_base(self):
+        base = os.getenv("NODE_MANAGER_BASE")
+        if not base:
+            base = self.temp_dir
+            os.environ["NODE_MANAGER_BASE"] = self.temp_dir
+        return base
 
     def get_repo_paths(self):
         """
@@ -88,14 +129,12 @@ class NodeManager(object):
 
         return repo_paths
 
-    # def release_dir(self):
-    #     """
-    #     Get the path to the HDA edit release directory.
-
-    #     Returns:
-    #         (str): The release directory.
-    #     """
-    #     return os.path.join(self.node_manager_temp_dir(), "release")
+    def setup_edit_dir(self):
+        """
+        """
+        edit_dir = os.path.join(self.base, "edit", getpass.getuser())
+        os.makedirs(edit_dir, exist_ok=True)
+        return edit_dir
 
     def initialise_repositories(self):
         """Initialise the HDA repoositories."""

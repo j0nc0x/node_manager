@@ -4,6 +4,8 @@
 
 import logging
 
+import hdefereval
+
 from node_manager import manager
 
 logger = logging.getLogger(__name__)
@@ -18,11 +20,15 @@ def get_node_manager():
     return manager.NodeManager.init()
 
 
-def publish(current_node):
-    """Publish Definition callback.
+def run_menu_callback(method_name, node, **kwargs):
+    """Run node manager menu callback.
 
     Args:
-        current_node(hou.Node): The node to publish the definition for.
+        method_name(str): The method name to call.
+        node(hou.Node): The houdini node the menu callback was called from.
     """
     man = get_node_manager()
-    man.prepare_publish(current_node)
+    method = getattr(man, method_name, None)
+    if man and hasattr(man, method_name) and callable(getattr(man, method_name)):
+        method = getattr(man, method_name)
+        hdefereval.executeDeferred(method, node)
