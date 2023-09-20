@@ -33,6 +33,7 @@ class NodeManager(object):
 
     instance = None
     node_manager_plugin_path = "/Users/jcox/source/github/node_manager/lib/python/node_manager/plugins" # Read from env var
+    node_manager_discover_plugin = None
     # publish_node = None
     # validator_ui = None
 
@@ -62,19 +63,17 @@ class NodeManager(object):
 
         self.temp_dir = mkdtemp(prefix="node-manager-")
         self.base = self.get_base()
-        self.repos = self.get_repo_paths()
         self.edit_dir = self.setup_edit_dir()
 
         self.setup_callbacks()
 
         self.stats = {}
-        self.node_repos = dict()
         self.releases = list()
     #     self.depth = int(os.getenv("HDA_MANAGER_LOAD_DEPTH", 5))
 
     #     self.configure_window = None
 
-        self.initialise_repositories()
+        self.node_repos = self.initialise_repos()
         start = time.time()
         self.load_all()
         self.stats["load_hdas"] = time.time() - start
@@ -105,7 +104,7 @@ class NodeManager(object):
             if not plugin_file.startswith("__") and plugin_file.endswith(".py")
         ]:
             plugin_module = self.path_import(path)
-            plugin = plugin_module.NodeManagerPlugin()
+            plugin = plugin_module.NodeManagerPlugin(self)
             logger.info(
                 "Plugin {plugin_name} (Type: {plugin_type}) initialised from: {plugin_path}".format(
                     plugin_name=plugin.name,
@@ -114,6 +113,23 @@ class NodeManager(object):
                 )
             )
             self._plugins.append(plugin)
+
+    def get_discover_plugin(self):
+        if self.node_manager_discover_plugin:
+            discover_plugin = self.node_manager_discover_plugin
+        else:
+            discover_plugin = "DefaultNodeManagerDiscover"
+
+        for plugin in self._plugins:
+            if plugin.name == discover_plugin:
+                return plugin
+
+    def initialise_repos(self):
+        plugin = self.get_discover_plugin()
+        if not plugin:
+            raise RuntimeError("Couldn't find Node Manager Discover Plugin.")
+
+        return plugin.discover()
 
     def save(self, current_node):
         definition = current_node.type().definition()
@@ -157,20 +173,6 @@ class NodeManager(object):
             os.environ["NODE_MANAGER_BASE"] = self.temp_dir
         return base
 
-    def get_repo_paths(self):
-        """
-        Get a list of Node Manager repository paths from the environment.
-
-        Returns:
-            (list): A list of Node Manager repositories in the current environment.
-        """
-        repo_paths = []
-        node_manage_repos = os.getenv("NODE_MANAGER_REPOS")
-        if node_manage_repos:
-            repo_paths = node_manage_repos.split(",")
-
-        return repo_paths
-
     def setup_edit_dir(self):
         """
         """
@@ -178,24 +180,10 @@ class NodeManager(object):
         os.makedirs(edit_dir, exist_ok=True)
         return edit_dir
 
-    def initialise_repositories(self):
-        """Initialise the HDA repoositories."""
-        # # Create the repository object
-        # editable_hda_repo = repo.HDARepo(self, self.edit_dir, editable=True)
-        # name = editable_hda_repo.get_name()
-        # # Add to repositories list
-        # self.hda_repos[name] = editable_hda_repo
-
-        for path in self.repos:
-            # Create the repository object
-            node_repo = repo.NodeRepo(self, path)
-            name = node_repo.get_name()
-
-            # Add to repositories list
-            self.node_repos[name] = node_repo
-
     def load_all(self):
         """Load all nodeTypes."""
+        print("load_all")
+        print(self.node_repos)
         for repo_name in self.node_repos:
             self.node_repos.get(repo_name).load()
 
