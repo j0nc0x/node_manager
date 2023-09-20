@@ -6,10 +6,10 @@ from node_manager import repo
 logger = logging.getLogger(__name__)
 
 
-from node_manager.nodemanagerdiscover import NodeManagerDiscover
+from node_manager.discover import Discover
 
-class NodeManagerPlugin(NodeManagerDiscover):
-    name = "DefaultNodeManagerDiscover"
+class NodeManagerPlugin(Discover):
+    name = "DefaultDiscover"
 
     def __init__(self, manager):
         """ 

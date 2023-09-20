@@ -3,13 +3,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class NodeManagerDiscover(object):
-    plugin_type = "NodeManagerDiscover"
+class Discover(object):
+    plugin_type = "discover"
 
     def __init__(self):
         """ 
         """
-        logger.debug("Initialise NodeManagerDiscover.")
+        logger.debug("Initialise Discover.")
 
     def discover(self):
         """Implement this method to discover any node repositories that should

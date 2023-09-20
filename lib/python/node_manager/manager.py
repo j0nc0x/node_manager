@@ -32,8 +32,8 @@ class NodeManager(object):
     """Main HDA Manager Class."""
 
     instance = None
-    node_manager_plugin_path = "/Users/jcox/source/github/node_manager/lib/python/node_manager/plugins" # Read from env var
-    node_manager_discover_plugin = None
+    plugin_path = "/Users/jcox/source/github/node_manager/lib/python/node_manager/plugins" # Read from env var
+    discover_plugin = None
     # publish_node = None
     # validator_ui = None
 
@@ -98,9 +98,9 @@ class NodeManager(object):
         initialised plugins in self._plugins.
         """
         for path in [
-            os.path.join(self.node_manager_plugin_path, plugin_file)
+            os.path.join(self.plugin_path, plugin_file)
             for plugin_file
-            in os.listdir(self.node_manager_plugin_path)
+            in os.listdir(self.plugin_path)
             if not plugin_file.startswith("__") and plugin_file.endswith(".py")
         ]:
             plugin_module = self.path_import(path)
@@ -115,10 +115,10 @@ class NodeManager(object):
             self._plugins.append(plugin)
 
     def get_discover_plugin(self):
-        if self.node_manager_discover_plugin:
-            discover_plugin = self.node_manager_discover_plugin
+        if self.discover_plugin:
+            discover_plugin = self.discover_plugin
         else:
-            discover_plugin = "DefaultNodeManagerDiscover"
+            discover_plugin = "DefaultDiscover"
 
         for plugin in self._plugins:
             if plugin.name == discover_plugin:
