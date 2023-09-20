@@ -15,6 +15,7 @@ from git.exc import NoSuchPathError, InvalidGitRepositoryError
 
 from node_manager import nodetype
 from node_manager import utilities
+from node_manager.utils import plugin
 
 
 logger = logging.getLogger(__name__)
@@ -42,6 +43,8 @@ class NodeRepo(object):
         self.manager = manager
         self.repo_path = repo_path
         self.name = self.get_name()
+
+        print(plugin.get_load_plugin(self.manager.load_plugin, self.manager._plugins, self.manager))
 
         start = time.time()
         self.git_repo = self.clone_repo()

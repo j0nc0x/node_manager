@@ -3,7 +3,6 @@
 """HDA manager."""
 
 import getpass
-import importlib
 import logging
 import os
 import pkgutil
@@ -22,6 +21,7 @@ else:
 from node_manager import release
 from node_manager import repo
 from node_manager import utilities
+from node_manager.utils import plugin
 
 from node_manager.dependencies import nodes
 
@@ -34,6 +34,7 @@ class NodeManager(object):
     instance = None
     plugin_path = "/Users/jcox/source/github/node_manager/lib/python/node_manager/plugins" # Read from env var
     discover_plugin = None
+    load_plugin = "GitLoad"
     # publish_node = None
     # validator_ui = None
 
@@ -58,8 +59,7 @@ class NodeManager(object):
         """Initialise the NodeManager class."""
         logger.info("Initialising Node Manager")
 
-        self._plugins = []
-        self.initialise_plugins()
+        self._plugins = plugin.import_plugins(self.plugin_path)
 
         self.temp_dir = mkdtemp(prefix="node-manager-")
         self.base = self.get_base()
@@ -78,58 +78,14 @@ class NodeManager(object):
         self.load_all()
         self.stats["load_hdas"] = time.time() - start
 
-    @staticmethod
-    def path_import(plugin_path):
-        """See https://docs.python.org/3/library/importlib.html#importing-a-source-file-directly
-        
-        Args:
-            plugin_path(str): The path to the plugin file to import.
 
-        Returns:
-            object: The initialised plugin.
-        """
-        spec = importlib.util.spec_from_file_location(plugin_path, plugin_path)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        return module
-
-    def initialise_plugins(self):
-        """Discover all plugins found in self.node_manager_plugin_path, storing the
-        initialised plugins in self._plugins.
-        """
-        for path in [
-            os.path.join(self.plugin_path, plugin_file)
-            for plugin_file
-            in os.listdir(self.plugin_path)
-            if not plugin_file.startswith("__") and plugin_file.endswith(".py")
-        ]:
-            plugin_module = self.path_import(path)
-            plugin = plugin_module.NodeManagerPlugin(self)
-            logger.info(
-                "Plugin {plugin_name} (Type: {plugin_type}) initialised from: {plugin_path}".format(
-                    plugin_name=plugin.name,
-                    plugin_type=plugin.plugin_type,
-                    plugin_path=path,
-                )
-            )
-            self._plugins.append(plugin)
-
-    def get_discover_plugin(self):
-        if self.discover_plugin:
-            discover_plugin = self.discover_plugin
-        else:
-            discover_plugin = "DefaultDiscover"
-
-        for plugin in self._plugins:
-            if plugin.name == discover_plugin:
-                return plugin
 
     def initialise_repos(self):
-        plugin = self.get_discover_plugin()
-        if not plugin:
+        discover_plugin = plugin.get_discover_plugin(self.discover_plugin, self._plugins, self)
+        if not discover_plugin:
             raise RuntimeError("Couldn't find Node Manager Discover Plugin.")
 
-        return plugin.discover()
+        return discover_plugin.discover()
 
     def save(self, current_node):
         definition = current_node.type().definition()
