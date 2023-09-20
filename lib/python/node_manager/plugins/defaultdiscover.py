@@ -6,7 +6,7 @@ from node_manager import repo
 logger = logging.getLogger(__name__)
 
 
-from node_manager.discover import Discover
+from node_manager.plugins.base.discover import Discover
 
 class NodeManagerPlugin(Discover):
     name = "DefaultDiscover"
