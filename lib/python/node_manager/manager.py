@@ -49,8 +49,7 @@ class NodeManager(object):
         if cls.instance is None:
             start = time.time()
             cls.instance = cls()
-            cls.instance.stats["full_init"] = time.time() - start
-            print(cls.instance.stats)
+            cls.instance.stats["init"] = time.time() - start
         return cls.instance
 
     def __init__(
@@ -58,7 +57,9 @@ class NodeManager(object):
     ):
         """Initialise the NodeManager class."""
         logger.info("Initialising Node Manager")
+        self.stats = {}
 
+    def load(self):
         self._plugins = plugin.import_plugins(self.plugin_path)
 
         self.temp_dir = mkdtemp(prefix="node-manager-")
@@ -67,7 +68,6 @@ class NodeManager(object):
 
         self.setup_callbacks()
 
-        self.stats = {}
         self.releases = list()
     #     self.depth = int(os.getenv("HDA_MANAGER_LOAD_DEPTH", 5))
 
@@ -78,10 +78,12 @@ class NodeManager(object):
         self.load_all()
         self.stats["load_hdas"] = time.time() - start
 
+        print(self.stats)
+
 
 
     def initialise_repos(self):
-        discover_plugin = plugin.get_discover_plugin(self.discover_plugin, self._plugins, self)
+        discover_plugin = plugin.get_discover_plugin(self.discover_plugin)
         if not discover_plugin:
             raise RuntimeError("Couldn't find Node Manager Discover Plugin.")
 
@@ -364,13 +366,15 @@ def deferred_decorator(callback_returning_decorator):
 def initialise_in_background():
     logger.debug("Beginning initialisation using background thread.")
     yield
-    NodeManager.init()
+    manager_instance = NodeManager.init()
+    manager_instance.load()
     yield
     logger.debug("Initialisation complete.")
 
 def initialise_in_foreground():
     logger.debug("Beginning initialisation using main thread.")
-    NodeManager.init()
+    manager_instance = NodeManager.init()
+    manager_instance.load()
 
 def initialise_node_manager(background=True):
     if background and not do_work_in_background_thread:

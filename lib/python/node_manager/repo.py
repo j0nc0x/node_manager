@@ -44,7 +44,7 @@ class NodeRepo(object):
         self.repo_path = repo_path
         self.name = self.get_name()
 
-        print(plugin.get_load_plugin(self.manager.load_plugin, self.manager._plugins, self.manager))
+        print(plugin.get_load_plugin(self.manager.load_plugin))
 
         start = time.time()
         self.git_repo = self.clone_repo()

@@ -1,6 +1,10 @@
+#!/usr/bin/env python
+
 import importlib
 import logging
 import os
+
+from node_manager import utils
 
 
 logger = logging.getLogger(__name__)
@@ -21,13 +25,10 @@ def path_import(plugin_path):
     return module
 
 
-def initialise_plugin(plugin_module, manager=None):
+def initialise_plugin(plugin_module):
     """
     """
-    if manager:
-        plugin = plugin_module.NodeManagerPlugin(manager)
-    else:
-        plugin = plugin_module.NodeManagerPlugin()
+    plugin = plugin_module.NodeManagerPlugin()
     logger.info(
         "Plugin {plugin_name} (Type: {plugin_type})".format(
             plugin_name=plugin.name,
@@ -59,27 +60,29 @@ def import_plugins(plugin_path):
     return plugins
 
 
-def get_load_plugin(load_plugin_name, plugins, manager):
+def get_load_plugin(load_plugin_name):
     """
     """
+    manager_instance = utils.get_manager()
     if load_plugin_name:
         load_plugin = load_plugin_name
     else:
         load_plugin = "DefaultLoad"
 
-    for plugin_module in plugins:
+    for plugin_module in manager_instance._plugins:
         if plugin_module.NodeManagerPlugin.name == load_plugin:
-            return initialise_plugin(plugin_module, manager)
+            return initialise_plugin(plugin_module)
 
 
-def get_discover_plugin(discover_plugin_name, plugins, manager):
+def get_discover_plugin(discover_plugin_name):
     """
     """
+    manager_instance = utils.get_manager()
     if discover_plugin_name:
         discover_plugin = discover_plugin_name
     else:
         discover_plugin = "DefaultDiscover"
 
-    for plugin_module in plugins:
+    for plugin_module in manager_instance._plugins:
         if plugin_module.NodeManagerPlugin.name == discover_plugin:
-            return initialise_plugin(plugin_module, manager)
+            return initialise_plugin(plugin_module)

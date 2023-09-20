@@ -2,17 +2,17 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
+from node_manager import utils
 from node_manager.plugins.base.load import Load
 
 class NodeManagerPlugin(Load):
     name = "GitLoad"
 
-    def __init__(self, manager):
+    def __init__(self):
         """ 
         """
         super(NodeManagerPlugin, self).__init__()
-        self.manager = manager
+        self.manager = utils.get_manager()
         logger.debug("Initialsied GitLoad")
         logger.debug(self.name)
         logger.debug(self.plugin_type)
