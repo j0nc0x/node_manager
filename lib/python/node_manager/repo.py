@@ -50,13 +50,10 @@ class NodeRepo(object):
 
         self.node_manager_definition_files = self.initialise_repo()
 
-        self.library_path = self.get_library_path()
-
         self.editable = editable
         self.asset_subdirectory = "hda"
         self.node_types = dict()
 
-        self.version = self.get_version()
         self.commit_hash = None
 
         logger.info(
@@ -100,24 +97,16 @@ class NodeRepo(object):
         """
         return os.path.join(self.get_repo_root_dir(), "config", "config.json")
 
-    def get_library_path(self):
-        config_path = self.config_path()
-        repo_conf_data = {}
-        with open(config_path, "r") as repo_conf:
-            repo_conf_data = json.load(repo_conf)
+    # def repo_root(self):
+    #     """Get the root of the HDA repo on the filesystem.
 
-        return repo_conf_data.get("library_path")
+    #     Returns:
+    #         (str): The path to the HDA repo on disk.
+    #     """
+    #     # if self.editable:
+    #     #     return self.repo_path
 
-    def repo_root(self):
-        """Get the root of the HDA repo on the filesystem.
-
-        Returns:
-            (str): The path to the HDA repo on disk.
-        """
-        # if self.editable:
-        #     return self.repo_path
-
-        return os.path.dirname(self.library_path)
+    #     return os.path.dirname(self.library_path)
 
     def get_name(self):
         """Get the repo name.
@@ -141,29 +130,6 @@ class NodeRepo(object):
         # name = repo_conf_data.get("name")
     
         return self.repo_path.split("/")[-1][:-4]
-
-    def get_version(self):
-        """Get the repo version.
-
-        Returns:
-            (str): The version of the Node repo.
-        """
-        repo_conf_path = self.config_path()
-        repo_conf_data = None
-        with open(repo_conf_path, "r") as repo_conf:
-            repo_conf_data = json.load(repo_conf)
-
-        if not repo_conf_data:
-            logger.warning(
-                "Repo conf failed to load from {path}".format(
-                    path=repo_conf_path,
-                )
-            )
-            return
-
-        version = repo_conf_data.get("version")
-
-        return version
 
     def process_definition(self, definition, force=False):
         """Update the node_types dictionary usng the provided definition.
@@ -215,13 +181,6 @@ class NodeRepo(object):
                 directory=self.get_repo_temp_dir(),
             )
         )
-
-        if not os.path.exists(self.library_path):
-            raise RuntimeError(
-                "Couldn't load from: {directory}".format(
-                    directory=self.get_repo_temp_dir(),
-                )
-            )
 
         for definition_file in self.node_manager_definition_files:
             self.process_node_definition_file(definition_file)

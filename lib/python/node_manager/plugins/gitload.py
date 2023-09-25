@@ -23,12 +23,6 @@ class NodeManagerPlugin(Load):
         super(NodeManagerPlugin, self).__init__()
         self.manager = utils.get_manager()
         self.git_repo = None
-        self.extensions = [
-            ".hda",
-            ".hdanc",
-            ".otl",
-            ".otlnc",
-        ]
         logger.debug("Initialsied GitLoad")
         logger.debug(self.name)
         logger.debug(self.plugin_type)
