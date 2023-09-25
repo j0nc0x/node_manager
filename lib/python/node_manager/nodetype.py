@@ -70,3 +70,12 @@ class NodeType(object):
             self.versions[version].append(node_type_version)
         else:
             self.versions[version] = [node_type_version]
+
+    def all_versions(self):
+        """
+        Get all the versions of the node type.
+
+        Returns:
+            (dict): A dictionary of all of the versions of the node type.
+        """
+        return self.versions

@@ -12,6 +12,8 @@ from tempfile import mkdtemp
 
 import hou
 
+from packaging.version import parse
+
 if hou.isUIAvailable():
     from hdefereval import do_work_in_background_thread
 else:
@@ -20,7 +22,7 @@ else:
 from node_manager import release
 from node_manager import utilities
 from node_manager.utils import plugin
-
+from node_manager.dependencies import dialog
 from node_manager.dependencies import nodes
 
 logger = logging.getLogger(__name__)
@@ -32,7 +34,7 @@ class NodeManager(object):
     instance = None
     plugin_path = "/Users/jcox/source/github/node_manager/lib/python/node_manager/plugins" # Read from env var
     discover_plugin = None
-    load_plugin = None#"GitLoad"
+    load_plugin = "GitLoad"
     # publish_node = None
     # validator_ui = None
 
@@ -151,6 +153,32 @@ class NodeManager(object):
         for repo_name in self.node_repos:
             self.node_repos.get(repo_name).load_nodes()
 
+    def nodetype_from_definition(self, definition):
+        """
+        Retrieve the nodetype for the given definition.
+
+        Args:
+            definition(hou.HDADefinition): The HDA definition to use when
+                looking up the HDA Manager nodetype.
+
+        Returns:
+            node_type(rbl_pipe_hdamanager.nodetype.NodeType): The nodetype
+                looked-up.
+        """
+        # namespace = utilities.node_type_namespace(
+        #     definition.nodeTypeName(),
+        # )
+        repo = self.repo_from_definition(definition)
+        print(repo)
+
+        if repo:
+            current_name = definition.nodeTypeName()
+            category = definition.nodeTypeCategory().name()
+            index = utilities.node_type_index(current_name, category)
+            return repo.node_types.get(index)
+
+        return None
+
     def repo_from_definition(self, definition):
         """
         Retrieve the HDA repo the given definition belongs to.
@@ -178,6 +206,9 @@ class NodeManager(object):
         """
         for repo_name in self.node_repos:
             repo = self.node_repos.get(repo_name)
+            print(path)
+            print(repo.repo_root())
+            print(repo)
             if path.startswith(repo.repo_root()):
                 return repo
         return None
@@ -212,6 +243,70 @@ class NodeManager(object):
             return repo.name
 
         return None
+
+    def is_latest_version(self, current_node):
+        """
+        Check if current node is the latest version.
+
+        Args:
+            current_node(hou.Node): The node to check the version for.
+
+        Returns:
+            (bool): Is the definition at the latest version.
+        """
+        definition = nodes.definition_from_node(current_node.path())
+
+        # get all versions
+        nodetype = self.nodetype_from_definition(definition)
+
+        # If nodetype exists check that it is the latest version
+        if nodetype:
+            versions = [
+                parse(version)
+                for version
+                in nodetype.all_versions().keys()
+            ]
+            versions_sorted = sorted(versions, reverse=True)
+            latest_version = versions_sorted[0]
+
+            # get current version
+            nodeTypeName = definition.nodeTypeName()
+            current_version = parse(utilities.node_type_version(nodeTypeName))
+
+            # compare versions
+            if current_version < latest_version:
+                return False
+
+        return True
+
+    def edit_definition(self, current_node):
+        """Make a definition editable.
+
+        Copy to our edit_dir with a unique name, and then add to the HDA
+        manager and install to the current session.
+
+        Args:
+            current_node(hou.Node): The node to make the definition editable
+            for.
+
+        Returns:
+            (None)
+        """
+        definition = nodes.definition_from_node(current_node.path())
+
+        dialog_message = (
+            "You are about to edit a hda that is not the lastest version, do "
+            "you want to continue?"
+        )
+
+        if not self.is_latest_version(current_node) and dialog.display_message(
+            dialog_message, ("Ok", "Cancel"), title="Warning"
+        ):
+            logger.info("Making definition editable aborted by user.")
+            return
+
+        edit_repo = self.repo_from_definition(definition)
+        edit_repo.add_definition_copy(definition)
 
     def prepare_publish(self, current_node):
         """

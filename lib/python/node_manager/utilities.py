@@ -3,6 +3,7 @@
 """Node manager utils."""
 
 import logging
+import os
 import time
 
 
@@ -194,6 +195,40 @@ def release_branch_name(definition):
     )
 
 
+def editable_hda_path_from_components(definition, edit_dir, namespace=None, name=None):
+    """Get the editable HDA path.
+
+    Generate a file path where a hou.HDADefinition can be edited within the given edit
+    directory. If a new nodeType namespace or name has been provided take it into
+    account when generating the path.
+
+    Args:
+        definition(hou.HDADefinition): The HDA definition to generate the editable HDA
+            path for.
+        edit_dir(str): The root edit directory.
+        namespace(str): The updated namespace to use if it is being changed.
+        name(str): The updated name to use if it is being changed.
+
+    Returns:
+        (str): The editable HDA path on disk.
+    """
+    category = definition.nodeTypeCategory()
+    current_name = definition.nodeTypeName()
+    if valid_node_type_name(current_name):
+        # If the name is valid, use it
+        new_namespace = node_type_namespace(current_name, new_namespace=namespace)
+        new_name = node_type_name(current_name, new_name=name)
+        full_name = "{namespace}_{name}".format(namespace=new_namespace, name=new_name)
+    else:
+        # Otherwise just make do with whatever we have
+        full_name = definition.nodeTypeName()
+
+    editable_name = "{category}_{full_name}.{time}.hda".format(
+        category=category.name(), full_name=full_name, time=int(time.time())
+    )
+    return os.path.join(edit_dir, editable_name)
+
+
 def expanded_hda_name(definition):
     """Get the expanded HDA name.
 
@@ -219,3 +254,4 @@ def expanded_hda_name(definition):
         name=name,
         version=version,
     )
+

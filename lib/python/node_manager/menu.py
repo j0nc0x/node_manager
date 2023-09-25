@@ -3,6 +3,7 @@
 """Node manager menu utilities."""
 
 import logging
+import sys
 
 import hdefereval
 
@@ -18,6 +19,37 @@ def get_node_manager():
         (HDAManager): The instance for the running Node manager.
     """
     return manager.NodeManager.init()
+
+
+def edit(current_node):
+    """Edit edit of the selected node.
+
+    Args:
+        current_node(hou.Node): The node to edit.
+    """
+    print("Edit")
+    print(current_node)
+    man = get_node_manager()
+    man.edit_definition(current_node)
+
+
+def edit_major(current_node):
+    """Major version edit of the selected node.
+
+    Args:
+        current_node(hou.Node): The node to edit.
+    """
+    print("Edit Major")
+    print(current_node)
+
+
+def edit_minor(current_node):
+    """Minor version edit of the selected node.
+
+    Args:
+        current_node(hou.Node): The node to edit."""
+    print("Edit Minor")
+    print(current_node)
 
 
 def menu_error(method_name):
@@ -40,14 +72,12 @@ def run_menu_callback(method_name, node, **kwargs):
         method_name(str): The method name to call.
         node(hou.Node): The houdini node the menu callback was called from.
     """
-    man = get_node_manager()
-    method = getattr(man, method_name, None)
+    current_module = sys.modules[__name__]
     if (
-        man
-        and hasattr(man, method_name)
-        and callable(getattr(man, method_name))
+        hasattr(current_module, method_name)
+        and callable(getattr(current_module, method_name))
     ):
-        method = getattr(man, method_name)
+        method = getattr(current_module, method_name)
         hdefereval.executeDeferred(method, node)
     else:
         hdefereval.executeDeferred(menu_error, method_name)

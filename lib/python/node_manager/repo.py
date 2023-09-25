@@ -48,6 +48,7 @@ class NodeRepo(object):
         # self.build_repo()
         # self.manager.stats["build"] = time.time() - start
 
+        self.load_plugin = self.get_load_plugin()
         self.node_manager_definition_files = self.initialise_repo()
 
         self.editable = editable
@@ -76,11 +77,15 @@ class NodeRepo(object):
             str: The path to the HDA repo on disk."""
         return os.path.join(self.manager.temp_dir, self.name)
 
-    def initialise_repo(self):
-        """Initialise the NodeRepo.
+    def repo_root(self):
+        """"""
+        return self.load_plugin.get_repo_load_path()
+
+    def get_load_plugin(self):
+        """Get the load plugin for this repo.
 
         Returns:
-            list(NodeRepo): A list of NodeRepo objects.
+            (obj): The load plugin for this repo.
         """
         load_plugin = plugin.get_load_plugin(
             self.manager.load_plugin,
@@ -91,7 +96,15 @@ class NodeRepo(object):
         if not load_plugin:
             raise RuntimeError("Couldn't find Node Manager Load Plugin.")
 
-        return load_plugin.load()
+        return load_plugin
+
+    def initialise_repo(self):
+        """Initialise the NodeRepo.
+
+        Returns:
+            list(NodeRepo): A list of NodeRepo objects.
+        """
+        return self.load_plugin.load()
 
     def config_path(self):
         """
@@ -185,3 +198,38 @@ class NodeRepo(object):
 
         for definition_file in self.node_manager_definition_files:
             self.process_node_definition_file(definition_file)
+
+    def add_definition_copy(self, definition, namespace=None, name=None, version=None):
+        """Create a copy of a node definition.
+
+        Update the nodeTypeName if required.
+
+        Args:
+            definition(hou.HDADefinition): The node definition to copy.
+            namespace(:obj:`str`,optional): The node namespace to use for the copy.
+            name(:obj:`str`,optional): The node name to use for the copy.
+            version(:obj:`str`,optional): The node version to use for the copy.
+
+        Returns:
+            (str): The name of the copied node.
+        """
+        # Write the HDA to the edit_dir
+        editable_path = utilities.editable_hda_path_from_components(
+            definition, self.manager.edit_dir, namespace=namespace, name=name
+        )
+
+        # See if we are updating the NodeTypeName
+        if namespace or name or version:
+            new_name = utilities.node_type_name_from_components(
+                definition, namespace=namespace, name=name, version=version
+            )
+        else:
+            new_name = None
+
+        definition.copyToHDAFile(editable_path, new_name=new_name)
+        logger.debug("Definition saved to {path}".format(path=editable_path))
+
+        # Add the newly written HDA to the HDA Manager
+        self.process_node_definition_file(editable_path, force=True)
+
+        return new_name
