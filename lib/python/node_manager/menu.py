@@ -26,11 +26,11 @@ def menu_error(method_name):
     Args:
         method_name(str): The method_name to raise an error for.
     """
-    raise RuntimeError(
-        "Node Manager menu callback method not found: {}".format(
-            method_name,
-        )
+    message = "Node Manager menu callback method not found: {name}".format(
+        name=method_name,
     )
+    logger.error(message)
+    raise RuntimeError(message)
 
 
 def run_menu_callback(method_name, node, **kwargs):
