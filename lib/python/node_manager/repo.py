@@ -48,14 +48,13 @@ class NodeRepo(object):
         # self.build_repo()
         # self.manager.stats["build"] = time.time() - start
 
-        self.initialise_repo()
+        self.node_manager_definition_files = self.initialise_repo()
 
         self.library_path = self.get_library_path()
 
         self.editable = editable
         self.asset_subdirectory = "hda"
         self.node_types = dict()
-        self.extensions = [".hda", ".hdanc"]
 
         self.version = self.get_version()
         self.commit_hash = None
@@ -224,10 +223,10 @@ class NodeRepo(object):
                 )
             )
 
-        for definition_file in os.listdir(self.get_repo_temp_dir()):
-            if os.path.splitext(definition_file)[1].lower() in self.extensions:
-                full_path = os.path.join(
-                    self.get_repo_temp_dir(),
-                    definition_file,
-                )
-                self.process_node_definition_file(full_path)
+        for definition_file in self.node_manager_definition_files:
+            # if os.path.splitext(definition_file)[1].lower() in self.extensions:
+            #     full_path = os.path.join(
+            #         self.get_repo_temp_dir(),
+            #         definition_file,
+            #     )
+            self.process_node_definition_file(definition_file)

@@ -16,8 +16,12 @@ class NodeManagerPlugin(Load):
         logger.debug(self.name)
         logger.debug(self.plugin_type)
 
-    def load(self):
-        """Implement this method to load a repositories contents.
+    def load(self, path, root, temp):
+        """Load the Node Manager repository.
+
+        Args:
+            path(str): The path to the Node Manager repository.
+            root(str): The root directory of the Node Manager repository.
+            temp(str): The temp directory of the Node Manager repository.
         """
         pass
-
