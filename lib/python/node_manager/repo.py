@@ -5,7 +5,6 @@
 import json
 import logging
 import os
-import subprocess
 import time
 
 import hou
@@ -67,10 +66,18 @@ class NodeRepo(object):
             )
         )
 
-    def local_repo_root(self):
-        return os.path.join(self.manager.base, self.name)
+    def get_repo_root_dir(self):
+        """Get the root directory for the HDA repo.
 
-    def repo_temp_dir(self):
+        Returns:
+            str: The path to the HDA repo on disk."""
+        return os.path.join(self.manager.base_dir, self.name)
+
+    def get_repo_temp_dir(self):
+        """Get the temp directory for the HDA repo.
+
+        Returns:
+            str: The path to the HDA repo on disk."""
         return os.path.join(self.manager.temp_dir, self.name)
 
     def initialise_repo(self):
@@ -85,14 +92,14 @@ class NodeRepo(object):
 
         return load_plugin.load(
             self.repo_path,
-            self.local_repo_root(),
-            self.repo_temp_dir(),
+            self.get_repo_root_dir(),
+            self.get_repo_temp_dir(),
         )
 
     def config_path(self):
         """
         """
-        return os.path.join(self.local_repo_root(), "config", "config.json")
+        return os.path.join(self.get_repo_root_dir(), "config", "config.json")
 
     def get_library_path(self):
         config_path = self.config_path()
@@ -204,14 +211,23 @@ class NodeRepo(object):
 
     def load_nodes(self):
         """Load all definitions contained by this repository."""
-        logger.debug("Reading from {directory}".format(directory=self.repo_temp_dir()))
+        logger.debug(
+            "Reading from {directory}".format(
+                directory=self.get_repo_temp_dir(),
+            )
+        )
 
         if not os.path.exists(self.library_path):
             raise RuntimeError(
-                "Couldn't load from: {directory}".format(directory=self.repo_temp_dir())
+                "Couldn't load from: {directory}".format(
+                    directory=self.get_repo_temp_dir(),
+                )
             )
 
-        for definition_file in os.listdir(self.repo_temp_dir()):
+        for definition_file in os.listdir(self.get_repo_temp_dir()):
             if os.path.splitext(definition_file)[1].lower() in self.extensions:
-                full_path = os.path.join(self.repo_temp_dir(), definition_file)
+                full_path = os.path.join(
+                    self.get_repo_temp_dir(),
+                    definition_file,
+                )
                 self.process_node_definition_file(full_path)

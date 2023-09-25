@@ -5,7 +5,6 @@
 import getpass
 import logging
 import os
-import pkgutil
 import subprocess
 import time
 
@@ -19,7 +18,6 @@ else:
     do_work_in_background_thread = None
 
 from node_manager import release
-from node_manager import repo
 from node_manager import utilities
 from node_manager.utils import plugin
 
@@ -60,84 +58,96 @@ class NodeManager(object):
         self.stats = {}
 
     def load(self):
+        """Load the HDA Manager."""
         self._plugins = plugin.import_plugins(self.plugin_path)
 
         self.temp_dir = mkdtemp(prefix="node-manager-")
-        self.base = self.get_base()
-        self.edit_dir = self.setup_edit_dir()
-
-        self.setup_callbacks()
-
+        self.base_dir = self.get_base_dir()
+        self.edit_dir = self.get_edit_dir()
+        # self.setup_callbacks()
         self.releases = list()
-    #     self.depth = int(os.getenv("HDA_MANAGER_LOAD_DEPTH", 5))
-
-    #     self.configure_window = None
-
         self.node_repos = self.initialise_repos()
         start = time.time()
         self.load_all()
         self.stats["load_hdas"] = time.time() - start
 
-        print(self.stats)
-
     def initialise_repos(self):
+        """Initialise the NodeRepos.
+
+        Returns:
+            list(NodeRepo): A list of NodeRepo objects.
+        """
         discover_plugin = plugin.get_discover_plugin(self.discover_plugin)
         if not discover_plugin:
             raise RuntimeError("Couldn't find Node Manager Discover Plugin.")
 
         return discover_plugin.discover()
 
-    def save(self, current_node):
-        definition = current_node.type().definition()
-        save_path = definition.libraryFilePath()
-        install = False
-        if save_path.startswith(self.temp_dir):
-            logger.info("Saving HDA to node manager edit directory.")
-            hda_filename = os.path.basename(save_path)
-            save_path = os.path.join(self.edit_dir, hda_filename)
-            install = True
+    # def save(self, current_node):
+    #     definition = current_node.type().definition()
+    #     save_path = definition.libraryFilePath()
+    #     install = False
+    #     if save_path.startswith(self.temp_dir):
+    #         logger.info("Saving HDA to node manager edit directory.")
+    #         hda_filename = os.path.basename(save_path)
+    #         save_path = os.path.join(self.edit_dir, hda_filename)
+    #         install = True
 
-        definition.updateFromNode(current_node)
-        definition.save(save_path)
+    #     definition.updateFromNode(current_node)
+    #     definition.save(save_path)
 
-        if install:
-            hou.hda.installFile(
-                save_path,
-                oplibraries_file="Scanned Asset Library Directories",
-                force_use_assets=True,
-            )
+    #     if install:
+    #         hou.hda.installFile(
+    #             save_path,
+    #             oplibraries_file="Scanned Asset Library Directories",
+    #             force_use_assets=True,
+    #         )
 
-    def save_hda_callback(self, asset_definition, **kwargs):
-        print("before save HDA")
-        print(asset_definition)
-        print(kwargs)
+    # def save_hda_callback(self, asset_definition, **kwargs):
+    #     print("before save HDA")
+    #     print(asset_definition)
+    #     print(kwargs)
 
-    def setup_callbacks(self):
+    # def setup_callbacks(self):
+    #     """
+    #     """
+    #     hou.hda.addEventCallback((hou.hdaEventType.BeforeAssetSaved, ), self.save_hda_callback)
+
+    # def is_initialised(self):
+    #     """
+    #     """
+    #     return self.initialised
+
+    def get_base_dir(self):
+        """Get the base directory for the HDA Manager from the
+        NODE_MANAGER_BASE env var.
+
+        Returns:
+            str: The base directory for the HDA Manager.
         """
-        """
-        hou.hda.addEventCallback((hou.hdaEventType.BeforeAssetSaved, ), self.save_hda_callback)
-
-    def is_initialised(self):
-        """
-        """
-        return self.initialised
-
-    def get_base(self):
-        base = os.getenv("NODE_MANAGER_BASE")
-        if not base:
-            base = self.temp_dir
+        base_dir = os.getenv("NODE_MANAGER_BASE")
+        if not base_dir:
+            base_dir = self.temp_dir
             os.environ["NODE_MANAGER_BASE"] = self.temp_dir
-        return base
+        return base_dir
 
-    def setup_edit_dir(self):
+    def get_edit_dir(self, create_on_disk=True):
+        """Get the edit directory for the HDA Manager.
+
+        Args:
+            create_on_disk(bool): Should the directory be created on disk if
+                it doesn't exist?
+
+        Returns:
+            str: The edit directory for the HDA Manager.
         """
-        """
-        edit_dir = os.path.join(self.base, "edit", getpass.getuser())
-        os.makedirs(edit_dir, exist_ok=True)
+        edit_dir = os.path.join(self.base_dir, "edit", getpass.getuser())
+        if create_on_disk:
+            os.makedirs(edit_dir, exist_ok=True)
         return edit_dir
 
     def load_all(self):
-        """Load all nodeTypes."""
+        """Load all node definitions from the repositories."""
         for repo_name in self.node_repos:
             self.node_repos.get(repo_name).load_nodes()
 
@@ -360,6 +370,7 @@ def deferred_decorator(callback_returning_decorator):
 
 @deferred_decorator(lambda: do_work_in_background_thread)
 def initialise_in_background():
+    """Initialise the Node Manager in the Houdini background thread."""
     logger.debug("Beginning initialisation using background thread.")
     yield
     manager_instance = NodeManager.init()
@@ -367,14 +378,26 @@ def initialise_in_background():
     yield
     logger.debug("Initialisation complete.")
 
+
 def initialise_in_foreground():
+    """Initialise the Node Manager in the Houdini main thread."""
     logger.debug("Beginning initialisation using main thread.")
     manager_instance = NodeManager.init()
     manager_instance.load()
 
+
 def initialise_node_manager(background=True):
+    """Initialise the Node Manager.
+
+    Args:
+        background(bool): Should the Node Manager be initialised in the
+            background thread?
+    """
     if background and not do_work_in_background_thread:
-        logger.warning("Attempted to use background thread but UI not available, reverting to main thread.")
+        logger.warning(
+            "Attempted to use background thread but UI not available, "
+            "reverting to main thread."
+        )
     if background and do_work_in_background_thread:
         initialise_in_background()
     else:
