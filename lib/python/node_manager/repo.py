@@ -82,15 +82,16 @@ class NodeRepo(object):
         Returns:
             list(NodeRepo): A list of NodeRepo objects.
         """
-        load_plugin = plugin.get_load_plugin(self.manager.load_plugin)
-        if not load_plugin:
-            raise RuntimeError("Couldn't find Node Manager Load Plugin.")
-
-        return load_plugin.load(
+        load_plugin = plugin.get_load_plugin(
+            self.manager.load_plugin,
             self.repo_path,
             self.get_repo_root_dir(),
             self.get_repo_temp_dir(),
         )
+        if not load_plugin:
+            raise RuntimeError("Couldn't find Node Manager Load Plugin.")
+
+        return load_plugin.load()
 
     def config_path(self):
         """

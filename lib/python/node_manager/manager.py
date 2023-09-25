@@ -32,7 +32,7 @@ class NodeManager(object):
     instance = None
     plugin_path = "/Users/jcox/source/github/node_manager/lib/python/node_manager/plugins" # Read from env var
     discover_plugin = None
-    load_plugin = "GitLoad"
+    load_plugin = None#"GitLoad"
     # publish_node = None
     # validator_ui = None
 
@@ -77,7 +77,7 @@ class NodeManager(object):
         Returns:
             list(NodeRepo): A list of NodeRepo objects.
         """
-        discover_plugin = plugin.get_discover_plugin(self.discover_plugin)
+        discover_plugin = plugin.get_discover_plugin(self.discover_plugin, )
         if not discover_plugin:
             raise RuntimeError("Couldn't find Node Manager Discover Plugin.")
 

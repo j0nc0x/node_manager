@@ -25,7 +25,7 @@ def path_import(plugin_path):
     return module
 
 
-def initialise_plugin(plugin_module):
+def initialise_plugin(plugin_module, **kwargs):
     """Initialise the given plugin.
 
     Args:
@@ -34,7 +34,7 @@ def initialise_plugin(plugin_module):
     Returns:
         object: The initialised plugin.
     """
-    plugin = plugin_module.NodeManagerPlugin()
+    plugin = plugin_module.NodeManagerPlugin(**kwargs)
     logger.info(
         "Plugin {plugin_name} (Type: {plugin_type})".format(
             plugin_name=plugin.name,
@@ -72,7 +72,7 @@ def import_plugins(plugin_path):
     return plugins
 
 
-def get_load_plugin(load_plugin_name):
+def get_load_plugin(load_plugin_name, repo_path, repo_root, repo_temp):
     """Get the given load plugin.
 
     Args:
@@ -89,7 +89,12 @@ def get_load_plugin(load_plugin_name):
 
     for plugin_module in manager_instance._plugins:
         if plugin_module.NodeManagerPlugin.name == load_plugin:
-            return initialise_plugin(plugin_module)
+            return initialise_plugin(
+                plugin_module,
+                repo_path=repo_path,
+                repo_root=repo_root,
+                repo_temp=repo_temp,
+            )
 
 
 def get_discover_plugin(discover_plugin_name):

@@ -12,9 +12,12 @@ class NodeManagerPlugin(object):
     name = "DefaultLoad"
     plugin_type = "load"
 
-    def __init__(self):
+    def __init__(self, repo_path, repo_root, repo_temp):
         """ 
         """
+        self.repo_path = repo_path
+        self.repo_root = repo_root
+        self.repo_temp = repo_temp
         self.manager = utils.get_manager()
         logger.debug("Initialise DefaultLoad.")
 
@@ -25,7 +28,15 @@ class NodeManagerPlugin(object):
             ".otlnc",
         ]
 
-    def get_node_definition_files(self, path):
+    def get_repo_load_path(self):
+        """Get the path on disk to load the repository from.
+
+        Returns:
+            str: The path on disk to load the repository from.
+        """
+        return self.repo_path
+
+    def get_node_definition_files(self):
         """Get a list of node definition files in the given directory.
 
         Args:
@@ -35,17 +46,11 @@ class NodeManagerPlugin(object):
             list: A list of node definition files.
         """
         return [
-            os.path.join(path, node_definition_file)
-            for node_definition_file in os.listdir(path)
+            os.path.join(self.get_repo_load_path(), node_definition_file)
+            for node_definition_file in os.listdir(self.get_repo_load_path())
             if os.path.splitext(node_definition_file)[1] in self.extensions
         ]
 
-    def load(self, path):
-        """Load the Node Manager repository.
-
-        Args:
-            path(str): The path to the Node Manager repository.
-            root(str): The root directory of the Node Manager repository.
-            temp(str): The temp directory of the Node Manager repository.
-        """
-        return self.get_node_definition_files(path)
+    def load(self):
+        """Load the Node Manager repository."""
+        return self.get_node_definition_files()
