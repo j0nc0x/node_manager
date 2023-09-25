@@ -23,22 +23,40 @@ class NodeManagerPlugin(Load):
         logger.debug(self.name)
         logger.debug(self.plugin_type)
 
-    def clone_repo(self, repo_path, root):
-        """Clone the Node Manager repository."""
+    def clone_repo(self, path, root):
+        """Clone the Node Manager repository.
+
+        Args:
+            path(str): The git path to the Node Manager repository.
+            root(str): The root directory of the Node Manager repository.
+
+        Returns:
+            git.Repo: The cloned repository.
+        """
         cloned_repo = None
         try:
             cloned_repo = Repo(root)
             cloned_repo.git.pull()
         except (NoSuchPathError, InvalidGitRepositoryError) as error:
-            logger.debug("Couldn't load repo from {path}, clone instead.".format(path=root))
+            logger.debug(
+                "Couldn't load repo from {path}, clone instead.".format(
+                    path=root,
+                )
+            )
+            logger.debug(error)
 
         if not cloned_repo:
-            cloned_repo = Repo.clone_from(repo_path, root, depth=1)
+            cloned_repo = Repo.clone_from(path, root, depth=1)
 
         return cloned_repo
 
     def build_repo(self, root, temp):
-        """Build the Node Manager repository."""
+        """Build the Node Manager repository.
+
+        Args:
+            root(str): The root directory of the Node Manager repository.
+            temp(str): The temp directory of the Node Manager repository.
+        """
         os.makedirs(temp)
         expanded_hda_dir = os.path.join(root, "dcc", "houdini", "hda")
         for hda in os.listdir(expanded_hda_dir):
@@ -48,8 +66,18 @@ class NodeManagerPlugin(Load):
             hotl_cmd = ["hotl", "-C", path, hda_path]
             logger.debug(hotl_cmd)
             result = subprocess.call(hotl_cmd)
+            if result != 0:
+                raise RuntimeError(
+                    "Failed to build HDA: {hda}".format(hda=hda)
+                )
 
-    def load(self, repo_path, root, temp):
-        """Load the Node Manager repository."""
-        self.git_repo = self.clone_repo(repo_path, root)
+    def load(self, path, root, temp):
+        """Load the Node Manager repository.
+
+        Args:
+            path(str): The git path to the Node Manager repository.
+            root(str): The root directory of the Node Manager repository.
+            temp(str): The temp directory of the Node Manager repository.
+        """
+        self.git_repo = self.clone_repo(path, root)
         self.build_repo(root, temp)
