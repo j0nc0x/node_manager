@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def path_import(plugin_path):
     """See https://docs.python.org/3/library/importlib.html#importing-a-source-file-directly
-    
+
     Args:
         plugin_path(str): The path to the plugin file to import.
 
@@ -26,7 +26,13 @@ def path_import(plugin_path):
 
 
 def initialise_plugin(plugin_module):
-    """
+    """Initialise the given plugin.
+
+    Args:
+        plugin_module(object): The plugin module to initialise.
+
+    Returns:
+        object: The initialised plugin.
     """
     plugin = plugin_module.NodeManagerPlugin()
     logger.info(
@@ -41,6 +47,12 @@ def initialise_plugin(plugin_module):
 def import_plugins(plugin_path):
     """Import all plugins found in self.node_manager_plugin_path, storing the
     initialised plugins in self._plugins.
+
+    Args:
+        plugin_path(str): The path to the plugins to import.
+
+    Returns:
+        list: A list of plugins.
     """
     plugins = []
     for path in [
@@ -61,7 +73,13 @@ def import_plugins(plugin_path):
 
 
 def get_load_plugin(load_plugin_name):
-    """
+    """Get the given load plugin.
+
+    Args:
+        load_plugin_name(str): The name of the load plugin to get.
+
+    Returns:
+        object: The load plugin.
     """
     manager_instance = utils.get_manager()
     if load_plugin_name:
@@ -75,7 +93,13 @@ def get_load_plugin(load_plugin_name):
 
 
 def get_discover_plugin(discover_plugin_name):
-    """
+    """Get the given discover plugin.
+
+    Args:
+        discover_plugin_name(str): The name of the discover plugin to get.
+
+    Returns:
+        object: The discover plugin.
     """
     manager_instance = utils.get_manager()
     if discover_plugin_name:

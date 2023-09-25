@@ -80,8 +80,6 @@ class NodeManager(object):
 
         print(self.stats)
 
-
-
     def initialise_repos(self):
         discover_plugin = plugin.get_discover_plugin(self.discover_plugin)
         if not discover_plugin:
@@ -140,10 +138,8 @@ class NodeManager(object):
 
     def load_all(self):
         """Load all nodeTypes."""
-        print("load_all")
-        print(self.node_repos)
         for repo_name in self.node_repos:
-            self.node_repos.get(repo_name).load()
+            self.node_repos.get(repo_name).load_nodes()
 
     def repo_from_definition(self, definition):
         """

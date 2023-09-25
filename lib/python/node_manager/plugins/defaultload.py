@@ -9,8 +9,7 @@ class NodeManagerPlugin(Load):
     name = "DefaultLoad"
 
     def __init__(self):
-        """ 
-        """
+        """Initialise the DefaultLoad plugin."""
         super(NodeManagerPlugin, self).__init__()
         self.manager = utils.get_manager()
         logger.debug("Initialsied DefaultLoad")

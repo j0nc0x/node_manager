@@ -2,6 +2,7 @@
 
 from node_manager import manager
 
+
 def get_manager():
     """Get the node manager instance if one exists.
 

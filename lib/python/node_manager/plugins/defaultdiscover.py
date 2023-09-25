@@ -13,8 +13,7 @@ class NodeManagerPlugin(Discover):
     name = "DefaultDiscover"
 
     def __init__(self):
-        """ 
-        """
+        """Initialise the DefaultDiscover plugin."""
         super(NodeManagerPlugin, self).__init__()
         self.manager = utils.get_manager()
         logger.debug("Initialsied DefaultDiscover")

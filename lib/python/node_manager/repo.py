@@ -10,9 +10,6 @@ import time
 
 import hou
 
-from git import Repo
-from git.exc import NoSuchPathError, InvalidGitRepositoryError
-
 from node_manager import nodetype
 from node_manager import utilities
 from node_manager.utils import plugin
@@ -44,16 +41,17 @@ class NodeRepo(object):
         self.repo_path = repo_path
         self.name = self.get_name()
 
-        print(plugin.get_load_plugin(self.manager.load_plugin))
-
         start = time.time()
-        self.git_repo = self.clone_repo()
-        self.manager.stats["repo_clone"] = time.time() - start
+        # self.git_repo = self.clone_repo()
+        # self.manager.stats["repo_clone"] = time.time() - start
+
+        # start = time.time()
+        # self.build_repo()
+        # self.manager.stats["build"] = time.time() - start
+
+        self.initialise_repo()
+
         self.library_path = self.get_library_path()
-
-        start = time.time()
-        self.build_repo()
-        self.manager.stats["build"] = time.time() - start
 
         self.editable = editable
         self.asset_subdirectory = "hda"
@@ -75,34 +73,26 @@ class NodeRepo(object):
     def repo_temp_dir(self):
         return os.path.join(self.manager.temp_dir, self.name)
 
+    def initialise_repo(self):
+        """Initialise the NodeRepo.
+
+        Returns:
+            list(NodeRepo): A list of NodeRepo objects.
+        """
+        load_plugin = plugin.get_load_plugin(self.manager.load_plugin)
+        if not load_plugin:
+            raise RuntimeError("Couldn't find Node Manager Load Plugin.")
+
+        return load_plugin.load(
+            self.repo_path,
+            self.local_repo_root(),
+            self.repo_temp_dir(),
+        )
+
     def config_path(self):
         """
         """
         return os.path.join(self.local_repo_root(), "config", "config.json")
-
-    def clone_repo(self):
-        cloned_repo = None
-        try:
-            cloned_repo =  Repo(self.local_repo_root())
-            cloned_repo.git.pull()
-        except (NoSuchPathError, InvalidGitRepositoryError) as error:
-            logger.debug("Couldn't load repo from {path}, clone instead.".format(path=self.local_repo_root()))
-
-        if not cloned_repo:
-            cloned_repo = Repo.clone_from(self.repo_path, self.local_repo_root(), depth=1)
-
-        return cloned_repo
-
-    def build_repo(self):
-        os.makedirs(self.repo_temp_dir())
-        expanded_hda_dir = os.path.join(self.local_repo_root(), "dcc", "houdini", "hda")
-        for hda in os.listdir(expanded_hda_dir):
-            path = os.path.join(expanded_hda_dir, hda)
-            hda_path = os.path.join(self.repo_temp_dir(), hda)
-            logger.info("Processing {source}".format(source=path))
-            hotl_cmd = ["hotl", "-C", path, hda_path]
-            logger.debug(hotl_cmd)
-            result = subprocess.call(hotl_cmd)
 
     def get_library_path(self):
         config_path = self.config_path()
@@ -212,7 +202,7 @@ class NodeRepo(object):
                 definition, force=force
             )
 
-    def load(self):
+    def load_nodes(self):
         """Load all definitions contained by this repository."""
         logger.debug("Reading from {directory}".format(directory=self.repo_temp_dir()))
 
