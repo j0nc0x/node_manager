@@ -224,9 +224,4 @@ class NodeRepo(object):
             )
 
         for definition_file in self.node_manager_definition_files:
-            # if os.path.splitext(definition_file)[1].lower() in self.extensions:
-            #     full_path = os.path.join(
-            #         self.get_repo_temp_dir(),
-            #         definition_file,
-            #     )
             self.process_node_definition_file(definition_file)
