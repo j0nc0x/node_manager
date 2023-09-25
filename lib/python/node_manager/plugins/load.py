@@ -4,21 +4,26 @@ import logging
 import os
 
 from node_manager import utils
-from node_manager.plugins.base.load import Load
 
 logger = logging.getLogger(__name__)
 
 
-class NodeManagerPlugin(Load):
+class NodeManagerPlugin(object):
     name = "DefaultLoad"
+    plugin_type = "load"
 
     def __init__(self):
-        """Initialise the DefaultLoad plugin."""
-        super(NodeManagerPlugin, self).__init__()
+        """ 
+        """
         self.manager = utils.get_manager()
-        logger.debug("Initialsied DefaultLoad")
-        logger.debug(self.name)
-        logger.debug(self.plugin_type)
+        logger.debug("Initialise DefaultLoad.")
+
+        self.extensions = [
+            ".hda",
+            ".hdanc",
+            ".otl",
+            ".otlnc",
+        ]
 
     def get_node_definition_files(self, path):
         """Get a list of node definition files in the given directory.
@@ -35,11 +40,11 @@ class NodeManagerPlugin(Load):
             if os.path.splitext(node_definition_file)[1] in self.extensions
         ]
 
-    def load(self, path, root, temp):
+    def load(self, path):
         """Load the Node Manager repository.
 
         Args:
-            path(str): The git path to the Node Manager repository.
+            path(str): The path to the Node Manager repository.
             root(str): The root directory of the Node Manager repository.
             temp(str): The temp directory of the Node Manager repository.
         """

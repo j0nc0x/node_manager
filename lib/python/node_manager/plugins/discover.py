@@ -4,21 +4,19 @@ import os
 from node_manager import repo
 from node_manager import utils
 
+
 logger = logging.getLogger(__name__)
 
 
-from node_manager.plugins.base.discover import Discover
-
-class NodeManagerPlugin(Discover):
+class NodeManagerPlugin(object):
     name = "DefaultDiscover"
+    plugin_type = "discover"
 
     def __init__(self):
-        """Initialise the DefaultDiscover plugin."""
-        super(NodeManagerPlugin, self).__init__()
+        """ 
+        """
         self.manager = utils.get_manager()
-        logger.debug("Initialsied DefaultDiscover")
-        logger.debug(self.name)
-        logger.debug(self.plugin_type)
+        logger.debug("Initialise Discover.")
 
     @staticmethod
     def get_repo_paths():

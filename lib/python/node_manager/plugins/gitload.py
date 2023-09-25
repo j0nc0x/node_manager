@@ -7,7 +7,7 @@ import os
 import subprocess
 
 from node_manager import utils
-from node_manager.plugins.base.load import Load
+from node_manager.plugins import load
 
 from git import Repo
 from git.exc import NoSuchPathError, InvalidGitRepositoryError
@@ -15,13 +15,12 @@ from git.exc import NoSuchPathError, InvalidGitRepositoryError
 logger = logging.getLogger(__name__)
 
 
-class NodeManagerPlugin(Load):
+class NodeManagerPlugin(load.NodeManagerPlugin):
     name = "GitLoad"
 
     def __init__(self):
         """Initialise the GitLoad plugin."""
         super(NodeManagerPlugin, self).__init__()
-        self.manager = utils.get_manager()
         self.git_repo = None
         logger.debug("Initialsied GitLoad")
         logger.debug(self.name)
@@ -75,21 +74,6 @@ class NodeManagerPlugin(Load):
                     "Failed to build HDA: {hda}".format(hda=hda)
                 )
 
-    def get_node_definition_files(self, temp):
-        """Get a list of node definition files in the given directory.
-
-        Args:
-            temp(str): The directory to search for node definition files.
-
-        Returns:
-            list: A list of node definition files.
-        """
-        return [
-            os.path.join(temp, node_definition_file)
-            for node_definition_file in os.listdir(temp)
-            if os.path.splitext(node_definition_file)[1] in self.extensions
-        ]
-
     def load(self, path, root, temp):
         """Load the Node Manager repository.
 
@@ -100,4 +84,4 @@ class NodeManagerPlugin(Load):
         """
         self.git_repo = self.clone_repo(path, root)
         self.build_repo(root, temp)
-        return self.get_node_definition_files(temp)
+        return super(NodeManagerPlugin, self).load(temp)
