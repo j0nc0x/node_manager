@@ -333,14 +333,27 @@ class NodeManager(object):
             "HDA release successful!", title="HDA Manager: Publish HDA"
         )
 
+
 def null_decorator(function):
+    """A decorator that does nothing.
+
+    Args:
+        function(function): The function to decorate.
+    """
     pass
 
 
 def deferred_decorator(callback_returning_decorator):
-    """ Borrowing this from SideFX -> $HFS/houdini/python3.9libs/sas/localassets.py
+    """ Borrowing from SideFX: $HFS/houdini/python3.9libs/sas/localassets.py
     This decorator defers another decorator from being called until the
     decorated function is actually called.
+
+    Args:
+        callback_returning_decorator(function): A function that returns the
+            decorator to be used to decorate the function.
+
+    Returns:
+        function: The decorated function.
     """
     # We can't use the nonlocal keyword until Python 3, so use a mutable
     # object to let inner functions modify items local to the closure's
