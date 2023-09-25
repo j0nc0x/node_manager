@@ -22,6 +22,9 @@ return True
                 <label>Edit</label>
                 <scriptCode>
 print("edit")
+from node_manager import menu
+current_node = kwargs.get("node", None)
+menu.run_menu_callback("edit", **kwargs)
                 </scriptCode>
             </scriptItem>
             <scriptItem id="edit_major_hda">
@@ -35,6 +38,9 @@ return True
                 <label>Edit (New Major)</label>
                 <scriptCode>
 print("edit major")
+from node_manager import menu
+current_node = kwargs.get("node", None)
+menu.run_menu_callback("edit_major", **kwargs)
                 </scriptCode>
             </scriptItem>
             <scriptItem id="edit_minor_hda">
@@ -48,6 +54,9 @@ return True
                 <label>Edit (New Minor)</label>
                 <scriptCode>
 print("edit minor")
+from node_manager import menu
+current_node = kwargs.get("node", None)
+menu.run_menu_callback("edit_minor", **kwargs)
                 </scriptCode>
             </scriptItem>
             <scriptItem id="publish_hda">

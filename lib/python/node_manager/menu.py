@@ -20,6 +20,19 @@ def get_node_manager():
     return manager.NodeManager.init()
 
 
+def menu_error(method_name):
+    """Raise a menu error.
+
+    Args:
+        method_name(str): The method_name to raise an error for.
+    """
+    raise RuntimeError(
+        "Node Manager menu callback method not found: {}".format(
+            method_name,
+        )
+    )
+
+
 def run_menu_callback(method_name, node, **kwargs):
     """Run node manager menu callback.
 
@@ -29,6 +42,12 @@ def run_menu_callback(method_name, node, **kwargs):
     """
     man = get_node_manager()
     method = getattr(man, method_name, None)
-    if man and hasattr(man, method_name) and callable(getattr(man, method_name)):
+    if (
+        man
+        and hasattr(man, method_name)
+        and callable(getattr(man, method_name))
+    ):
         method = getattr(man, method_name)
         hdefereval.executeDeferred(method, node)
+    else:
+        hdefereval.executeDeferred(menu_error, method_name)
