@@ -388,8 +388,26 @@ class NodeManager(object):
                 )
             )
 
+        # Copy and install definition modifying the nodetypename
         edit_repo = self.repo_from_definition(definition)
-        edit_repo.add_definition_copy(definition, version=new_version)
+        updated_node_type_name = edit_repo.add_definition_copy(definition, version=new_version)
+
+        if updated_node_type_name:
+            # Update the node in the scene
+            logger.debug(
+                "Updating {node} to {name}".format(
+                    node=current_node,
+                    name=updated_node_type_name,
+                )
+            )
+            current_node.changeNodeType(updated_node_type_name)
+
+        # Clean up the old definition  if it wasn't part of repo
+        definition_path = definition.libraryFilePath()
+        repo = self.repo_from_hda_file(definition_path)
+        if not repo:
+            logger.debug("Unistalling {path}".format(path=definition_path))
+            hou.hda.uninstallFile(definition.libraryFilePath())
 
     def prepare_publish(self, current_node):
         """
