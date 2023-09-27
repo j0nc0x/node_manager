@@ -59,7 +59,9 @@ def import_plugins(plugin_path):
         os.path.join(plugin_path, plugin_file)
         for plugin_file
         in os.listdir(plugin_path)
-        if not plugin_file.startswith("__") and plugin_file.endswith(".py")
+        if not plugin_file.startswith("__")
+        and not plugin_file.startswith(".")
+        and plugin_file.endswith(".py")
     ]:
         plugin_module = path_import(path)
         logger.info(

@@ -213,16 +213,31 @@ class NodeRepo(object):
         Returns:
             (str): The name of the copied node.
         """
+        logger.debug(
+            "Adding definition {definition} to repo {repo}".format(
+                definition=definition.nodeTypeName(),
+                repo=self.name,
+            )
+        )
+        logger.debug(
+            "Updating namespace: {namespace}, name: {name}, version: {version}".format(
+                namespace=namespace,
+                name=name,
+                version=version,
+            )
+        )
         # Write the HDA to the edit_dir
         editable_path = utilities.editable_hda_path_from_components(
             definition, self.manager.edit_dir, namespace=namespace, name=name
         )
+        logger.debug("Editable path: {path}".format(path=editable_path))
 
         # See if we are updating the NodeTypeName
         if namespace or name or version:
             new_name = utilities.node_type_name_from_components(
                 definition, namespace=namespace, name=name, version=version
             )
+            logger.debug("Using new name: {new_name}".format(new_name=new_name))
         else:
             new_name = None
 

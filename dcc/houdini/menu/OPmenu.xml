@@ -21,7 +21,6 @@ return True
                 </expression>    
                 <label>Edit</label>
                 <scriptCode>
-print("edit")
 from node_manager import menu
 current_node = kwargs.get("node", None)
 menu.run_menu_callback("edit", **kwargs)
@@ -37,7 +36,6 @@ return True
                 </expression>    
                 <label>Edit (New Major)</label>
                 <scriptCode>
-print("edit major")
 from node_manager import menu
 current_node = kwargs.get("node", None)
 menu.run_menu_callback("edit_major", **kwargs)
@@ -53,7 +51,6 @@ return True
                 </expression>    
                 <label>Edit (New Minor)</label>
                 <scriptCode>
-print("edit minor")
 from node_manager import menu
 current_node = kwargs.get("node", None)
 menu.run_menu_callback("edit_minor", **kwargs)

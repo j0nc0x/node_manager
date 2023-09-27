@@ -34,7 +34,7 @@ class NodeManager(object):
     instance = None
     plugin_path = "/Users/jcox/source/github/node_manager/lib/python/node_manager/plugins" # Read from env var
     discover_plugin = None
-    load_plugin = "GitLoad"
+    load_plugin = None#"GitLoad"
     # publish_node = None
     # validator_ui = None
 
@@ -165,11 +165,21 @@ class NodeManager(object):
             node_type(rbl_pipe_hdamanager.nodetype.NodeType): The nodetype
                 looked-up.
         """
+        logger.debug(
+            "Looking up Node Manager NodeType for {definition}".format(
+                definition=definition.nodeTypeName(),
+            )
+        )
         # namespace = utilities.node_type_namespace(
         #     definition.nodeTypeName(),
         # )
         repo = self.repo_from_definition(definition)
-        print(repo)
+        logger.debug(
+            "Repo {repo} found from definition {definition}".format(
+                repo=repo,
+                definition=definition.nodeTypeName(),
+            )
+        )
 
         if repo:
             current_name = definition.nodeTypeName()
@@ -177,6 +187,7 @@ class NodeManager(object):
             index = utilities.node_type_index(current_name, category)
             return repo.node_types.get(index)
 
+        logger.warning("No NodeType found.")
         return None
 
     def repo_from_definition(self, definition):
@@ -190,8 +201,36 @@ class NodeManager(object):
             hda_repo(rbl_pipe_hdamanager.repo.HDARepo): The HDA repo instance for the
                 given namespace.
         """
+        logger.debug(
+            "Looking up Node Manager Repo from definition: {definition}".format(
+                definition=definition.nodeTypeName(),
+            )
+        )
         path = definition.libraryFilePath()
-        return self.repo_from_hda_file(path)
+        repo = self.repo_from_hda_file(path)
+        if repo:
+            logger.info("Found repo from HDA file: {repo}".format(repo=repo))
+            return repo
+        logger.debug(
+            "No repo found for definition after lookup based on filename: {path}".format(
+                path=path,
+            )
+        )
+        
+        for repo_name in self.node_repos:
+            repo = self.node_repos.get(repo_name)
+
+        if repo:
+            logger.warning("Defaulted to first repository found: {repo}".format(repo=repo))
+            return repo
+        
+        logger.error(
+            "No repo found for definition: {definition}".format(
+                definition=definition,
+            )
+        )
+        raise RuntimeError("No repo found for definition {definition}".format(definition=definition.nodeTypeName()))
+
 
     def repo_from_hda_file(self, path):
         """
@@ -206,11 +245,28 @@ class NodeManager(object):
         """
         for repo_name in self.node_repos:
             repo = self.node_repos.get(repo_name)
-            print(path)
-            print(repo.repo_root())
-            print(repo)
             if path.startswith(repo.repo_root()):
                 return repo
+        return None
+    
+    def nodetypeversion_from_definition(self, definition):
+        """
+        Retrieve the nodetypeversion for the given definition.
+
+        Args:
+            definition(hou.HDADefinition): The definition to get the NodeTypeVersion
+                for.
+
+        Returns:
+            node_type_version(rbl_pipe_hdamanager.nodetypeversion.NodeTypeVersion): The
+                nodetype looked-up.
+        """
+        nodetype = self.nodetype_from_definition(definition)
+        if nodetype:
+            current_name = definition.nodeTypeName()
+            version = utilities.node_type_version(current_name)
+            return nodetype.versions.get(version)
+
         return None
 
     def package_name_from_definition(self, definition):
@@ -279,7 +335,7 @@ class NodeManager(object):
 
         return True
 
-    def edit_definition(self, current_node):
+    def edit_definition(self, current_node, major=False, minor=False):
         """Make a definition editable.
 
         Copy to our edit_dir with a unique name, and then add to the HDA
@@ -288,10 +344,12 @@ class NodeManager(object):
         Args:
             current_node(hou.Node): The node to make the definition editable
             for.
-
-        Returns:
-            (None)
+            major(bool): Should the edit be a major version?
+            minor(bool): Should the edit be a minor version?
         """
+        if major and minor:
+            raise RuntimeError("Can't edit definition as both major and minor.")
+
         definition = nodes.definition_from_node(current_node.path())
 
         dialog_message = (
@@ -305,8 +363,33 @@ class NodeManager(object):
             logger.info("Making definition editable aborted by user.")
             return
 
+        new_version = None
+        if major or minor:
+            logger.debug("Major or Minor version updated for editable node.")
+            current_version = utilities.node_type_version(definition.nodeTypeName())
+            current_version_components = len(current_version.split("."))
+            version = parse(current_version)
+            new_version = "{major}.{minor}".format(
+                major=version.major + major,
+                minor=version.minor + minor,
+            )
+            if current_version_components == 3:
+                logger.debug(
+                    "Current version is major.minor.patch, adding patch."
+                )
+                new_version = "{new_version}.{micro}".format(
+                    new_version=new_version,
+                    micro=version.micro,
+                )
+
+            logger.debug(
+                "Editable node will be created with new version {version}".format(
+                    version=new_version,
+                )
+            )
+
         edit_repo = self.repo_from_definition(definition)
-        edit_repo.add_definition_copy(definition)
+        edit_repo.add_definition_copy(definition, version=new_version)
 
     def prepare_publish(self, current_node):
         """
@@ -404,10 +487,8 @@ class NodeManager(object):
         hda_release = release.HDARelease(
             full_release_dir, node_type_name, branch, hda_name, package, release_comment, repo,
         )
-        print(hda_release)
         self.releases.append(hda_release)
         released_path = hda_release.release()
-        print(released_path)
         return
 
         if not released_path:

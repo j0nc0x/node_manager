@@ -27,8 +27,6 @@ def edit(current_node):
     Args:
         current_node(hou.Node): The node to edit.
     """
-    print("Edit")
-    print(current_node)
     man = get_node_manager()
     man.edit_definition(current_node)
 
@@ -39,8 +37,8 @@ def edit_major(current_node):
     Args:
         current_node(hou.Node): The node to edit.
     """
-    print("Edit Major")
-    print(current_node)
+    man = get_node_manager()
+    man.edit_definition(current_node, major=True)
 
 
 def edit_minor(current_node):
@@ -48,8 +46,17 @@ def edit_minor(current_node):
 
     Args:
         current_node(hou.Node): The node to edit."""
-    print("Edit Minor")
-    print(current_node)
+    man = get_node_manager()
+    man.edit_definition(current_node, minor=True)
+
+def prepare_publish(current_node):
+    """Prepare a node for publishing.
+
+    Args:
+        current_node(hou.Node): The node to prepare for publishing.
+    """
+    man = get_node_manager()
+    man.prepare_publish(current_node)
 
 
 def menu_error(method_name):
