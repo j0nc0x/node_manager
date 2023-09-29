@@ -117,3 +117,23 @@ def get_discover_plugin(discover_plugin_name):
     for plugin_module in manager_instance._plugins:
         if plugin_module.NodeManagerPlugin.name == discover_plugin:
             return initialise_plugin(plugin_module)
+
+
+def get_release_plugin(release_plugin_name):
+    """Get the given release plugin.
+
+    Args:
+        release_plugin_name(str): The name of the release plugin to get.
+
+    Returns:
+        object: The release plugin.
+    """
+    manager_instance = utils.get_manager()
+    if release_plugin_name:
+        publish_plugin = release_plugin_name
+    else:
+        publish_plugin = "DefaultRelease"
+
+    for plugin_module in manager_instance._plugins:
+        if plugin_module.NodeManagerPlugin.name == publish_plugin:
+            return initialise_plugin(plugin_module)

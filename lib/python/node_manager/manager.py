@@ -35,6 +35,7 @@ class NodeManager(object):
     plugin_path = "/Users/jcox/source/github/node_manager/lib/python/node_manager/plugins" # Read from env var
     discover_plugin = None
     load_plugin = None#"GitLoad"
+    release_plugin = None
     # publish_node = None
     # validator_ui = None
 
@@ -438,21 +439,6 @@ class NodeManager(object):
         # )
         # HDAManager.validator_ui = validator.launch_ui()
 
-        self.publish_definition(current_node)
-
-    def publish_definition(self, current_node):
-        """
-        Publish a definition being edited by the HDA manager.
-
-        Args:
-            current_node(hou.Node): The node to publish the definition for.
-
-        Returns:
-            (None)
-
-        Raises:
-            RuntimeError: HDA couldn't be expanded or package couldn't be found.
-        """
         result = hou.ui.readInput(
             "Please enter a release comment for this node publish:",
             buttons=("Publish", "Cancel"),
@@ -462,70 +448,15 @@ class NodeManager(object):
             logger.info("HDA Release cancelled by user.")
             return
 
-        definition = nodes.definition_from_node(current_node.path())
-        definition.updateFromNode(current_node)
-
-        current_name = definition.libraryFilePath()
-        if result[1]:
+        release_comment = None
+        if result and result[1]:
             release_comment = result[1]
-        else:
-            release_comment = "Updated {name}".format(
-                name=utilities.node_type_name(current_name)
-            )
 
-        # Define the release directory
-        release_subdir = "release_{time}".format(time=int(time.time()))
-        full_release_dir = os.path.join(self.release_dir(), release_subdir)
+        release_plugin = plugin.get_release_plugin(self.release_plugin)
+        if not release_plugin:
+            raise RuntimeError("Couldn't find Node Manager Release Plugin.")
 
-        # Expand the HDA ready for release
-        hda_name = utilities.expanded_hda_name(definition)
-        expand_dir = os.path.join(full_release_dir, hda_name)
-
-        # expandToDirectory doesn't allow inclusion of contents - raise with SideFx, but
-        # reverting to subprocess.
-        cmd = ["hotl", "-X", expand_dir, definition.libraryFilePath()]
-        process = subprocess.Popen(cmd)
-        process.wait()
-
-        # verify release
-        if process.returncode != 0:
-            # Non-zero return code
-            raise RuntimeError("HDA expansion didn't complete successfully.")
-
-        # Determine the other information needed to conduct a release
-        node_type_name = definition.nodeTypeName()
-        branch = utilities.release_branch_name(definition)
-        package = self.package_name_from_definition(definition)
-        if not package:
-            raise RuntimeError("No package found for definition")
-
-        repo = self.repo_from_definition(definition)
-
-        # Create and run the release
-        hda_release = release.HDARelease(
-            full_release_dir, node_type_name, branch, hda_name, package, release_comment, repo,
-        )
-        self.releases.append(hda_release)
-        released_path = hda_release.release()
-        return
-
-        if not released_path:
-            hou.ui.setStatusMessage(
-                "HDA release aborted for {name}.".format(name=hda_name)
-            )
-            return
-
-        # Add newly released .hda
-        repo = self.repo_from_hda_file(released_path)
-        repo.process_hda_file(released_path, force=True)
-
-        # Remove released definition
-        repo.remove_definition(definition)
-
-        # Success
-        hou.ui.displayMessage(
-            "HDA release successful!", title="HDA Manager: Publish HDA"
-        )
+        return release_plugin.release(current_node, release_comment=release_comment)
 
 
 def null_decorator(function):

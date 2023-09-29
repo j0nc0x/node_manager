@@ -71,7 +71,7 @@ current_node = kwargs.get("node", None)
 menu.run_menu_callback("prepare_publish", **kwargs)
                 </scriptCode>
             </scriptItem>
-            <removeItem id="opmenu.vhda_options"/>            
-            <removeItem id="opmenu.saveoptype"/>
+            <!-- <removeItem id="opmenu.vhda_options"/>             -->
+            <!-- <removeItem id="opmenu.saveoptype"/> -->
       </menu>
 </menuDocument>

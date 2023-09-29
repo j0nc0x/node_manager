@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+
+"""Default Discover Plugin."""
+
 import logging
 import os
 

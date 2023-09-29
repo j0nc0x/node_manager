@@ -143,7 +143,15 @@ class NodeRepo(object):
 
         # name = repo_conf_data.get("name")
     
-        return self.repo_path.split("/")[-1][:-4]
+        name = self.repo_path.split("/")[-1]
+        logger.debug(
+            "Calculating repo name from {path} as {name}".format(
+                path=self.repo_path,
+                name=name,
+            )
+        )
+
+        return name
 
     def process_definition(self, definition, force=False):
         """Update the node_types dictionary usng the provided definition.

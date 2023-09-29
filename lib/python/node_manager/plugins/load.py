@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+"""Default Load Plugin."""
+
 import logging
 import os
 
