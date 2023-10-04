@@ -100,9 +100,6 @@ class NodeManagerPlugin(object):
         # Remove released definition
         repo.remove_definition(definition)
 
-        # repo.add_definition_copy(definition)
-        logger.debug("Release complete.")
-
         # Success
         hou.ui.displayMessage(
             "HDA release successful!", title="HDA Manager: Publish HDA"
