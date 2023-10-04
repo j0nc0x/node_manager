@@ -62,10 +62,10 @@ class NodeManagerPlugin(object):
         definition = nodes.definition_from_node(current_node.path())
         definition.updateFromNode(current_node)
 
-        current_name = definition.libraryFilePath()
+        node_file_path = definition.libraryFilePath()
         if not release_comment:
             release_comment = "Updated {name}".format(
-                name=utilities.node_type_name(current_name)
+                name=utilities.node_type_name(node_file_path)
             )
 
         logger.debug("Release comment: {comment}".format(comment=release_comment))
@@ -73,8 +73,6 @@ class NodeManagerPlugin(object):
         repo = self.get_release_repo(definition)
         logger.debug("Using release repo: {repo}".format(repo=repo.name))
         logger.debug("Repo path: {path}".format(path=repo.repo_path))
-
-        node_file_path = definition.libraryFilePath()
 
         # Expand the HDA ready for release
         hda_name = utilities.expanded_hda_name(definition)
