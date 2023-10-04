@@ -59,8 +59,11 @@ class NodeManagerPlugin(load.NodeManagerPlugin):
 
     def build_repo(self):
         """Build the Node Manager repository."""
-        os.makedirs(self.repo_temp)
+        if not os.path.exists(self.repo_temp):
+            os.makedirs(self.repo_temp)
+            logger.debug("Created temp directory: {path}".format(path=self.repo_temp))
         expanded_hda_dir = os.path.join(self.repo_root, "dcc", "houdini", "hda")
+
         for hda in os.listdir(expanded_hda_dir):
             path = os.path.join(expanded_hda_dir, hda)
             hda_path = os.path.join(self.repo_temp, hda)

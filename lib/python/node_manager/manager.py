@@ -34,7 +34,7 @@ class NodeManager(object):
     instance = None
     plugin_path = "/Users/jcox/source/github/node_manager/lib/python/node_manager/plugins" # Read from env var
     discover_plugin = None
-    load_plugin = None#"GitLoad"
+    load_plugin = "GitLoad"
     release_plugin = None
     # publish_node = None
     # validator_ui = None

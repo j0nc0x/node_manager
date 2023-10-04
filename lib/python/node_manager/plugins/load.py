@@ -21,7 +21,13 @@ class NodeManagerPlugin(object):
         self.repo_root = repo_root
         self.repo_temp = repo_temp
         self.manager = utils.get_manager()
-        logger.debug("Initialise DefaultLoad.")
+        logger.debug(
+            "Initialise DefaultLoad: {repo_path} {repo_root} {repo_temp}".format(
+                repo_path=repo_path,
+                repo_root=repo_root,
+                repo_temp=repo_temp,
+            )
+        )
 
         self.extensions = [
             ".hda",
@@ -55,4 +61,6 @@ class NodeManagerPlugin(object):
 
     def load(self):
         """Load the Node Manager repository."""
-        return self.get_node_definition_files()
+        node_definition_files = self.get_node_definition_files()
+        logger.debug("Loading node definition files: {files}".format(files=node_definition_files))
+        return node_definition_files
