@@ -67,6 +67,7 @@ class NodeManager(object):
         self.temp_dir = mkdtemp(prefix="node-manager-")
         self.base_dir = self.get_base_dir()
         self.edit_dir = self.get_edit_dir()
+        self.backup_dir = os.path.join(self.edit_dir, "backup")
         # self.setup_callbacks()
         self.releases = list()
         self.node_repos = self.initialise_repos()

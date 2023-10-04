@@ -2,7 +2,8 @@
 
 import logging
 import os
-import time
+
+import hou
 
 from node_manager import utils
 from node_manager import utilities
@@ -74,71 +75,35 @@ class NodeManagerPlugin(object):
         logger.debug("Repo path: {path}".format(path=repo.repo_path))
 
         node_file_path = definition.libraryFilePath()
-        release_path = os.path.join(repo.repo_path, os.path.basename(node_file_path))
+
+        # Expand the HDA ready for release
+        hda_name = utilities.expanded_hda_name(definition)
+        release_path = os.path.join(repo.repo_path, hda_name)
         logger.debug("Using release path: {path}".format(path=release_path))
         if os.path.isfile(release_path):
             logger.warning("Exisitng file will be overwritten by release to {path}".format(path=release_path))
-            backup_directory = os.path.join(repo.repo_path, ".node_manager_backup")
-            if not os.path.isdir(backup_directory):
-                os.mkdir(backup_directory)
+            backup_directory = repo.get_repo_backup_dir()
+            if not backup_directory:
+                raise RuntimeError("No backup directory found for {repo}".format(repo=repo.name))
+
             backup_path = os.path.join(backup_directory, os.path.basename(node_file_path))
             # This might cause issues if the file is already loaded by Houdini
             os.rename(release_path, backup_path)
-            logger.warning("Previous file backed up.")
+            logger.warning("Previous file backed up to {path}".format(path=backup_path))
             
         definition.copyToHDAFile(release_path)
+        logger.debug("Definition copied to {path}".format(path=release_path))
+
+        # Add newly released .hda
+        repo.process_node_definition_file(release_path, force=True)
+
+        # Remove released definition
+        repo.remove_definition(definition)
+
+        # repo.add_definition_copy(definition)
         logger.debug("Release complete.")
 
-        # # Define the release directory
-        # release_subdir = "release_{time}".format(time=int(time.time()))
-        # full_release_dir = os.path.join(self.release_dir(), release_subdir)
-
-        # # Expand the HDA ready for release
-        # hda_name = utilities.expanded_hda_name(definition)
-        # expand_dir = os.path.join(full_release_dir, hda_name)
-
-        # # expandToDirectory doesn't allow inclusion of contents - raise with SideFx, but
-        # # reverting to subprocess.
-        # cmd = ["hotl", "-X", expand_dir, definition.libraryFilePath()]
-        # process = subprocess.Popen(cmd)
-        # process.wait()
-
-        # # verify release
-        # if process.returncode != 0:
-        #     # Non-zero return code
-        #     raise RuntimeError("HDA expansion didn't complete successfully.")
-
-        # # Determine the other information needed to conduct a release
-        # node_type_name = definition.nodeTypeName()
-        # branch = utilities.release_branch_name(definition)
-        # package = self.package_name_from_definition(definition)
-        # if not package:
-        #     raise RuntimeError("No package found for definition")
-
-        # repo = self.repo_from_definition(definition)
-
-        # # Create and run the release
-        # hda_release = release.HDARelease(
-        #     full_release_dir, node_type_name, branch, hda_name, package, release_comment, repo,
-        # )
-        # self.releases.append(hda_release)
-        # released_path = hda_release.release()
-        # return
-
-        # if not released_path:
-        #     hou.ui.setStatusMessage(
-        #         "HDA release aborted for {name}.".format(name=hda_name)
-        #     )
-        #     return
-
-        # # Add newly released .hda
-        # repo = self.repo_from_hda_file(released_path)
-        # repo.process_hda_file(released_path, force=True)
-
-        # # Remove released definition
-        # repo.remove_definition(definition)
-
-        # # Success
-        # hou.ui.displayMessage(
-        #     "HDA release successful!", title="HDA Manager: Publish HDA"
-        # )
+        # Success
+        hou.ui.displayMessage(
+            "HDA release successful!", title="HDA Manager: Publish HDA"
+        )

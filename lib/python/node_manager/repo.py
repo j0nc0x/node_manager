@@ -77,6 +77,18 @@ class NodeRepo(object):
             str: The path to the HDA repo on disk."""
         return os.path.join(self.manager.temp_dir, self.name)
 
+    def get_repo_backup_dir(self):
+        """Get the backup directory for the HDA repo.
+
+        Returns:
+            str: The path to the HDA repo backup directory.
+        """
+        backup_directory = os.path.join(self.repo_path, ".node_manager_backup")
+        if not os.path.isdir(backup_directory):
+            os.mkdir(backup_directory)
+            logger.debug("Created backup directory: {path}".format(path=backup_directory))
+        return backup_directory
+
     def repo_root(self):
         """"""
         return self.load_plugin.get_repo_load_path()
@@ -206,6 +218,44 @@ class NodeRepo(object):
 
         for definition_file in self.node_manager_definition_files:
             self.process_node_definition_file(definition_file)
+
+    def remove_definition(self, definition):
+        """Remove the given defintion from the repo.
+
+        Also uninistall the definition from the current session and back it up.
+
+        Args:
+            definition(hou.HDADefinition): The node definition to remove.
+
+        Raises:
+            RuntimeError: NodeType not found.
+        """
+        # Remove version
+        current_name = definition.nodeTypeName()
+        category = definition.nodeTypeCategory().name()
+        index = utilities.node_type_index(current_name, category)
+        nodetype = self.manager.nodetype_from_definition(definition)
+        nodetype.remove_version(definition)
+
+        # Remove the nodetype if no versions remain
+        if len(nodetype.versions) == 0:
+            if index not in self.node_types:
+                raise RuntimeError(
+                    "NodeType {nodetype} not found in {repo}".format(
+                        nodetype=index, repo=self.get_name()
+                    )
+                )
+            del self.node_types[index]
+            logger.debug(
+                "Removed NodeType {nodetype} from {repo}".format(
+                    nodetype=index, repo=self.get_name()
+                )
+            )
+        else:
+            logger.debug(
+                "Nothing to remove. More than one version remains for "
+                "{nodetype}.".format(nodetype=index)
+            )
 
     def add_definition_copy(self, definition, namespace=None, name=None, version=None):
         """Create a copy of a node definition.

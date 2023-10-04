@@ -5,6 +5,7 @@
 import logging
 
 from node_manager import nodetypeversion
+from node_manager import utilities
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +71,83 @@ class NodeType(object):
             self.versions[version].append(node_type_version)
         else:
             self.versions[version] = [node_type_version]
+
+    def remove_version(self, definition):
+        """
+        Remove the NodeTypeVersion for the given definition.
+
+        Args:
+            definition(hou.HDADefinition): The definition to remove the version for.
+
+        Raises:
+            RuntimeError: The version couldn't be removed.
+        """
+        path = definition.libraryFilePath()
+        current_name = definition.nodeTypeName()
+        version = utilities.node_type_version(current_name)
+        if not version:
+            version = "no version"
+
+        # Get a list of nodetype definitions for the given version
+        version_definitions = self.get_version(version)
+        index = 0
+        for node_type_version in version_definitions:
+            if path == node_type_version.path:
+                self.remove_version_at_index(version, index)
+
+                # Uninstall the .hda file
+                utilities.uninstall_definition(
+                    definition, backup_dir=self.manager.backup_dir
+                )
+                logger.debug(
+                    "Removed Version {version} from {nodetype}".format(
+                        version=version, nodetype=self.name
+                    )
+                )
+                return
+            index += 1
+
+        raise RuntimeError("Couldn't remove version for {path}".format(path=path))
+
+    def remove_version_at_index(self, version, index):
+        """
+        Given a version and an index remove the associated NodeTypeVersion.
+
+        Args:
+            version(str): The version number to remove.
+            index(int): The version index to remove.
+
+        Raises:
+            RuntimeError: Invalid version or index provided.
+        """
+        if not self.get_version(version):
+            raise RuntimeError("Version not found: {version}".format(version=version))
+
+        if not index < len(self.get_version(version)):
+            raise RuntimeError("Invalid index: {index}".format(index=index))
+
+        # Remove the NodeTypeVersion
+        del self.get_version(version)[index]
+
+    def get_version(self, version):
+        """
+        Get any NodeTypeVersions for the given version.
+
+        Args:
+            version(str): The version to get the NodeTypeVersions for.
+
+        Returns:
+            (list): A list of NodeTypeVersions for the given version.
+        """
+        if version in self.versions:
+            return self.versions.get(version)
+
+        logger.debug(
+            "Version {version} for {name} doesn't exist.".format(
+                version=version, name=self.name
+            )
+        )
+        return list()
 
     def all_versions(self):
         """
