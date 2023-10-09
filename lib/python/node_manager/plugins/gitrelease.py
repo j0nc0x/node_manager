@@ -71,7 +71,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         Returns:
             (str): The release directory.
         """
-        return os.path.join(self.repo.context.get("repo_temp"), "release")
+        return os.path.join(self.repo.context.get("git_repo_temp"), "release")
 
     def release(self, current_node, release_comment=None):
         """

@@ -65,20 +65,6 @@ class NodeRepo(object):
             )
         )
 
-    def get_repo_root_dir(self):
-        """Get the root directory for the HDA repo.
-
-        Returns:
-            str: The path to the HDA repo on disk."""
-        return os.path.join(self.manager.context.get("base_dir"), self.name)
-
-    def get_repo_temp_dir(self):
-        """Get the temp directory for the HDA repo.
-
-        Returns:
-            str: The path to the HDA repo on disk."""
-        return os.path.join(self.manager.context.get("temp_dir"), self.name)
-
     def get_repo_backup_dir(self):
         """Get the backup directory for the HDA repo.
 
@@ -91,19 +77,12 @@ class NodeRepo(object):
             logger.debug("Created backup directory: {path}".format(path=backup_directory))
         return backup_directory
 
-    def repo_root(self):
-        """"""
-        return self.load_plugin.get_repo_load_path()
-
     def get_load_plugin(self):
         """Get the load plugin for this repo.
 
         Returns:
             (obj): The load plugin for this repo.
         """
-        self.context["repo_root"] = self.get_repo_root_dir()
-        self.context["repo_temp"] = self.get_repo_temp_dir()
-
         load_plugin = plugin.get_load_plugin(
             self.manager.load_plugin,
             self,
@@ -124,7 +103,7 @@ class NodeRepo(object):
     def config_path(self):
         """
         """
-        return os.path.join(self.get_repo_root_dir(), "config", "config.json")
+        return os.path.join(self.context.get("git_repo_root"), "config", "config.json")
 
     # def repo_root(self):
     #     """Get the root of the HDA repo on the filesystem.
@@ -215,7 +194,7 @@ class NodeRepo(object):
         """Load all definitions contained by this repository."""
         logger.debug(
             "Reading from {directory}".format(
-                directory=self.get_repo_temp_dir(),
+                directory=self.context.get("git_repo_temp"),
             )
         )
 
@@ -289,7 +268,7 @@ class NodeRepo(object):
         )
         # Write the HDA to the edit_dir
         editable_path = utilities.editable_hda_path_from_components(
-            definition, self.manager.context.get("edit_dir"), namespace=namespace, name=name
+            definition, self.manager.context.get("manager_edit_dir"), namespace=namespace, name=name
         )
         logger.debug("Editable path: {path}".format(path=editable_path))
 
