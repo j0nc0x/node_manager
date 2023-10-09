@@ -65,10 +65,10 @@ class NodeManager(object):
         self._plugins = plugin.import_plugins(self.plugin_path)
 
         self.context = {}
-        self.temp_dir = mkdtemp(prefix="node-manager-")
-        self.base_dir = self.get_base_dir()
-        self.edit_dir = self.get_edit_dir()
-        self.backup_dir = os.path.join(self.edit_dir, "backup")
+        self.context["temp_dir"] = mkdtemp(prefix="node-manager-")
+        self.context["base_dir"] = self.get_base_dir()
+        self.context["edit_dir"] = self.get_edit_dir()
+        self.context["backup_dir"] = os.path.join(self.context.get("edit_dir"), "backup")
         # self.setup_callbacks()
         self.releases = list()
         self.node_repos = self.initialise_repos()
@@ -132,8 +132,8 @@ class NodeManager(object):
         """
         base_dir = os.getenv("NODE_MANAGER_BASE")
         if not base_dir:
-            base_dir = self.temp_dir
-            os.environ["NODE_MANAGER_BASE"] = self.temp_dir
+            base_dir = self.context.get("temp_dir")
+            os.environ["NODE_MANAGER_BASE"] = self.context.get("temp_dir")
         return base_dir
 
     def get_edit_dir(self, create_on_disk=True):
@@ -146,7 +146,7 @@ class NodeManager(object):
         Returns:
             str: The edit directory for the HDA Manager.
         """
-        edit_dir = os.path.join(self.base_dir, "edit", getpass.getuser())
+        edit_dir = os.path.join(self.context.get("base_dir"), "edit", getpass.getuser())
         if create_on_disk:
             os.makedirs(edit_dir, exist_ok=True)
         return edit_dir
@@ -154,7 +154,7 @@ class NodeManager(object):
     def git_dir(self):
         """
         """
-        return os.path.join(self.temp_dir, "git")
+        return os.path.join(self.context.get("temp_dir"), "git")
 
     def load_all(self):
         """Load all node definitions from the repositories."""

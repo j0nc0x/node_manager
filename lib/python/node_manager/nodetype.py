@@ -97,7 +97,7 @@ class NodeType(object):
 
                 # Uninstall the .hda file
                 utilities.uninstall_definition(
-                    definition, backup_dir=self.manager.backup_dir
+                    definition, backup_dir=self.manager.context.get("backup_dir")
                 )
                 logger.debug(
                     "Removed Version {version} from {nodetype}".format(

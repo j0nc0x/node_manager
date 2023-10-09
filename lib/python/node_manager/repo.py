@@ -70,14 +70,14 @@ class NodeRepo(object):
 
         Returns:
             str: The path to the HDA repo on disk."""
-        return os.path.join(self.manager.base_dir, self.name)
+        return os.path.join(self.manager.context.get("base_dir"), self.name)
 
     def get_repo_temp_dir(self):
         """Get the temp directory for the HDA repo.
 
         Returns:
             str: The path to the HDA repo on disk."""
-        return os.path.join(self.manager.temp_dir, self.name)
+        return os.path.join(self.manager.context.get("temp_dir"), self.name)
 
     def get_repo_backup_dir(self):
         """Get the backup directory for the HDA repo.
@@ -289,7 +289,7 @@ class NodeRepo(object):
         )
         # Write the HDA to the edit_dir
         editable_path = utilities.editable_hda_path_from_components(
-            definition, self.manager.edit_dir, namespace=namespace, name=name
+            definition, self.manager.context.get("edit_dir"), namespace=namespace, name=name
         )
         logger.debug("Editable path: {path}".format(path=editable_path))
 
