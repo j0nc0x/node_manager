@@ -14,18 +14,14 @@ class NodeManagerPlugin(object):
     name = "DefaultLoad"
     plugin_type = "load"
 
-    def __init__(self, repo_path, repo_root, repo_temp):
+    def __init__(self, repo):
         """ 
         """
-        self.repo_path = repo_path
-        self.repo_root = repo_root
-        self.repo_temp = repo_temp
+        self.repo = repo
         self.manager = utils.get_manager()
         logger.debug(
-            "Initialise DefaultLoad: {repo_path} {repo_root} {repo_temp}".format(
-                repo_path=repo_path,
-                repo_root=repo_root,
-                repo_temp=repo_temp,
+            "Initialise DefaultLoad: {repo_path}".format(
+                repo_path=self.get_repo_load_path(),
             )
         )
 
@@ -42,7 +38,7 @@ class NodeManagerPlugin(object):
         Returns:
             str: The path on disk to load the repository from.
         """
-        return self.repo_path
+        return self.repo.repo_path
 
     def get_node_definition_files(self):
         """Get a list of node definition files in the given directory.

@@ -30,9 +30,11 @@ class NodeManagerPlugin(object):
             (list): A list of Node Manager repositories in the current environment.
         """
         repo_paths = []
-        node_manage_repos = os.getenv("NODE_MANAGER_REPOS")
-        if node_manage_repos:
-            repo_paths = node_manage_repos.split(",")
+        #node_manager_repos = os.getenv("NODE_MANAGER_REPOS")
+        #node_manager_repos = "/Users/jcox/hdas"
+        node_manager_repos = "git@github.com:j0nc0x/hda_repo.git"
+        if node_manager_repos:
+            repo_paths = node_manager_repos.split(",")
         return repo_paths
 
     def discover(self):

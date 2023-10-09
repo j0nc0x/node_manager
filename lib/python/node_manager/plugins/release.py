@@ -23,9 +23,10 @@ class NodeManagerPlugin(object):
     name = plugin_name
     plugin_type = plugin_class
 
-    def __init__(self):
+    def __init__(self, repo):
         """ 
         """
+        self.repo = repo
         self.manager = utils.get_manager()
         logger.debug("Initialise Release.")
 
@@ -46,6 +47,19 @@ class NodeManagerPlugin(object):
 
         raise RuntimeError("No release repository found.")
 
+    def get_release_definition(self, current_node):
+        """Get the release definition for the given node.
+
+        Args:
+            current_node(hou.Node): The node to get the release definition for.
+
+        Returns:
+            hou.HDADefinition: The release definition.
+        """
+        definition = nodes.definition_from_node(current_node.path())
+        definition.updateFromNode(current_node)
+        return definition
+
     def release(self, current_node, release_comment=None):
         """Initialise Node Repositories from the NODE_MANAGER_REPOS environment
         variable.
@@ -59,8 +73,8 @@ class NodeManagerPlugin(object):
         """
         logger.info("Beginning HDA release.")
 
-        definition = nodes.definition_from_node(current_node.path())
-        definition.updateFromNode(current_node)
+        # Get the release definitionq
+        definition = self.get_release_definition(current_node)
 
         node_file_path = definition.libraryFilePath()
         if not release_comment:

@@ -62,6 +62,10 @@ class HDARelease(object):
         self.comment = release_comment
         self.repo = repo
         logger.info("Initialised HDA Release process")
+        logger.debug("Release directory: {path}".format(path=self.release_dir))
+
+    def git_repo(self):
+        return self.repo.context.get("git_repo")
 
     def git_dir(self):
         """
@@ -70,7 +74,8 @@ class HDARelease(object):
         Returns:
             (str): The path to the git repository.
         """
-        return self.repo.manager.git_dir
+        logger.debug(self.repo.context.get("repo_root"))
+        return self.repo.context.get("repo_root")
 
     def expand_dir(self):
         """
@@ -164,7 +169,7 @@ class HDARelease(object):
         config_path = self.config_path()
 
         # Create the branch
-        current = self.repo.git_repo.create_head(self.release_branch)
+        current = self.git_repo().create_head(self.release_branch)
         current.checkout()
 
         # Check if expanded node directory already exists, delete it if it does
@@ -193,22 +198,22 @@ class HDARelease(object):
             repo_conf_data = json.load(repo_conf)
 
         # Get the release version
-        release_tags = [str(tag) for tag in self.repo.git_repo.tags]
+        release_tags = [str(tag) for tag in self.git_repo().tags]
         self.release_version = self.get_release_version(repo_conf_data.get("version"), major, minor, patch, release_tags)
 
         # Copy the expanaded HDA into it's correct location
         shutil.copytree(self.expand_dir(), hda_path)
 
         # See if anything was updated
-        changes = [change.a_path for change in self.repo.git_repo.index.diff(None)]
-        if not changes and not self.repo.git_repo.untracked_files:
+        changes = [change.a_path for change in self.git_repo().index.diff(None)]
+        if not changes and not self.git_repo().untracked_files:
             logger.debug("No changes have been made to this HDA, aborting.")
             return None
 
         # Add and commit
-        self.repo.git_repo.git.add(A=True)
-        self.repo.git_repo.git.commit(m=self.comment)
-        self.repo.git_repo.git.push("--set-upstream", "origin", current)
+        self.git_repo().git.add(A=True)
+        self.git_repo().git.commit(m=self.comment)
+        self.git_repo().git.push("--set-upstream", "origin", current)
 
         # Increment version in config
         repo_conf_data["version"] = self.release_version
@@ -216,23 +221,23 @@ class HDARelease(object):
             json.dump(repo_conf_data, repo_conf)
 
         # Commit and push
-        self.repo.git_repo.git.commit(config_path, m="Version up")
-        self.repo.git_repo.git.push()
+        self.git_repo().git.commit(config_path, m="Version up")
+        self.git_repo().git.push()
 
         # Push tag to repo
-        new_tag = self.repo.git_repo.create_tag(self.release_version, message="Release {version}".format(version=self.release_version))
-        self.repo.git_repo.remotes.origin.push(new_tag)
+        new_tag = self.git_repo().create_tag(self.release_version, message="Release {version}".format(version=self.release_version))
+        self.git_repo().remotes.origin.push(new_tag)
 
         # merge to master
-        self.repo.git_repo.git.reset("--hard")
-        main = self.repo.git_repo.heads.main
+        self.git_repo().git.reset("--hard")
+        main = self.git_repo().heads.main
         main.checkout()
-        self.repo.git_repo.git.pull()
-        self.repo.git_repo.git.merge(current, "--no-ff")
-        self.repo.git_repo.git.push()
+        self.git_repo().git.pull()
+        self.git_repo().git.merge(current, "--no-ff")
+        self.git_repo().git.push()
 
         # remove release branch
-        remote = self.repo.git_repo.remote(name='origin')
+        remote = self.git_repo().remote(name='origin')
         remote.push(refspec=(':{branch}'.format(branch=self.release_branch)))
 
         # clean up release dir

@@ -37,6 +37,8 @@ class NodeRepo(object):
             editable(:obj:`bool`,optional): Are the HDAs in this repository editable?
         """
         self.manager = manager
+        self.context = {}
+
         self.repo_path = repo_path
         self.name = self.get_name()
 
@@ -99,11 +101,12 @@ class NodeRepo(object):
         Returns:
             (obj): The load plugin for this repo.
         """
+        self.context["repo_root"] = self.get_repo_root_dir()
+        self.context["repo_temp"] = self.get_repo_temp_dir()
+
         load_plugin = plugin.get_load_plugin(
             self.manager.load_plugin,
-            self.repo_path,
-            self.get_repo_root_dir(),
-            self.get_repo_temp_dir(),
+            self,
         )
         if not load_plugin:
             raise RuntimeError("Couldn't find Node Manager Load Plugin.")

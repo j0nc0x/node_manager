@@ -35,7 +35,7 @@ class NodeManager(object):
     plugin_path = "/Users/jcox/source/github/node_manager/lib/python/node_manager/plugins" # Read from env var
     discover_plugin = None
     load_plugin = "GitLoad"
-    release_plugin = None
+    release_plugin = "GitRelease"
     # publish_node = None
     # validator_ui = None
 
@@ -64,6 +64,7 @@ class NodeManager(object):
         """Load the HDA Manager."""
         self._plugins = plugin.import_plugins(self.plugin_path)
 
+        self.context = {}
         self.temp_dir = mkdtemp(prefix="node-manager-")
         self.base_dir = self.get_base_dir()
         self.edit_dir = self.get_edit_dir()
@@ -149,6 +150,11 @@ class NodeManager(object):
         if create_on_disk:
             os.makedirs(edit_dir, exist_ok=True)
         return edit_dir
+
+    def git_dir(self):
+        """
+        """
+        return os.path.join(self.temp_dir, "git")
 
     def load_all(self):
         """Load all node definitions from the repositories."""
@@ -268,37 +274,6 @@ class NodeManager(object):
             current_name = definition.nodeTypeName()
             version = utilities.node_type_version(current_name)
             return nodetype.versions.get(version)
-
-        return None
-
-    def package_name_from_definition(self, definition):
-        """
-        Use the namespace for the given definition to infer the rez package.
-
-        Args:
-            definition(hou.HDADefinition): The definition to work out the package name
-                from.
-
-        Returns:
-            (str): The package name.
-
-        Raises:
-            RuntimeError: No package could be found based on the given definition.
-        """
-        # if utilities.allow_show_publish():
-        #     repo = self.repo_from_project()
-
-        #     if repo:
-        #         return repo.package_name
-
-        #     raise RuntimeError("No package found for the current project")
-        # else:
-        current_name = definition.nodeTypeName()
-        #namespace = utilities.node_type_namespace(current_name)
-        repo = self.repo_from_definition(definition)
-
-        if repo:
-            return repo.name
 
         return None
 
@@ -453,7 +428,8 @@ class NodeManager(object):
         if result and result[1]:
             release_comment = result[1]
 
-        release_plugin = plugin.get_release_plugin(self.release_plugin)
+        repo = self.repo_from_definition(nodes.definition_from_node(current_node.path()))
+        release_plugin = plugin.get_release_plugin(self.release_plugin, repo)
         if not release_plugin:
             raise RuntimeError("Couldn't find Node Manager Release Plugin.")
 
