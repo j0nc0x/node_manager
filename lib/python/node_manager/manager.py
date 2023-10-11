@@ -5,7 +5,6 @@
 import getpass
 import logging
 import os
-import subprocess
 import time
 
 from tempfile import mkdtemp
@@ -19,7 +18,6 @@ if hou.isUIAvailable():
 else:
     do_work_in_background_thread = None
 
-from node_manager import release
 from node_manager import utilities
 from node_manager.utils import plugin
 from node_manager.dependencies import dialog
