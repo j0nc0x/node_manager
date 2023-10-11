@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import logging
+import os
 import sys
 
 import hou
@@ -14,7 +15,17 @@ logging.basicConfig(
     stream=sys.stdout,
 )
 
-manager.initialise_node_manager(background=hou.isUIAvailable())
+# os.environ["NODE_MANAGER_BASE"] = "/Users/jcox/hdas"
+# manager.initialise_node_manager(
+#     background=hou.isUIAvailable(),
+# )
+
+os.environ["NODE_MANAGER_BASE"] = "/Users/jcox/hdas_git"
+manager.initialise_node_manager(
+    background=hou.isUIAvailable(),
+    load_plugin="GitLoad",
+    release_plugin="GitRelease",
+)
 
 # def houdini_startup():
 #     """Houdini startup script.

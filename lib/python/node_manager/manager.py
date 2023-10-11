@@ -33,31 +33,51 @@ class NodeManager(object):
 
     instance = None
     plugin_path = "/Users/jcox/source/github/node_manager/lib/python/node_manager/plugins" # Read from env var
-    discover_plugin = None
-    load_plugin = "GitLoad"
-    release_plugin = "GitRelease"
     # publish_node = None
     # validator_ui = None
 
     @classmethod
-    def init(cls):
+    def init(
+        cls,
+        discover_plugin=None,
+        load_plugin=None,
+        release_plugin=None,
+    ):
         """
         Initialise the HDAManager storing the instance in the class.
+
+        Args:
+            discover_plugin(str, optional): The name of the discover plugin to use.
+            load_plugin(str, optional): The name of the load plugin to use.
+            release_plugin(str, optional): The name of the release plugin to use.
 
         Returns:
             (HDAManager): The HDAManager instance.
         """
         if cls.instance is None:
             start = time.time()
-            cls.instance = cls()
+            cls.instance = cls(
+                discover_plugin=discover_plugin,
+                load_plugin=load_plugin,
+                release_plugin=release_plugin,
+            )
             cls.instance.stats["init"] = time.time() - start
         return cls.instance
 
     def __init__(
         self,
+        discover_plugin=None,
+        load_plugin=None,
+        release_plugin=None,
     ):
         """Initialise the NodeManager class."""
         logger.info("Initialising Node Manager")
+
+        # Define which plugins to use.
+        self.discover_plugin = discover_plugin
+        self.load_plugin = load_plugin
+        self.release_plugin = release_plugin
+
         self.stats = {}
 
     def load(self):
@@ -484,8 +504,18 @@ def deferred_decorator(callback_returning_decorator):
 
 
 @deferred_decorator(lambda: do_work_in_background_thread)
-def initialise_in_background():
-    """Initialise the Node Manager in the Houdini background thread."""
+def initialise_in_background(
+    discover_plugin=None,
+    load_plugin=None,
+    release_plugin=None,
+):
+    """Initialise the Node Manager in the Houdini background thread.
+
+    Args:
+        discover_plugin(str, optional): The name of the discover plugin to use.
+        load_plugin(str, optional): The name of the load plugin to use.
+        release_plugin(str, optional): The name of the release plugin to use.
+    """
     logger.debug("Beginning initialisation using background thread.")
     yield
     manager_instance = NodeManager.init()
@@ -494,19 +524,37 @@ def initialise_in_background():
     logger.debug("Initialisation complete.")
 
 
-def initialise_in_foreground():
-    """Initialise the Node Manager in the Houdini main thread."""
+def initialise_in_foreground(
+    discover_plugin=None,
+    load_plugin=None,
+    release_plugin=None,
+):
+    """Initialise the Node Manager in the Houdini main thread.
+
+    Args:
+        discover_plugin(str, optional): The name of the discover plugin to use.
+        load_plugin(str, optional): The name of the load plugin to use.
+        release_plugin(str, optional): The name of the release plugin to use.
+    """
     logger.debug("Beginning initialisation using main thread.")
     manager_instance = NodeManager.init()
     manager_instance.load()
 
 
-def initialise_node_manager(background=True):
+def initialise_node_manager(
+        background=True,
+        discover_plugin=None,
+        load_plugin=None,
+        release_plugin=None,
+    ):
     """Initialise the Node Manager.
 
     Args:
         background(bool): Should the Node Manager be initialised in the
             background thread?
+        discover_plugin(str, optional): The name of the discover plugin to use.
+        load_plugin(str, optional): The name of the load plugin to use.
+        release_plugin(str, optional): The name of the release plugin to use.
     """
     if background and not do_work_in_background_thread:
         logger.warning(
@@ -514,6 +562,14 @@ def initialise_node_manager(background=True):
             "reverting to main thread."
         )
     if background and do_work_in_background_thread:
-        initialise_in_background()
+        initialise_in_background(
+            discover_plugin=discover_plugin,
+            load_plugin=load_plugin,
+            release_plugin=release_plugin,
+        )
     else:
-        initialise_in_foreground()
+        initialise_in_foreground(
+            discover_plugin=discover_plugin,
+            load_plugin=load_plugin,
+            release_plugin=release_plugin,
+        )
