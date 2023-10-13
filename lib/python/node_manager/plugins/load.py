@@ -19,9 +19,10 @@ class NodeManagerPlugin(object):
         """
         self.repo = repo
         self.manager = utils.get_manager()
+        self.repo.context["repo_load_path"] = self.repo.context.get("repo_path")
         logger.debug(
             "Initialise DefaultLoad: {repo_path}".format(
-                repo_path=self.get_repo_load_path(),
+                repo_path=self.repo.context.get("repo_path"),
             )
         )
 
@@ -32,14 +33,6 @@ class NodeManagerPlugin(object):
             ".otlnc",
         ]
 
-    def get_repo_load_path(self):
-        """Get the path on disk to load the repository from.
-
-        Returns:
-            str: The path on disk to load the repository from.
-        """
-        return self.repo.repo_path
-
     def get_node_definition_files(self):
         """Get a list of node definition files in the given directory.
 
@@ -49,9 +42,10 @@ class NodeManagerPlugin(object):
         Returns:
             list: A list of node definition files.
         """
+        load_path = self.repo.context.get("repo_load_path")
         return [
-            os.path.join(self.get_repo_load_path(), node_definition_file)
-            for node_definition_file in os.listdir(self.get_repo_load_path())
+            os.path.join(load_path, node_definition_file)
+            for node_definition_file in os.listdir(load_path)
             if os.path.splitext(node_definition_file)[1] in self.extensions
         ]
 

@@ -85,18 +85,18 @@ class NodeManagerPlugin(object):
         logger.debug("Release comment: {comment}".format(comment=release_comment))
 
         repo = self.get_release_repo(definition)
-        logger.debug("Using release repo: {repo}".format(repo=repo.name))
-        logger.debug("Repo path: {path}".format(path=repo.repo_path))
+        logger.debug("Using release repo: {repo}".format(repo=repo.context.get("name")))
+        logger.debug("Repo path: {path}".format(path=repo.context.get("repo_path")))
 
         # Expand the HDA ready for release
         hda_name = utilities.expanded_hda_name(definition)
-        release_path = os.path.join(repo.repo_path, hda_name)
+        release_path = os.path.join(repo.context.get("repo_path"), hda_name)
         logger.debug("Using release path: {path}".format(path=release_path))
         if os.path.isfile(release_path):
             logger.warning("Exisitng file will be overwritten by release to {path}".format(path=release_path))
             backup_directory = repo.get_repo_backup_dir()
             if not backup_directory:
-                raise RuntimeError("No backup directory found for {repo}".format(repo=repo.name))
+                raise RuntimeError("No backup directory found for {repo}".format(repo=repo.context.get("name")))
 
             backup_path = os.path.join(backup_directory, os.path.basename(node_file_path))
             # This might cause issues if the file is already loaded by Houdini

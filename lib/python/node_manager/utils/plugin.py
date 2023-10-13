@@ -74,6 +74,26 @@ def import_plugins(plugin_path):
     return plugins
 
 
+def get_discover_plugin(discover_plugin_name):
+    """Get the given discover plugin.
+
+    Args:
+        discover_plugin_name(str): The name of the discover plugin to get.
+
+    Returns:
+        object: The discover plugin.
+    """
+    manager_instance = utils.get_manager()
+    if discover_plugin_name:
+        discover_plugin = discover_plugin_name
+    else:
+        discover_plugin = "DefaultDiscover"
+
+    for plugin_module in manager_instance._plugins:
+        if plugin_module.NodeManagerPlugin.name == discover_plugin:
+            return initialise_plugin(plugin_module)
+
+
 def get_load_plugin(load_plugin_name, repo):
     """Get the given load plugin.
 
@@ -97,24 +117,26 @@ def get_load_plugin(load_plugin_name, repo):
             )
 
 
-def get_discover_plugin(discover_plugin_name):
-    """Get the given discover plugin.
+def get_edit_plugin(edit_plugin_name):
+    """Get the given edit plugin.
 
     Args:
-        discover_plugin_name(str): The name of the discover plugin to get.
+        edit_plugin_name(str): The name of the edit plugin to get.
 
     Returns:
-        object: The discover plugin.
+        object: The load plugin.
     """
     manager_instance = utils.get_manager()
-    if discover_plugin_name:
-        discover_plugin = discover_plugin_name
+    if edit_plugin_name:
+        edit_plugin = edit_plugin_name
     else:
-        discover_plugin = "DefaultDiscover"
+        edit_plugin = "DefaultEdit"
 
     for plugin_module in manager_instance._plugins:
-        if plugin_module.NodeManagerPlugin.name == discover_plugin:
-            return initialise_plugin(plugin_module)
+        if plugin_module.NodeManagerPlugin.name == edit_plugin:
+            return initialise_plugin(
+                plugin_module,
+            )
 
 
 def get_release_plugin(release_plugin_name, repo):

@@ -39,8 +39,8 @@ class NodeRepo(object):
         self.manager = manager
         self.context = {}
 
-        self.repo_path = repo_path
-        self.name = self.get_name()
+        self.context["repo_path"] = repo_path
+        self.context["name"] = self.get_name()
 
         start = time.time()
         # self.git_repo = self.clone_repo()
@@ -61,7 +61,8 @@ class NodeRepo(object):
 
         logger.info(
             "Initialised HDA Repo: {name} ({path})".format(
-                name=self.name, path=self.repo_path
+                name=self.context.get("name"),
+                path=self.context.get("repo_path"),
             )
         )
 
@@ -71,7 +72,7 @@ class NodeRepo(object):
         Returns:
             str: The path to the HDA repo backup directory.
         """
-        backup_directory = os.path.join(self.repo_path, ".node_manager_backup")
+        backup_directory = os.path.join(self.context.get("repo_path"), ".node_manager_backup")
         if not os.path.isdir(backup_directory):
             os.mkdir(backup_directory)
             logger.debug("Created backup directory: {path}".format(path=backup_directory))
@@ -83,6 +84,7 @@ class NodeRepo(object):
         Returns:
             (obj): The load plugin for this repo.
         """
+        logger.debug("Using load plugin: {plugin}".format(plugin=self.manager.load_plugin))
         load_plugin = plugin.get_load_plugin(
             self.manager.load_plugin,
             self,
@@ -137,10 +139,10 @@ class NodeRepo(object):
 
         # name = repo_conf_data.get("name")
     
-        name = self.repo_path.split("/")[-1]
+        name = self.context.get("repo_path").split("/")[-1]
         logger.debug(
             "Calculating repo name from {path} as {name}".format(
-                path=self.repo_path,
+                path=self.context.get("repo_path"),
                 name=name,
             )
         )
@@ -256,7 +258,7 @@ class NodeRepo(object):
         logger.debug(
             "Adding definition {definition} to repo {repo}".format(
                 definition=definition.nodeTypeName(),
-                repo=self.name,
+                repo=self.context.get("name"),
             )
         )
         logger.debug(

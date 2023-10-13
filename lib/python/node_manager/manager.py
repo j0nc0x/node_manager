@@ -31,14 +31,13 @@ class NodeManager(object):
 
     instance = None
     plugin_path = "/Users/jcox/source/github/node_manager/lib/python/node_manager/plugins" # Read from env var
-    # publish_node = None
-    # validator_ui = None
 
     @classmethod
     def init(
         cls,
         discover_plugin=None,
         load_plugin=None,
+        edit_plugin=None,
         release_plugin=None,
     ):
         """
@@ -47,6 +46,7 @@ class NodeManager(object):
         Args:
             discover_plugin(str, optional): The name of the discover plugin to use.
             load_plugin(str, optional): The name of the load plugin to use.
+            edit_plugin(str, optional): The name of the edit plugin to use.
             release_plugin(str, optional): The name of the release plugin to use.
 
         Returns:
@@ -57,6 +57,7 @@ class NodeManager(object):
             cls.instance = cls(
                 discover_plugin=discover_plugin,
                 load_plugin=load_plugin,
+                edit_plugin=edit_plugin,
                 release_plugin=release_plugin,
             )
             cls.instance.stats["init"] = time.time() - start
@@ -66,6 +67,7 @@ class NodeManager(object):
         self,
         discover_plugin=None,
         load_plugin=None,
+        edit_plugin=None,
         release_plugin=None,
     ):
         """Initialise the NodeManager class."""
@@ -74,6 +76,7 @@ class NodeManager(object):
         # Define which plugins to use.
         self.discover_plugin = discover_plugin
         self.load_plugin = load_plugin
+        self.edit_plugin = edit_plugin
         self.release_plugin = release_plugin
 
         self.stats = {}
@@ -345,64 +348,11 @@ class NodeManager(object):
         if major and minor:
             raise RuntimeError("Can't edit definition as both major and minor.")
 
-        definition = nodes.definition_from_node(current_node.path())
+        edit_plugin = plugin.get_edit_plugin(self.edit_plugin)
+        if not edit_plugin:
+            raise RuntimeError("Couldn't find Node Manager Edit Plugin.")
 
-        dialog_message = (
-            "You are about to edit a hda that is not the lastest version, do "
-            "you want to continue?"
-        )
-
-        if not self.is_latest_version(current_node) and dialog.display_message(
-            dialog_message, ("Ok", "Cancel"), title="Warning"
-        ):
-            logger.info("Making definition editable aborted by user.")
-            return
-
-        new_version = None
-        if major or minor:
-            logger.debug("Major or Minor version updated for editable node.")
-            current_version = utilities.node_type_version(definition.nodeTypeName())
-            current_version_components = len(current_version.split("."))
-            version = parse(current_version)
-            new_version = "{major}.{minor}".format(
-                major=version.major + major,
-                minor=version.minor + minor,
-            )
-            if current_version_components == 3:
-                logger.debug(
-                    "Current version is major.minor.patch, adding patch."
-                )
-                new_version = "{new_version}.{micro}".format(
-                    new_version=new_version,
-                    micro=version.micro,
-                )
-
-            logger.debug(
-                "Editable node will be created with new version {version}".format(
-                    version=new_version,
-                )
-            )
-
-        # Copy and install definition modifying the nodetypename
-        edit_repo = self.repo_from_definition(definition)
-        updated_node_type_name = edit_repo.add_definition_copy(definition, version=new_version)
-
-        if updated_node_type_name:
-            # Update the node in the scene
-            logger.debug(
-                "Updating {node} to {name}".format(
-                    node=current_node,
-                    name=updated_node_type_name,
-                )
-            )
-            current_node.changeNodeType(updated_node_type_name)
-
-        # Clean up the old definition  if it wasn't part of repo
-        definition_path = definition.libraryFilePath()
-        repo = self.repo_from_hda_file(definition_path)
-        if not repo:
-            logger.debug("Unistalling {path}".format(path=definition_path))
-            hou.hda.uninstallFile(definition.libraryFilePath())
+        return edit_plugin.edit_definition(current_node, major=False, minor=False)
 
     def prepare_publish(self, current_node):
         """
@@ -505,6 +455,7 @@ def deferred_decorator(callback_returning_decorator):
 def initialise_in_background(
     discover_plugin=None,
     load_plugin=None,
+    edit_plugin=None,
     release_plugin=None,
 ):
     """Initialise the Node Manager in the Houdini background thread.
@@ -512,11 +463,17 @@ def initialise_in_background(
     Args:
         discover_plugin(str, optional): The name of the discover plugin to use.
         load_plugin(str, optional): The name of the load plugin to use.
+        edit_plugin(str, optional): The name of the edit plugin to use.
         release_plugin(str, optional): The name of the release plugin to use.
     """
     logger.debug("Beginning initialisation using background thread.")
     yield
-    manager_instance = NodeManager.init()
+    manager_instance = NodeManager.init(
+        discover_plugin=discover_plugin,
+        load_plugin=load_plugin,
+        edit_plugin=edit_plugin,
+        release_plugin=release_plugin,
+    )
     manager_instance.load()
     yield
     logger.debug("Initialisation complete.")
@@ -525,6 +482,7 @@ def initialise_in_background(
 def initialise_in_foreground(
     discover_plugin=None,
     load_plugin=None,
+    edit_plugin=None,
     release_plugin=None,
 ):
     """Initialise the Node Manager in the Houdini main thread.
@@ -532,10 +490,16 @@ def initialise_in_foreground(
     Args:
         discover_plugin(str, optional): The name of the discover plugin to use.
         load_plugin(str, optional): The name of the load plugin to use.
+        edit_plugin(str, optional): The name of the edit plugin to use.
         release_plugin(str, optional): The name of the release plugin to use.
     """
     logger.debug("Beginning initialisation using main thread.")
-    manager_instance = NodeManager.init()
+    manager_instance = NodeManager.init(
+        discover_plugin=discover_plugin,
+        load_plugin=load_plugin,
+        edit_plugin=edit_plugin,
+        release_plugin=release_plugin,
+    )
     manager_instance.load()
 
 
@@ -543,6 +507,7 @@ def initialise_node_manager(
         background=True,
         discover_plugin=None,
         load_plugin=None,
+        edit_plugin=None,
         release_plugin=None,
     ):
     """Initialise the Node Manager.
@@ -552,8 +517,18 @@ def initialise_node_manager(
             background thread?
         discover_plugin(str, optional): The name of the discover plugin to use.
         load_plugin(str, optional): The name of the load plugin to use.
+        edit_plugin(str, optional): The name of the edit plugin to use.
         release_plugin(str, optional): The name of the release plugin to use.
     """
+    logger.debug(
+        "Initialising Node Manager using discover plugin: {discover_plugin}, "
+        "load_plugin: {load_plugin}, edit_plugin: {edit_plugin}, release_plugin: {release_plugin}.".format(
+            discover_plugin=discover_plugin,
+            load_plugin=load_plugin,
+            edit_plugin=edit_plugin,
+            release_plugin=release_plugin,
+        )
+    )
     if background and not do_work_in_background_thread:
         logger.warning(
             "Attempted to use background thread but UI not available, "
@@ -563,11 +538,13 @@ def initialise_node_manager(
         initialise_in_background(
             discover_plugin=discover_plugin,
             load_plugin=load_plugin,
+            edit_plugin=edit_plugin,
             release_plugin=release_plugin,
         )
     else:
         initialise_in_foreground(
             discover_plugin=discover_plugin,
             load_plugin=load_plugin,
+            edit_plugin=edit_plugin,
             release_plugin=release_plugin,
         )
