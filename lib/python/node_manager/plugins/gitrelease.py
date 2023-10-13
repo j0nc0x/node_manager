@@ -55,7 +55,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         #current_name = definition.nodeTypeName()
         #namespace = utilities.node_type_namespace(current_name)
         if self.repo:
-            return self.repo.name
+            return self.repo.context.get("name")
         return None
         # repo = self.manager.repo_from_definition(definition)
 
@@ -71,7 +71,8 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         Returns:
             (str): The release directory.
         """
-        return os.path.join(self.repo.context.get("git_repo_temp"), "release")
+        logger.debug(self.repo.context)
+        return os.path.join(self.repo.context.get("git_repo_root"), "release")
 
     def release(self, current_node, release_comment=None):
         """

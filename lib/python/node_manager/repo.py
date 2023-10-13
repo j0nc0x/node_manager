@@ -105,7 +105,7 @@ class NodeRepo(object):
     def config_path(self):
         """
         """
-        return os.path.join(self.context.get("git_repo_root"), "config", "config.json")
+        return os.path.join(self.context.get("git_repo_clone"), "config", "config.json")
 
     # def repo_root(self):
     #     """Get the root of the HDA repo on the filesystem.

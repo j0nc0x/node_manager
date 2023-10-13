@@ -22,6 +22,7 @@ class NodeManagerPlugin(load.NodeManagerPlugin):
         """Initialise the GitLoad plugin."""
         super(NodeManagerPlugin, self).__init__(repo)
         self.repo.context["git_repo_root"] = self.git_repo_root()
+        self.repo.context["git_repo_clone"] = self.git_repo_clone_dir()
         self.repo.context["repo_load_path"] = os.path.join(
             self.manager.context.get("manager_temp_dir"),
             self.repo.context.get("name"),
@@ -39,6 +40,13 @@ class NodeManagerPlugin(load.NodeManagerPlugin):
             str: The path to the HDA repo on disk."""
         return os.path.join(self.manager.context.get("manager_base_dir"), self.repo.context.get("name"))
 
+    def git_repo_clone_dir(self):
+        """Get the git repo clone directory.
+
+        Returns:
+            str: The path to the HDA repo on disk."""
+        return os.path.join(self.repo.context.get("git_repo_root"), self.repo.context.get("name"))
+
     def clone_repo(self):
         """Clone the Node Manager repository.
 
@@ -46,7 +54,7 @@ class NodeManagerPlugin(load.NodeManagerPlugin):
             git.Repo: The cloned repository.
         """
         cloned_repo = None
-        repo_root = self.repo.context.get("git_repo_root")
+        repo_root = self.repo.context.get("git_repo_clone")
         try:
             cloned_repo = Repo(repo_root)
             cloned_repo.git.pull()
@@ -60,13 +68,16 @@ class NodeManagerPlugin(load.NodeManagerPlugin):
                     path=repo_root,
                 )
             )
-            cloned_repo = Repo.clone_from(self.repo.context.get("repo_load_path"), repo_root, depth=1)
+            if not os.path.isdir(repo_root):
+                os.makedirs(repo_root)
+                logger.debug("Created repo directory: {path}".format(path=repo_root))
+            cloned_repo = Repo.clone_from(self.repo.context.get("repo_path"), repo_root, depth=1)
 
         return cloned_repo
 
     def build_repo(self):
         """Build the Node Manager repository."""
-        repo_root = self.repo.context.get("git_repo_root")
+        repo_root = self.repo.context.get("git_repo_clone")
         repo_build = self.repo.context.get("repo_load_path")
         logger.debug("-----")
         logger.debug("Repo root: {path}".format(path=repo_root))
