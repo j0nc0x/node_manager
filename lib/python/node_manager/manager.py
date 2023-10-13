@@ -352,6 +352,13 @@ class NodeManager(object):
             major(bool): Should the edit be a major version?
             minor(bool): Should the edit be a minor version?
         """
+        logger.debug(
+            "Edit {node} (Major: {major}, Minor: {minor})".format(
+                node=current_node,
+                major=major,
+                minor=minor,
+            )
+        )
         if major and minor:
             raise RuntimeError("Can't edit definition as both major and minor.")
 
@@ -359,7 +366,7 @@ class NodeManager(object):
         if not edit_plugin:
             raise RuntimeError("Couldn't find Node Manager Edit Plugin.")
 
-        return edit_plugin.edit_definition(current_node, major=False, minor=False)
+        return edit_plugin.edit_definition(current_node, major=major, minor=minor)
 
     def prepare_publish(self, current_node):
         """

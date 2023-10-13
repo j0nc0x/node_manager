@@ -11,6 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 class NodeManagerPlugin(object):
+    """Default Load Plugin."""
+
     name = "DefaultLoad"
     plugin_type = "load"
 
@@ -20,24 +22,20 @@ class NodeManagerPlugin(object):
         self.repo = repo
         self.manager = utils.get_manager()
         self.repo.context["repo_load_path"] = self.repo.context.get("repo_path")
-        logger.debug(
-            "Initialise DefaultLoad: {repo_path}".format(
-                repo_path=self.repo.context.get("repo_path"),
-            )
-        )
-
         self.extensions = [
             ".hda",
             ".hdanc",
             ".otl",
             ".otlnc",
         ]
+        logger.debug(
+            "Initialise DefaultLoad: {repo_path}".format(
+                repo_path=self.repo.context.get("repo_path"),
+            )
+        )
 
     def get_node_definition_files(self):
         """Get a list of node definition files in the given directory.
-
-        Args:
-            path(str): The directory to search for node definition files.
 
         Returns:
             list: A list of node definition files.
@@ -50,7 +48,11 @@ class NodeManagerPlugin(object):
         ]
 
     def load(self):
-        """Load the Node Manager repository."""
+        """Load the Node Manager repository.
+
+        Returns:
+            list: A list of node definition files.
+        """
         node_definition_files = self.get_node_definition_files()
         logger.debug("Loading node definition files: {files}".format(files=node_definition_files))
         return node_definition_files

@@ -31,6 +31,20 @@ class NodeManagerPlugin(object):
         )
 
     def edit_definition(self, current_node, major=False, minor=False):
+        """Edit the definition of the given node.
+
+        Args:
+            current_node(hou.Node): The node to edit.
+            major(bool): Whether to increment the major version.
+            minor(bool): Whether to increment the minor version.
+        """
+        logger.debug(
+            "Edit {node} (Major: {major}, Minor: {minor})".format(
+                node=current_node,
+                major=major,
+                minor=minor,
+            )
+        )
         definition = nodes.definition_from_node(current_node.path())
 
         dialog_message = (

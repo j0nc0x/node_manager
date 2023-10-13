@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+"""Default Release Plugin."""
+
 import logging
 import os
 
@@ -20,22 +22,18 @@ logger = logging.getLogger(
 
 
 class NodeManagerPlugin(object):
+    """Default Release Plugin."""
     name = plugin_name
     plugin_type = plugin_class
 
     def __init__(self, repo):
-        """ 
-        """
+        """Initialise the DefaultRelease plugin."""
         self.repo = repo
         self.manager = utils.get_manager()
         logger.debug("Initialise Release.")
 
-    def get_release_repo(self, definition):
+    def get_release_repo(self):
         """Get the release repository for the given definition.
-
-        Args:
-            definition(hou.HDADefinition): The definition to get the release
-                repository for.
 
         Returns:
             object: The release repository.
@@ -84,7 +82,7 @@ class NodeManagerPlugin(object):
 
         logger.debug("Release comment: {comment}".format(comment=release_comment))
 
-        repo = self.get_release_repo(definition)
+        repo = self.get_release_repo()
         logger.debug("Using release repo: {repo}".format(repo=repo.context.get("name")))
         logger.debug("Repo path: {path}".format(path=repo.context.get("repo_path")))
 

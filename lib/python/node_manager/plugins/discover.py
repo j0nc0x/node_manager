@@ -13,12 +13,13 @@ logger = logging.getLogger(__name__)
 
 
 class NodeManagerPlugin(object):
+    """Default Discover Plugin."""
+
     name = "DefaultDiscover"
     plugin_type = "discover"
 
     def __init__(self):
-        """ 
-        """
+        """Initialise the DefaultDiscover plugin."""
         self.manager = utils.get_manager()
         logger.debug("Initialise Discover.")
 
