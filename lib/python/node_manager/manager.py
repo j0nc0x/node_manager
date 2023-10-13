@@ -41,7 +41,7 @@ class NodeManager(object):
         release_plugin=None,
     ):
         """
-        Initialise the HDAManager storing the instance in the class.
+        Initialise the HDAManager if it isn't already initialised, storing the instance in the class.
 
         Args:
             discover_plugin(str, optional): The name of the discover plugin to use.
@@ -70,7 +70,14 @@ class NodeManager(object):
         edit_plugin=None,
         release_plugin=None,
     ):
-        """Initialise the NodeManager class."""
+        """Initialise the NodeManager class.
+
+        Args:
+            discover_plugin(str, optional): The name of the discover plugin to use.
+            load_plugin(str, optional): The name of the load plugin to use.
+            edit_plugin(str, optional): The name of the edit plugin to use.
+            release_plugin(str, optional): The name of the release plugin to use.
+        """
         logger.info("Initialising Node Manager")
 
         # Define which plugins to use.
