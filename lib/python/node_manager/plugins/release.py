@@ -114,3 +114,4 @@ class NodeManagerPlugin(object):
         hou.ui.displayMessage(
             "HDA release successful!", title="HDA Manager: Publish HDA"
         )
+        return True

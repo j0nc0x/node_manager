@@ -74,7 +74,7 @@ class NodeManagerPlugin(object):
             version = parse(current_version)
             new_version = "{major}.{minor}".format(
                 major=version.major + major,
-                minor=version.minor + minor,
+                minor=0 if major else version.minor + minor,
             )
             logger.debug(
                 "New version will be {version}".format(

@@ -192,15 +192,18 @@ class NodeRepo(object):
                 definition, force=force
             )
 
-    def load_nodes(self):
+    def load_nodes(self, force=False):
         """Load all definitions contained by this repository."""
         logger.debug(
             "Reading from {directory}".format(
                 directory=self.context.get("git_repo_temp"),
             )
         )
+        if force:
+            self.node_manager_definition_files = self.initialise_repo()
 
         for definition_file in self.node_manager_definition_files:
+            logger.debug("Processing {path}".format(path=definition_file))
             self.process_node_definition_file(definition_file)
 
     def remove_definition(self, definition):

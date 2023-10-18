@@ -5,6 +5,8 @@ import os
 import subprocess
 import time
 
+import hou
+
 from node_manager import release as node_release
 from node_manager import utils
 from node_manager import utilities
@@ -122,30 +124,11 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         if not package:
             raise RuntimeError("No package found for definition")
 
-        repo = self.manager.repo_from_definition(definition)
+        #repo = self.manager.repo_from_definition(definition)
 
         # Create and run the release
         hda_release = node_release.HDARelease(
-            full_release_dir, node_type_name, branch, hda_name, package, release_comment, repo,
+            full_release_dir, node_type_name, branch, hda_name, package, release_comment, self.repo,
         )
         self.manager.releases.append(hda_release)
-        released_path = hda_release.release()
-        return
-
-        # if not released_path:
-        #     hou.ui.setStatusMessage(
-        #         "HDA release aborted for {name}.".format(name=hda_name)
-        #     )
-        #     return
-
-        # # Add newly released .hda
-        # repo = self.repo_from_hda_file(released_path)
-        # repo.process_hda_file(released_path, force=True)
-
-        # # Remove released definition
-        # repo.remove_definition(definition)
-
-        # # Success
-        # hou.ui.displayMessage(
-        #     "HDA release successful!", title="HDA Manager: Publish HDA"
-        # )
+        return hda_release.release()

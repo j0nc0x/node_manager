@@ -20,6 +20,7 @@ else:
 
 from node_manager import utilities
 from node_manager.utils import plugin
+from node_manager.utils import callbacks
 from node_manager.dependencies import dialog
 from node_manager.dependencies import nodes
 
@@ -79,6 +80,8 @@ class NodeManager(object):
             release_plugin(str, optional): The name of the release plugin to use.
         """
         logger.info("Initialising Node Manager")
+
+        self.node_repos = {}
 
         # Define which plugins to use.
         self.discover_plugin = discover_plugin
@@ -184,10 +187,52 @@ class NodeManager(object):
         """
         return os.path.join(self.context.get("manager_temp_dir"), "git")
 
-    def load_all(self):
+    def load_all(self, force=False):
         """Load all node definitions from the repositories."""
         for repo_name in self.node_repos:
-            self.node_repos.get(repo_name).load_nodes()
+            self.node_repos.get(repo_name).load_nodes(force=force)
+
+    def is_node_manager_node(self, current_node):
+        """Check if the given node is a Node Manager node.
+
+        Args:
+            current_node(hou.Node): The node to check.
+
+        Returns:
+            (bool): Is the node a Node Manager node?
+        """
+        definition = nodes.definition_from_node(current_node.path())
+        if not definition:
+            raise RuntimeError("Couldn't find definition for {node}".format(node=current_node))
+        
+        nodetypeversion = self.nodetypeversion_from_definition(definition)
+        logger.debug("Nodetypeversion: {nodetypeversion}".format(nodetypeversion=nodetypeversion))
+        if nodetypeversion:
+            logger.debug("{node} is a Node Manager node.".format(node=current_node))
+            return False
+
+        logger.debug("{node} is not a Node Manager node.".format(node=current_node))
+        return True
+
+    def nodetypeversion_from_definition(self, definition):
+        """
+        Retrieve the nodetypeversion for the given definition.
+
+        Args:
+            definition(hou.HDADefinition): The definition to get the NodeTypeVersion
+                for.
+
+        Returns:
+            node_type_version(rbl_pipe_hdamanager.nodetypeversion.NodeTypeVersion): The
+                nodetype looked-up.
+        """
+        nodetype = self.nodetype_from_definition(definition)
+        if nodetype:
+            current_name = definition.nodeTypeName()
+            version = utilities.node_type_version(current_name)
+            return nodetype.versions.get(version)
+
+        return None
 
     def nodetype_from_definition(self, definition):
         """
@@ -253,19 +298,19 @@ class NodeManager(object):
             )
         )
         
-        for repo_name in self.node_repos:
-            repo = self.node_repos.get(repo_name)
+        # for repo_name in self.node_repos:
+        #     repo = self.node_repos.get(repo_name)
 
-        if repo:
-            logger.warning("Defaulted to first repository found: {repo}".format(repo=repo))
-            return repo
+        # if repo:
+        #     logger.warning("Defaulted to first repository found: {repo}".format(repo=repo))
+        #     return repo
         
-        logger.error(
-            "No repo found for definition: {definition}".format(
-                definition=definition,
-            )
-        )
-        raise RuntimeError("No repo found for definition {definition}".format(definition=definition.nodeTypeName()))
+        # logger.error(
+        #     "No repo found for definition: {definition}".format(
+        #         definition=definition,
+        #     )
+        # )
+        # raise RuntimeError("No repo found for definition {definition}".format(definition=definition.nodeTypeName()))
 
 
     def repo_from_hda_file(self, path):
@@ -279,31 +324,28 @@ class NodeManager(object):
             hda_repo(rbl_pipe_hdamanager.repo.HDARepo): The HDA repo instance for the
                 given namespace.
         """
+        logger.debug("Checking if {path} is in a repo.".format(path=path))
         for repo_name in self.node_repos:
             repo = self.node_repos.get(repo_name)
-            if path.startswith(repo.context.get("git_repo_root")):
+            logger.debug("Checking repo with path: {path}".format(path=repo.context))
+            if path.startswith(repo.context.get("repo_load_path")):
                 return repo
         return None
-    
-    def nodetypeversion_from_definition(self, definition):
-        """
-        Retrieve the nodetypeversion for the given definition.
+
+    def get_release_repo(self, current_node):
+        """Get the release repository for the given node.
 
         Args:
-            definition(hou.HDADefinition): The definition to get the NodeTypeVersion
-                for.
-
-        Returns:
-            node_type_version(rbl_pipe_hdamanager.nodetypeversion.NodeTypeVersion): The
-                nodetype looked-up.
+            current_node(hou.Node): The node to get the release repository for.
         """
-        nodetype = self.nodetype_from_definition(definition)
-        if nodetype:
-            current_name = definition.nodeTypeName()
-            version = utilities.node_type_version(current_name)
-            return nodetype.versions.get(version)
+        if len(self.node_repos) == 1:
+            a= next(iter(self.node_repos.values()))
+            logger.debug("-----------------")
+            logger.debug(a)
+            logger.debug(type(a))
+            return a
 
-        return None
+        raise NotImplementedError("Multiple repo support not currently implemented.")
 
     def is_latest_version(self, current_node):
         """
@@ -352,6 +394,7 @@ class NodeManager(object):
             major(bool): Should the edit be a major version?
             minor(bool): Should the edit be a minor version?
         """
+        path = current_node.path()
         logger.debug(
             "Edit {node} (Major: {major}, Minor: {minor})".format(
                 node=current_node,
@@ -366,7 +409,10 @@ class NodeManager(object):
         if not edit_plugin:
             raise RuntimeError("Couldn't find Node Manager Edit Plugin.")
 
-        return edit_plugin.edit_definition(current_node, major=major, minor=minor)
+        edit_plugin.edit_definition(current_node, major=major, minor=minor)
+
+        # Force node callback to run
+        callbacks.node_created_or_loaded(nodes.node_at_path(path))
 
     def prepare_publish(self, current_node):
         """
@@ -396,6 +442,7 @@ class NodeManager(object):
         #     size=(800, 500),
         # )
         # HDAManager.validator_ui = validator.launch_ui()
+        path = current_node.path()
 
         result = hou.ui.readInput(
             "Please enter a release comment for this node publish:",
@@ -410,12 +457,29 @@ class NodeManager(object):
         if result and result[1]:
             release_comment = result[1]
 
-        repo = self.repo_from_definition(nodes.definition_from_node(current_node.path()))
+        repo = self.get_release_repo(current_node)
         release_plugin = plugin.get_release_plugin(self.release_plugin, repo)
         if not release_plugin:
             raise RuntimeError("Couldn't find Node Manager Release Plugin.")
 
-        return release_plugin.release(current_node, release_comment=release_comment)
+        success = release_plugin.release(current_node, release_comment=release_comment)
+
+        if success:
+            self.load_all(force=True)
+            callbacks.node_created_or_loaded(nodes.node_at_path(path))
+
+            # # Add newly released .hda
+            # repo = self.manager.repo_from_hda_file(released_path)
+            # repo.process_hda_file(released_path, force=True)
+
+            # # Remove released definition
+            # repo.remove_definition(definition)
+
+            # # Success
+            # hou.ui.displayMessage(
+            #     "HDA release successful!", title="HDA Manager: Publish HDA"
+            # )
+
 
 
 def null_decorator(function):

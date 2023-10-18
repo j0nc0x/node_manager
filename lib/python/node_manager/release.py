@@ -74,6 +74,9 @@ class HDARelease(object):
         Returns:
             (str): The path to the git repository.
         """
+        logger.debug(self.repo)
+        logger.debug(self.repo.context)
+        logger.debug(self.repo.context.get("git_repo_clone"))
         return self.repo.context.get("git_repo_clone")
 
     def expand_dir(self):

@@ -148,6 +148,8 @@ def get_release_plugin(release_plugin_name, repo):
     Returns:
         object: The release plugin.
     """
+    logger.debug("Get release plugin using repo {repo}".format(repo=repo))
+
     manager_instance = utils.get_manager()
     if release_plugin_name:
         publish_plugin = release_plugin_name
