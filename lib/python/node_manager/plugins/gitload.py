@@ -6,6 +6,8 @@ import logging
 import os
 import subprocess
 
+import hou
+
 from node_manager import utils
 from node_manager.plugins import load
 
@@ -92,7 +94,12 @@ class NodeManagerPlugin(load.NodeManagerPlugin):
             path = os.path.join(expanded_hda_dir, hda)
             hda_path = os.path.join(repo_build, hda)
             logger.info("Processing {source}".format(source=path))
-            hotl_cmd = ["hotl", "-C", path, hda_path]
+            hotl_cmd = [
+                "hotl",
+                "-c" if hou.isApprentice() else "-l", # Maybe we should error-check this?
+                path,
+                hda_path,
+            ]
             logger.debug(hotl_cmd)
             result = subprocess.call(hotl_cmd)
             if result != 0:

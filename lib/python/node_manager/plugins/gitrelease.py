@@ -107,7 +107,12 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
 
         # expandToDirectory doesn't allow inclusion of contents - raise with SideFx, but
         # reverting to subprocess.
-        cmd = ["hotl", "-X", expand_dir, definition.libraryFilePath()]
+        cmd = [
+            "hotl",
+            "-x" if hou.isApprentice() else "-tp", # Maybe we should error-check this?
+            expand_dir,
+            definition.libraryFilePath(),
+        ]
         process = subprocess.Popen(cmd)
         process.wait()
 
