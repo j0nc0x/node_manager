@@ -6,7 +6,7 @@ import logging
 
 import hou
 
-from node_manager import utilities
+from node_manager.utils import definition as definitionutils
 
 logger = logging.getLogger(__name__)
 
@@ -48,4 +48,4 @@ class NodeTypeVersion(object):
         self.installed = True
         logger.info("Installed file {path}".format(path=path))
 
-        utilities.cleanup_embedded_definitions(self.definition.nodeType())
+        definitionutils.cleanup_embedded_definitions(self.definition.nodeType())

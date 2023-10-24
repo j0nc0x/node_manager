@@ -9,7 +9,6 @@ import hou
 
 from node_manager import release as node_release
 from node_manager import utils
-from node_manager import utilities
 from node_manager.plugins import release
 
 plugin_name = "GitRelease"
@@ -55,7 +54,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         #     raise RuntimeError("No package found for the current project")
         # else:
         #current_name = definition.nodeTypeName()
-        #namespace = utilities.node_type_namespace(current_name)
+        #namespace = utils.node_type_namespace(current_name)
         if self.repo:
             return self.repo.context.get("name")
         return None
@@ -95,7 +94,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         node_file_path = definition.libraryFilePath()
         if not release_comment:
             release_comment = "Updated {name}".format(
-                name=utilities.node_type_name(node_file_path)
+                name=utils.node_type_name(node_file_path)
             )
 
         # Define the release directory
@@ -103,7 +102,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         full_release_dir = os.path.join(self.release_dir(), release_subdir)
 
         # Expand the HDA ready for release
-        hda_name = utilities.expanded_hda_name(definition)
+        hda_name = utils.expanded_hda_name(definition)
         expand_dir = os.path.join(full_release_dir, hda_name)
 
         # expandToDirectory doesn't allow inclusion of contents - raise with SideFx, but
@@ -119,7 +118,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
 
         # Determine the other information needed to conduct a release
         node_type_name = definition.nodeTypeName()
-        branch = utilities.release_branch_name(definition)
+        branch = utils.release_branch_name(definition)
         package = self.package_name_from_definition(definition)
         if not package:
             raise RuntimeError("No package found for definition")

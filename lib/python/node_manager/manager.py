@@ -18,7 +18,7 @@ if hou.isUIAvailable():
 else:
     do_work_in_background_thread = None
 
-from node_manager import utilities
+from node_manager import utils
 from node_manager.utils import plugin
 from node_manager.utils import callbacks
 from node_manager.dependencies import dialog
@@ -229,7 +229,7 @@ class NodeManager(object):
         nodetype = self.nodetype_from_definition(definition)
         if nodetype:
             current_name = definition.nodeTypeName()
-            version = utilities.node_type_version(current_name)
+            version = utils.node_type_version(current_name)
             return nodetype.versions.get(version)
 
         return None
@@ -251,7 +251,7 @@ class NodeManager(object):
                 definition=definition.nodeTypeName(),
             )
         )
-        # namespace = utilities.node_type_namespace(
+        # namespace = utils.node_type_namespace(
         #     definition.nodeTypeName(),
         # )
         repo = self.repo_from_definition(definition)
@@ -265,7 +265,7 @@ class NodeManager(object):
         if repo:
             current_name = definition.nodeTypeName()
             category = definition.nodeTypeCategory().name()
-            index = utilities.node_type_index(current_name, category)
+            index = utils.node_type_index(current_name, category)
             return repo.node_types.get(index)
 
         logger.warning("No NodeType found.")
@@ -374,7 +374,7 @@ class NodeManager(object):
 
             # get current version
             nodeTypeName = definition.nodeTypeName()
-            current_version = parse(utilities.node_type_version(nodeTypeName))
+            current_version = parse(utils.node_type_version(nodeTypeName))
 
             # compare versions
             if current_version < latest_version:

@@ -9,7 +9,6 @@ from packaging.version import parse
 import hou
 
 from node_manager import utils
-from node_manager import utilities
 from node_manager.dependencies import dialog
 from node_manager.dependencies import nodes
 
@@ -61,7 +60,7 @@ class NodeManagerPlugin(object):
         new_version = None
         if major or minor:
             logger.debug("Major or Minor version updated for editable node.")
-            current_version = utilities.node_type_version(definition.nodeTypeName())
+            current_version = utils.node_type_version(definition.nodeTypeName())
             logger.debug(
                 "Current version is {version}".format(version=current_version)
             )

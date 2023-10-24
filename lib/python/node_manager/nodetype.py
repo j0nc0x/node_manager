@@ -5,7 +5,8 @@
 import logging
 
 from node_manager import nodetypeversion
-from node_manager import utilities
+from node_manager import utils
+from node_manager.utils import definition as definitionutils
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +85,7 @@ class NodeType(object):
         """
         path = definition.libraryFilePath()
         current_name = definition.nodeTypeName()
-        version = utilities.node_type_version(current_name)
+        version = utils.node_type_version(current_name)
         if not version:
             version = "no version"
 
@@ -96,7 +97,7 @@ class NodeType(object):
                 self.remove_version_at_index(version, index)
 
                 # Uninstall the .hda file
-                utilities.uninstall_definition(
+                definitionutils.uninstall_definition(
                     definition, backup_dir=self.manager.context.get("backup_dir")
                 )
                 logger.debug(

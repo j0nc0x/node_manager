@@ -12,7 +12,7 @@ from packaging.version import parse
 
 from git import Repo
 
-from node_manager import utilities
+from node_manager import utils
 
 logger = logging.getLogger(__name__)
 
@@ -185,9 +185,9 @@ class HDARelease(object):
                 )
             )
         else:
-            namespace = utilities.node_type_namespace(self.node_type_name)
-            name = utilities.node_type_name(self.node_type_name)
-            version = utilities.node_type_version(self.node_type_name)
+            namespace = utils.node_type_namespace(self.node_type_name)
+            name = utils.node_type_name(self.node_type_name)
+            version = utils.node_type_version(self.node_type_name)
             regex = re.compile(".*{namespace}\.{name}\.{major}\.(\d*).hda".format(namespace=namespace, name=name, major=parse(version).major))
             same_major_version = [path for path in os.listdir(self.node_root()) if regex.match(path)]
             if same_major_version:

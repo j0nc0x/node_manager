@@ -10,7 +10,7 @@ import time
 import hou
 
 from node_manager import nodetype
-from node_manager import utilities
+from node_manager import utils
 from node_manager.utils import plugin
 
 
@@ -162,10 +162,10 @@ class NodeRepo(object):
         """
         current_name = definition.nodeTypeName()
         category = definition.nodeTypeCategory().name()
-        index = utilities.node_type_index(current_name, category)
-        name = utilities.node_type_name(current_name)
-        namespace = utilities.node_type_namespace(current_name)
-        version = utilities.node_type_version(current_name)
+        index = utils.node_type_index(current_name, category)
+        name = utils.node_type_name(current_name)
+        namespace = utils.node_type_namespace(current_name)
+        version = utils.node_type_version(current_name)
 
         # Add the node_type to our dictionary if it doesn't already exist
         if index not in self.node_types:
@@ -220,7 +220,7 @@ class NodeRepo(object):
         # Remove version
         current_name = definition.nodeTypeName()
         category = definition.nodeTypeCategory().name()
-        index = utilities.node_type_index(current_name, category)
+        index = utils.node_type_index(current_name, category)
         nodetype = self.manager.nodetype_from_definition(definition)
         nodetype.remove_version(definition)
 
@@ -272,14 +272,14 @@ class NodeRepo(object):
             )
         )
         # Write the HDA to the edit_dir
-        editable_path = utilities.editable_hda_path_from_components(
+        editable_path = utils.editable_hda_path_from_components(
             definition, self.manager.context.get("manager_edit_dir"), namespace=namespace, name=name
         )
         logger.debug("Editable path: {path}".format(path=editable_path))
 
         # See if we are updating the NodeTypeName
         if namespace or name or version:
-            new_name = utilities.node_type_name_from_components(
+            new_name = utils.node_type_name_from_components(
                 definition, namespace=namespace, name=name, version=version
             )
             logger.debug("Using new name: {new_name}".format(new_name=new_name))

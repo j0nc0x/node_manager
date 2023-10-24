@@ -8,7 +8,6 @@ import os
 import hou
 
 from node_manager import utils
-from node_manager import utilities
 from node_manager.dependencies import nodes
 
 plugin_name = "DefaultRelease"
@@ -77,7 +76,7 @@ class NodeManagerPlugin(object):
         node_file_path = definition.libraryFilePath()
         if not release_comment:
             release_comment = "Updated {name}".format(
-                name=utilities.node_type_name(node_file_path)
+                name=utils.node_type_name(node_file_path)
             )
 
         logger.debug("Release comment: {comment}".format(comment=release_comment))
@@ -87,7 +86,7 @@ class NodeManagerPlugin(object):
         logger.debug("Repo path: {path}".format(path=repo.context.get("repo_path")))
 
         # Expand the HDA ready for release
-        hda_name = utilities.expanded_hda_name(definition)
+        hda_name = utils.expanded_hda_name(definition)
         release_path = os.path.join(repo.context.get("repo_path"), hda_name)
         logger.debug("Using release path: {path}".format(path=release_path))
         if os.path.isfile(release_path):
