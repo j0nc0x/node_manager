@@ -35,7 +35,7 @@ def node_graphic(current_node, edit=False):
 
     
     """
-    width_ratio = 1
+    width_ratio = 0.8
     image_path = "/Users/jcox/Documents/test.png"
 
     #set up background image plane
@@ -51,9 +51,9 @@ def node_graphic(current_node, edit=False):
     # y1 = -width_ratio*ratio - current_node.size()[1]*1.1
     # x2 = current_node.size()[0] * 2.1
     # y2 = 0
-    x1 = current_node.size()[0] * 0.95
+    x1 = current_node.size()[0] * 1
     y1 = 0
-    x2 = current_node.size()[0] * 0.95 + width_ratio
+    x2 = current_node.size()[0] * 1 + width_ratio
     y2 = width_ratio * ratio
     logger.debug("Using size {x1}, {y1}, {x2}, {y2}".format(x1=x1, y1=y1, x2=x2, y2=y2))
     rect = hou.BoundingRect(x1, y1, x2, y2)
