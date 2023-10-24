@@ -59,4 +59,3 @@ def node_created_or_loaded(current_node):
     # We created or loaded a NodeManager node
     logger.debug("NodeCreatedOrLoaded: {node}".format(node=current_node.name()))
     node.node_comment(current_node, edit=edit)
-    node.node_graphic(current_node, edit=edit)
