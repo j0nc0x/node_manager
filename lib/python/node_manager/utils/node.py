@@ -22,3 +22,4 @@ def node_comment(current_node, edit=False):
         state = "Editable"
     current_node.setComment("Node Manager: {state}".format(state=state))
     current_node.setGenericFlag(hou.nodeFlag.DisplayComment, True)
+    logger.debug("Set comment on node: {node}".format(node=current_node.name()))
