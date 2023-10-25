@@ -36,12 +36,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
 
         self._release_dir = None
         self._node_type_name = None
-        self._release_branch = None
-        self._node_name = None
-        self._release_version = None
-        self._package = None
-        self._comment = None
-        self._repo = None
+        self.node_name = None
 
         logger.debug("Initialise Release.")
 
@@ -88,77 +83,9 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         """
         logger.debug(self.repo.context)
         return os.path.join(self.repo.context.get("git_repo_root"), "release")
-    
-
-
-# #!/usr/bin/env python
-
-# """HDA manager release process."""
-
-# import json
-# import logging
-# import os
-# import re
-# import shutil
-
-# from packaging.version import parse
-
-# from git import Repo
-
-# from node_manager import utils
-
-# logger = logging.getLogger(__name__)
-
-
-# class HDARelease(object):
-#     """The HDA Release process.
-
-#     This class handles the release process for a hou.HDADefinition that is ready to be
-#     published. We ultimately want to have the option to run this outside of Houdini -
-#     ie. on a server, so also want to avoid taking up a Houdini Engine license / running
-#     the risk of not getting a license. Therefore all Houdini operations are complete
-#     prior to this class being initialised.
-#     """
-
-#     # __config = get_config()
-#     # hda_repo = __config.get("hda_repo")
-#     hda_repo = "git@github.com:j0nc0x/hda_repo.git" # Read this from repo config to allow multiple git repositories
-#     # package_root = "/Users/jcox/source/hda_library" # Read this from repo config to allow multiple git repositories
-
-#     def __init__(
-#         self,
-#         release_dir,
-#         node_type_name,
-#         release_branch,
-#         node_name,
-#         package,
-#         release_comment,
-#         repo,
-#     ):
-#         """
-#         Initialise HDARelease to prepare the release process.
-
-#         Args:
-#             release_dir(str): The working directory where the release will be run.
-#             node_type_name(str): The node type name of the HDA being released.
-#             release_branch(str): The branch to use for the release.
-#             node_name(str): The name of the node being released.
-#             package(str): The name of the package being released.
-#             release_comment(str): The comment to use for the release.
-#         """
-#         self._release_dir = release_dir
-#         self._node_type_name = node_type_name
-#         self._release_branch = release_branch
-#         self._node_name = node_name
-#         self._release_version = None
-#         self._package = package
-#         self._comment = release_comment
-#         self._repo = repo
-#         logger.info("Initialised HDA Release process")
-#         logger.debug("Release directory: {path}".format(path=self._release_dir))
 
     def _git_repo(self):
-        return self._repo.context.get("git_repo")
+        return self.repo.context.get("git_repo")
 
     def _git_dir(self):
         """
@@ -167,10 +94,10 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         Returns:
             (str): The path to the git repository.
         """
-        logger.debug(self._repo)
-        logger.debug(self._repo.context)
-        logger.debug(self._repo.context.get("git_repo_clone"))
-        return self._repo.context.get("git_repo_clone")
+        logger.debug(self.repo)
+        logger.debug(self.repo.context)
+        logger.debug(self.repo.context.get("git_repo_clone"))
+        return self.repo.context.get("git_repo_clone")
 
     def _expand_dir(self):
         """
@@ -179,7 +106,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         Returns:
             (str): The HDA expand directory.
         """
-        return os.path.join(self._release_dir, self._node_name)
+        return os.path.join(self._release_dir, self.node_name)
 
     def _node_root(self):
         """
@@ -193,7 +120,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         Returns:
             (str): The node path.
         """
-        return os.path.join(self._node_root(), self._node_name)
+        return os.path.join(self._node_root(), self.node_name)
 
     def _config_path(self):
         """
@@ -247,7 +174,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
 
         return release_version
 
-    def process_release(self):
+    def process_release(self, branch, comment=None):
         """
         Run the HDA release process.
 
@@ -264,7 +191,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         config_path = self._config_path()
 
         # Create the branch
-        current = self._git_repo().create_head(self._release_branch)
+        current = self._git_repo().create_head(branch)
         current.checkout()
 
         # Check if expanded node directory already exists, delete it if it does
@@ -307,7 +234,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
 
         # Add and commit
         self._git_repo().git.add(A=True)
-        self._git_repo().git.commit(m=self._comment)
+        self._git_repo().git.commit(m=comment)
         self._git_repo().git.push("--set-upstream", "origin", current)
 
         # Increment version in config
@@ -333,7 +260,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
 
         # remove release branch
         remote = self._git_repo().remote(name='origin')
-        remote.push(refspec=(':{branch}'.format(branch=self._release_branch)))
+        remote.push(refspec=(':{branch}'.format(branch=branch)))
 
         # clean up release dir
         #shutil.rmtree(self._release_dir)
@@ -342,14 +269,9 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         )
 
         # success
-        logger.info("Release successful for {hda}.".format(hda=self._node_name))
+        logger.info("Release successful for {hda}.".format(hda=self.node_name))
 
         return True
-
-
-
-
-
 
     def release(self, current_node, release_comment=None):
         """
@@ -414,11 +336,6 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
 
         self._release_dir = full_release_dir
         self._node_type_name = node_type_name
-        self._release_branch = branch
-        self._node_name = hda_name
-        self._release_version = None
-        self._package = package
-        self._comment = release_comment
-        self._repo = self.repo
+        self.node_name = hda_name
 
-        return self.process_release()
+        return self.process_release(branch=branch, comment=release_comment)
