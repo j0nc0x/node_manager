@@ -44,15 +44,31 @@ def initialise_plugin(plugin_module, **kwargs):
     return plugin
 
 
-def import_plugins(plugin_path):
-    """Import all plugins found in self.node_manager_plugin_path, storing the
-    initialised plugins in self._plugins.
+def import_plugins():
+    """Import all plugins found from the $NODE_MANAGER_PLUGINS_PATH environment
+    variable, returing a list of initialised plugins.
+
+    Returns:
+        list: A list of initialised plugins.
+    """
+    plugins = []
+    for plugin_path in os.environ.get("NODE_MANAGER_PLUGINS_PATH", "").split(":"):
+        print(plugin_path)
+        if plugin_path:
+            plugins.extend(import_plugins_from_path(plugin_path))
+
+    return plugins
+
+
+def import_plugins_from_path(plugin_path):
+    """Import all plugins found in the given plugin_path, returing a list of
+    initialised plugins.
 
     Args:
         plugin_path(str): The path to the plugins to import.
 
     Returns:
-        list: A list of plugins.
+        list: A list of initialised plugins.
     """
     plugins = []
     for path in [
@@ -89,6 +105,9 @@ def get_discover_plugin(discover_plugin_name):
     else:
         discover_plugin = "DefaultDiscover"
 
+    print(discover_plugin)
+    print(manager_instance._plugins)
+    print("---")
     for plugin_module in manager_instance._plugins:
         if plugin_module.NodeManagerPlugin.name == discover_plugin:
             return initialise_plugin(plugin_module)

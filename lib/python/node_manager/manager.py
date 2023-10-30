@@ -31,7 +31,6 @@ class NodeManager(object):
     """Main HDA Manager Class."""
 
     instance = None
-    plugin_path = "/Users/jcox/source/github/node_manager/lib/python/node_manager/plugins" # Read from env var
 
     @classmethod
     def init(
@@ -93,7 +92,7 @@ class NodeManager(object):
 
     def load(self):
         """Load the HDA Manager."""
-        self._plugins = plugin.import_plugins(self.plugin_path)
+        self._plugins = plugin.import_plugins()
 
         self.context = {}
         self.context["manager_temp_dir"] = mkdtemp(prefix="node-manager-")

@@ -25,7 +25,7 @@ logging.basicConfig(
 
 # Git based load
 os.environ["NODE_MANAGER_REPOS"] = "git@github.com:j0nc0x/hda_repo.git"
-os.environ["NODE_MANAGER_BASE"] = "/Users/jcox/hdas_git"
+# os.environ["NODE_MANAGER_BASE"] = "/Users/jcox/hdas_git"
 manager.initialise_node_manager(
     background=hou.isUIAvailable(),
     load_plugin="GitLoad",
