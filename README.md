@@ -7,4 +7,5 @@ Design Points
 - Use standard UIs and workflows where possible.
 
 Requirements:
-- GitPython
+- `GitPython`: https://pypi.org/project/GitPython/
+- `packaging`: https://pypi.org/project/packaging/
