@@ -90,6 +90,10 @@ class NodeManagerPlugin(load.NodeManagerPlugin):
             logger.debug("Created temp directory: {path}".format(path=repo_build))
         expanded_hda_dir = os.path.join(repo_root, "dcc", "houdini", "hda")
 
+        if not os.path.isdir(expanded_hda_dir):
+            logger.warning("Nothing to build, no HDA directory found: {path}".format(path=expanded_hda_dir))
+            return
+
         for hda in os.listdir(expanded_hda_dir):
             path = os.path.join(expanded_hda_dir, hda)
             hda_path = os.path.join(repo_build, hda)
