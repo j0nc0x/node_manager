@@ -3,12 +3,14 @@
 """Edit the node definition in a separate edit directory."""
 
 import logging
+import os
 
 from packaging.version import parse
 
 import hou
 
 from node_manager import utils
+from node_manager.utils import definition as definition_utils
 from node_manager.dependencies import dialog
 from node_manager.dependencies import nodes
 
@@ -95,9 +97,24 @@ class NodeManagerPlugin(object):
                 )
             )
 
+        # First determine if we can work where the node is currently located
+        manager_node = self.manager.is_node_manager_node(current_node)
+        node_editable = os.access(definition.libraryFilePath(), os.W_OK)
+        directory_editable = os.access(os.path.dirname(definition.libraryFilePath()), os.W_OK)
+        if manager_node == False and node_editable == True and directory_editable == True:
+            # We can edit this definition in its current location, no need to make a copy
+            logger.info("Node editable in its current location on disk.")
+            edit_directory = os.path.dirname(definition.libraryFilePath())
+        else:
+            edit_directory = self.manager.context.get("manager_edit_dir")
+
         # Copy and install definition modifying the nodetypename
-        edit_repo = self.manager.repo_from_definition(definition)
-        updated_node_type_name = edit_repo.add_definition_copy(definition, version=new_version)
+        # edit_repo = self.manager.repo_from_definition(definition)
+        updated_node_type_name = definition_utils.create_definition_copy(
+            definition,
+            edit_directory,
+            version=new_version,
+        )
         logger.debug(
             "Updated node type name: {name}".format(
                 name=updated_node_type_name,
