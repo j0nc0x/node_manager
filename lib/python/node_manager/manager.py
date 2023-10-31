@@ -208,10 +208,10 @@ class NodeManager(object):
         logger.debug("Nodetypeversion: {nodetypeversion}".format(nodetypeversion=nodetypeversion))
         if nodetypeversion:
             logger.debug("{node} is a Node Manager node.".format(node=current_node))
-            return False
+            return True
 
         logger.debug("{node} is not a Node Manager node.".format(node=current_node))
-        return True
+        return False
 
     def nodetypeversion_from_definition(self, definition):
         """
