@@ -10,7 +10,7 @@ import hou
 logger = logging.getLogger(__name__)
 
 
-def node_comment(current_node, edit=False):
+def node_comment(current_node, published=True):
     """Set the comment on a node.
 
     Args:
@@ -18,7 +18,7 @@ def node_comment(current_node, edit=False):
         edit(bool): Whether the node is editable or not.
     """
     state = "Published"
-    if edit:
+    if not published:
         state = "Editable"
     current_node.setComment("Node Manager: {state}".format(state=state))
     current_node.setGenericFlag(hou.nodeFlag.DisplayComment, True)
