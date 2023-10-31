@@ -339,9 +339,6 @@ class NodeManager(object):
         """
         if len(self.node_repos) == 1:
             a= next(iter(self.node_repos.values()))
-            logger.debug("-----------------")
-            logger.debug(a)
-            logger.debug(type(a))
             return a
 
         raise NotImplementedError("Multiple repo support not currently implemented.")
