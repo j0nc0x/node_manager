@@ -209,19 +209,25 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
             name = utils.node_type_name(self._node_type_name)
             version = utils.node_type_version(self._node_type_name)
             regex = re.compile(".*{namespace}\.{name}\.{major}\.(\d*).hda".format(namespace=namespace, name=name, major=parse(version).major))
-            same_major_version = [path for path in os.listdir(self._node_root()) if regex.match(path)]
-            if same_major_version:
-                minor = True
-            else:
+            if not os.path.exists(self._node_root()):
                 major = True
+            else:
+                same_major_version = [path for path in os.listdir(self._node_root()) if regex.match(path)]
+                if same_major_version:
+                    minor = True
+                else:
+                    major = True
 
         repo_conf_data = {}
-        with open(config_path, "r") as repo_conf:
-            repo_conf_data = json.load(repo_conf)
+        if os.path.isfile(config_path):
+            with open(config_path, "r") as repo_conf:
+                repo_conf_data = json.load(repo_conf)
+        else:
+            logger.warning("No config found at {path}, skipping.".format(path=config_path))
 
         # Get the release version
         release_tags = [str(tag) for tag in self._git_repo().tags]
-        self.release_version = self._get_release_version(repo_conf_data.get("version"), major, minor, patch, release_tags)
+        self.release_version = self._get_release_version(repo_conf_data.get("version", "0.0.0"), major, minor, patch, release_tags)
 
         # Copy the expanaded HDA into it's correct location
         shutil.copytree(self._expand_dir(), hda_path)
@@ -239,10 +245,12 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
 
         # Increment version in config
         repo_conf_data["version"] = self.release_version
+        os.makedirs(os.path.dirname(config_path), exist_ok=True)
         with open(config_path, "w") as repo_conf:
             json.dump(repo_conf_data, repo_conf)
 
         # Commit and push
+        self._git_repo().git.add(A=True)
         self._git_repo().git.commit(config_path, m="Version up")
         self._git_repo().git.push()
 

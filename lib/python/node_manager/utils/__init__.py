@@ -24,6 +24,15 @@ def get_manager():
     return manager_instance
 
 
+def using_rez():
+    """Check if the current session is using Rez.
+
+    Returns:
+        (bool): Is the current session using Rez?
+    """
+    return os.environ.get("REZ_NODE_MANAGER_BASE") is not None
+
+
 def valid_node_type_name(node_type_name):
     """
     Validate the nodeTypeName for the given hou.HDADefinition.
@@ -35,7 +44,7 @@ def valid_node_type_name(node_type_name):
         (bool): Is the node type name valid?
     """
     name_components = node_type_name_components(node_type_name)
-    if len(name_components) >= 3:
+    if len(name_components) >= 2:
         return True
 
     return False
@@ -167,9 +176,9 @@ def release_branch_name(definition):
     version = node_type_version(current_name)
     ts = time.gmtime()
     release_time = time.strftime("%d-%m-%y-%H-%M-%S", ts)
-    return "release_{category}-{namespace}-{name}-{version}-{time}".format(
+    return "release_{category}-{namespace}{name}-{version}-{time}".format(
         category=category,
-        namespace=namespace,
+        namespace="{namespace}-".format(namespace=namespace) if namespace else "",
         name=name,
         version=version,
         time=release_time,
@@ -222,16 +231,22 @@ def editable_hda_path_from_components(definition, edit_dir, namespace=None, name
     current_name = definition.nodeTypeName()
     if valid_node_type_name(current_name):
         # If the name is valid, use it
+        logger.debug("Using valid node type name: %s", current_name)
         new_namespace = node_type_namespace(current_name, new_namespace=namespace)
         new_name = node_type_name(current_name, new_name=name)
         full_name = "{namespace}_{name}".format(namespace=new_namespace, name=new_name)
     else:
         # Otherwise just make do with whatever we have
-        full_name = definition.nodeTypeName()
+        logger.debug("Using invalid node type name: %s", current_name)
+        full_name = definition.nodeType().nameComponents()[2]
 
     editable_name = "{category}_{full_name}.{time}.hda".format(
         category=category.name(), full_name=full_name, time=int(time.time())
     )
+
+    logger.debug("Editable name: %s", editable_name)
+    logger.debug("Edit dir: %s", edit_dir)
+
     return os.path.join(edit_dir, editable_name)
 
 
@@ -254,9 +269,9 @@ def expanded_hda_name(definition):
     name = node_type_name(current_name)
     namespace = node_type_namespace(current_name)
     version = node_type_version(current_name)
-    return "{category}_{namespace}.{name}.{version}.hda".format(
+    return "{category}_{namespace}{name}.{version}.hda".format(
         category=category,
-        namespace=namespace,
+        namespace="{namespace}.".format(namespace=namespace) if namespace else "",
         name=name,
         version=version,
     )
