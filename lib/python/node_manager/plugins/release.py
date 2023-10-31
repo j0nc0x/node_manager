@@ -8,6 +8,7 @@ import os
 import hou
 
 from node_manager import utils
+from node_manager.utils import definition as definition_utils
 from node_manager.dependencies import nodes
 
 plugin_name = "DefaultRelease"
@@ -106,8 +107,8 @@ class NodeManagerPlugin(object):
         # Add newly released .hda
         repo.process_node_definition_file(release_path, force=True)
 
-        # Remove released definition
-        repo.remove_definition(definition)
+        # Uninstall the old definition
+        definition_utils.uninstall_definition(definition)
 
         # Success
         hou.ui.displayMessage(
