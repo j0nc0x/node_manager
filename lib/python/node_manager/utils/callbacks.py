@@ -27,7 +27,7 @@ def cosmetic_callbacks_enabled():
         
     return enabled
 
-def node_created_or_loaded(current_node):
+def node_changed(current_node):
     """Handle a node being created or loaded.
 
     Args:
@@ -40,8 +40,6 @@ def node_created_or_loaded(current_node):
         logger.debug("UI available, cosmetic callbacks enabled.")
 
     # Is the node a digital asset?
-    logger.debug(current_node)
-    logger.debug(current_node.path())
     if not nodes.is_digital_asset(current_node.path()):
         logger.debug(
             "Skipping node that isn't digital asset: {node}".format(
@@ -50,12 +48,7 @@ def node_created_or_loaded(current_node):
         )
         return
 
-    # Is the node a NodeManager node?
-    manager = utils.get_manager()
-    edit = True
-    if not manager.is_node_manager_node(current_node):
-        edit = False
-
     # We created or loaded a NodeManager node
     logger.debug("NodeCreatedOrLoaded: {node}".format(node=current_node.name()))
-    node.node_comment(current_node, edit=edit)
+    manager = utils.get_manager()
+    node.node_comment(current_node, published=manager.is_node_manager_node(current_node))

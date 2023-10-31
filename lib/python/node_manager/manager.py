@@ -411,7 +411,7 @@ class NodeManager(object):
         edit_plugin.edit_definition(current_node, major=major, minor=minor)
 
         # Force node callback to run
-        callbacks.node_created_or_loaded(nodes.node_at_path(path))
+        callbacks.node_changed(nodes.node_at_path(path))
 
     def prepare_publish(self, current_node):
         """
@@ -465,7 +465,7 @@ class NodeManager(object):
 
         if success:
             self.load_all(force=True)
-            callbacks.node_created_or_loaded(nodes.node_at_path(path))
+            callbacks.node_changed(nodes.node_at_path(path))
 
             # # Add newly released .hda
             # repo = self.manager.repo_from_hda_file(released_path)
