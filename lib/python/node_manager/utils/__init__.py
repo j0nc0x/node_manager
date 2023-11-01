@@ -234,7 +234,10 @@ def editable_hda_path_from_components(definition, edit_dir, namespace=None, name
         logger.debug("Using valid node type name: %s", current_name)
         new_namespace = node_type_namespace(current_name, new_namespace=namespace)
         new_name = node_type_name(current_name, new_name=name)
-        full_name = "{namespace}_{name}".format(namespace=new_namespace, name=new_name)
+        full_name = "{namespace}{name}".format(
+            namespace="{namespace}_".format(namespace=new_namespace) if new_namespace else "",
+            name=new_name,
+        )
     else:
         # Otherwise just make do with whatever we have
         logger.debug("Using invalid node type name: %s", current_name)
