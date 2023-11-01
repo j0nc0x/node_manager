@@ -191,11 +191,12 @@ class NodeManager(object):
         for repo_name in self.node_repos:
             self.node_repos.get(repo_name).load_nodes(force=force)
 
-    def is_node_manager_node(self, current_node):
+    def is_node_manager_node(self, current_node, compare_path=True):
         """Check if the given node is a Node Manager node.
 
         Args:
             current_node(hou.Node): The node to check.
+            compare_path(bool, optional): Should the node path be used as an additional check?
 
         Returns:
             (bool): Is the node a Node Manager node?
@@ -206,12 +207,23 @@ class NodeManager(object):
         
         nodetypeversion = self.nodetypeversion_from_definition(definition)
         logger.debug("Nodetypeversion: {nodetypeversion}".format(nodetypeversion=nodetypeversion))
-        if nodetypeversion:
+        if not nodetypeversion:
+            logger.debug("{node} is not a Node Manager node.".format(node=current_node))
+            return False
+
+        # If we are not comparing the library file path then we can consider this a match
+        if not compare_path:
             logger.debug("{node} is a Node Manager node.".format(node=current_node))
             return True
 
-        logger.debug("{node} is not a Node Manager node.".format(node=current_node))
-        return False
+        # Otherwise lets compare the definition paths on disk
+        matched_definitions = [version  for version in nodetypeversion if version.definition.libraryFilePath() == definition.libraryFilePath()]
+        if matched_definitions:
+            logger.debug("{node} is a Node Manager node.".format(node=current_node))
+            return True
+        else:
+            logger.debug("{node} is not a Node Manager node.".format(node=current_node))
+            return False
 
     def nodetypeversion_from_definition(self, definition):
         """
