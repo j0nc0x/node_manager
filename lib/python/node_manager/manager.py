@@ -21,6 +21,7 @@ else:
 from node_manager import utils
 from node_manager.utils import plugin
 from node_manager.utils import callbacks
+from node_manager.utils import definition as definitionutils
 from node_manager.dependencies import dialog
 from node_manager.dependencies import nodes
 
@@ -421,6 +422,28 @@ class NodeManager(object):
 
         # Force node callback to run
         callbacks.node_changed(nodes.node_at_path(path))
+
+    def discard_definition(self, current_node):
+        """
+        Discard a definition being edited by the HDA manager.
+
+        Args:
+            current_node(hou.Node): The node we are attempting to discard.
+
+        Raises:
+            RuntimeError: Cant discard from read-only HDA repo.
+        """    
+        if not self.is_node_manager_node(current_node):
+            # Uninstall the definition
+            definition = nodes.definition_from_node(current_node.path())
+            definitionutils.uninstall_definition(
+                definition, backup_dir=self.context.get("backup_dir")
+            )
+
+            # Force node callback to run
+            callbacks.node_changed(current_node)
+        else:
+            raise RuntimeError("Can't discard definition from NodeManager HDA repo.")
 
     def prepare_publish(self, current_node):
         """
