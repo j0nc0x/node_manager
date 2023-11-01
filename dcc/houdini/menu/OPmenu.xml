@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <menuDocument>
       <menu>
+            <separatorItem/>
             <titleItem id="node_manager">
                 <insertAfter>opmenu.unsynchronize</insertAfter>
                 <expression>
@@ -55,8 +56,23 @@ current_node = kwargs.get("node", None)
 menu.run_menu_callback("edit_minor", **kwargs)
                 </scriptCode>
             </scriptItem> -->
-            <scriptItem id="publish_hda">
+            <scriptItem id="discard_hda">
                 <insertAfter>edit_hda</insertAfter>
+                <expression>
+current_node = kwargs.get("node", None)      
+from node_manager import menu
+return menu.display_discard(current_node)
+                </expression>    
+                <label>Discard Definition</label>
+                <scriptCode>
+from node_manager import menu
+current_node = kwargs.get("node", None)
+menu.run_menu_callback("discard", **kwargs)
+                </scriptCode>
+            </scriptItem>
+<separatorItem/>
+            <scriptItem id="publish_hda">
+                <insertAfter>discard_hda</insertAfter>
                 <expression>
 current_node = kwargs.get("node", None)      
 from node_manager import menu
