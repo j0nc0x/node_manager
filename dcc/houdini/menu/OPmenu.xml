@@ -14,10 +14,9 @@ return True
             <scriptItem id="edit_hda">
                 <insertAfter>node_manager</insertAfter>
                 <expression>
-return True
-#current_node = kwargs.get("node", None)      
-#from rbl_pipe_hdamanager import menu
-#return menu.display_publish(current_node)
+current_node = kwargs.get("node", None)      
+from node_manager import menu
+return menu.display_edit(current_node)
                 </expression>    
                 <label>Edit</label>
                 <scriptCode>
@@ -26,7 +25,7 @@ current_node = kwargs.get("node", None)
 menu.run_menu_callback("edit", **kwargs)
                 </scriptCode>
             </scriptItem>
-            <scriptItem id="edit_major_hda">
+            <!-- <scriptItem id="edit_major_hda">
                 <insertAfter>edit_hda</insertAfter>
                 <expression>
 return True
@@ -40,8 +39,8 @@ from node_manager import menu
 current_node = kwargs.get("node", None)
 menu.run_menu_callback("edit_major", **kwargs)
                 </scriptCode>
-            </scriptItem>
-            <scriptItem id="edit_minor_hda">
+            </scriptItem> -->
+            <!-- <scriptItem id="edit_minor_hda">
                 <insertAfter>edit_major_hda</insertAfter>
                 <expression>
 return True
@@ -55,14 +54,13 @@ from node_manager import menu
 current_node = kwargs.get("node", None)
 menu.run_menu_callback("edit_minor", **kwargs)
                 </scriptCode>
-            </scriptItem>
+            </scriptItem> -->
             <scriptItem id="publish_hda">
-                <insertAfter>edit_minor_hda</insertAfter>
+                <insertAfter>edit_hda</insertAfter>
                 <expression>
-return True
-#current_node = kwargs.get("node", None)      
-#from rbl_pipe_hdamanager import menu
-#return menu.display_publish(current_node)
+current_node = kwargs.get("node", None)      
+from node_manager import menu
+return menu.display_publish(current_node)
                 </expression>    
                 <label>Publish Definition</label>
                 <scriptCode>
