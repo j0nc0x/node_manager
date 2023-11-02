@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+"""Git Release Plugin."""
+
 import json
 import logging
 import os
@@ -26,11 +28,16 @@ logger = logging.getLogger(
 
 
 class NodeManagerPlugin(release.NodeManagerPlugin):
+    """Git Release Plugin."""
+
     name = plugin_name
     plugin_type = plugin_class
 
     def __init__(self, repo):
-        """ 
+        """Initialise the GitRelease plugin.
+        
+        Args:
+            repo(node_manager.repositories.NodeRepository): The repository to use.
         """
         super(NodeManagerPlugin, self).__init__(repo)
 
@@ -40,39 +47,16 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
 
         logger.debug("Initialise Release.")
 
-    def package_name_from_definition(self, definition):
+    def package_name(self):
         """
-        Use the namespace for the given definition to infer the rez package.
-
-        Args:
-            definition(hou.HDADefinition): The definition to work out the package name
-                from.
+        Lookup the package name from the context.
 
         Returns:
             (str): The package name.
-
-        Raises:
-            RuntimeError: No package could be found based on the given definition.
         """
-        # if utilities.allow_show_publish():
-        #     repo = self.repo_from_project()
-
-        #     if repo:
-        #         return repo.package_name
-
-        #     raise RuntimeError("No package found for the current project")
-        # else:
-        #current_name = definition.nodeTypeName()
-        #namespace = utils.node_type_namespace(current_name)
         if self.repo:
             return self.repo.context.get("name")
         return None
-        # repo = self.manager.repo_from_definition(definition)
-
-        # if repo:
-        #     return repo.name
-
-        # return None
 
     def release_dir(self):
         """
@@ -85,6 +69,11 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         return os.path.join(self.repo.context.get("git_repo_root"), "release")
 
     def _git_repo(self):
+        """Get the git repository.
+
+        Returns:
+            (git.Repo): The git repository.
+        """
         return self.repo.context.get("git_repo")
 
     def _git_dir(self):
@@ -94,9 +83,6 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         Returns:
             (str): The path to the git repository.
         """
-        logger.debug(self.repo)
-        logger.debug(self.repo.context)
-        logger.debug(self.repo.context.get("git_repo_clone"))
         return self.repo.context.get("git_repo_clone")
 
     def _expand_dir(self):
@@ -109,7 +95,10 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         return os.path.join(self._release_dir, self.node_name)
 
     def _node_root(self):
-        """
+        """Get the path to the node root.
+
+        Returns:
+            (str): The path to the node root.
         """
         return os.path.join(self._git_dir(), "dcc", "houdini", "hda")
 
@@ -123,12 +112,24 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         return os.path.join(self._node_root(), self.node_name)
 
     def _config_path(self):
-        """
+        """Get the path to the config file.
+        
+        Returns:
+            (str): The path to the config file.
         """
         return os.path.join(self._git_dir(), "config", "config.json")
 
     def _generate_release_version(self, version, major, minor, patch):
-        """
+        """Generate the release version for the current release.
+
+        Args:
+            version(str): The current version.
+            major(bool): Increment the major version.
+            minor(bool): Increment the minor version.
+            patch(bool): Increment the patch version.
+
+        Returns:
+            (str): The release version.
         """
         if major + minor + patch != 1:
             raise RuntimeError("Invalid version increment.")
@@ -157,7 +158,17 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         return release_version
 
     def _get_release_version(self, conf_version, major, minor, patch, release_tags):
-        """
+        """Get the release version for the current release.
+
+        Args:
+            conf_version(str): The version from the config file.
+            major(bool): Increment the major version.
+            minor(bool): Increment the minor version.
+            patch(bool): Increment the patch version.
+            release_tags(list): A list of release tags already in the repo.
+    
+        Returns:
+            (str): The release version.
         """
         limit = 10
         i = 0
@@ -177,6 +188,10 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
     def process_release(self, branch, comment=None):
         """
         Run the HDA release process.
+
+        Args:
+            branch(str): The name of the branch to release to.
+            comment(str, optional): The comment to use for the release.
 
         Returns:
             (str): The path of the released HDA.
@@ -291,6 +306,9 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
 
         Raises:
             RuntimeError: HDA couldn't be expanded or package couldn't be found.
+
+        Returns:
+            bool: Was the release successful.
         """
         logger.info("Beginning HDA release.")
 
@@ -330,17 +348,9 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         # Determine the other information needed to conduct a release
         node_type_name = definition.nodeTypeName()
         branch = utils.release_branch_name(definition)
-        package = self.package_name_from_definition(definition)
+        package = self.package_name()
         if not package:
             raise RuntimeError("No package found for definition")
-
-        #repo = self.manager.repo_from_definition(definition)
-
-        # Create and run the release
-        # hda_release = node_release.HDARelease(
-        #     full_release_dir, node_type_name, branch, hda_name, package, release_comment, self.repo,
-        # )
-        # self.manager.releases.append(hda_release)
 
         self._release_dir = full_release_dir
         self._node_type_name = node_type_name
