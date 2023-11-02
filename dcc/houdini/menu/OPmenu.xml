@@ -1,17 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <menuDocument>
-      <menu>
-            <separatorItem/>
-            <titleItem id="node_manager">
-                <insertAfter>opmenu.unsynchronize</insertAfter>
-                <expression>
-return True
-#current_node = kwargs.get("node", None)
-#from rbl_pipe_hdamanager import menu
-#return menu.display_main_menu(current_node)
-                </expression>      
-                <label>Node Manager</label>
-            </titleItem>
+    <menu>
+        <subMenu id="node_manager">
+        <label>Node Manager</label>
+        <insertAfter>opmenu.unsynchronize</insertAfter>
             <scriptItem id="edit_hda">
                 <insertAfter>node_manager</insertAfter>
                 <expression>
@@ -19,43 +11,13 @@ current_node = kwargs.get("node", None)
 from node_manager import menu
 return menu.display_edit(current_node)
                 </expression>    
-                <label>Edit</label>
+                <label>Edit Defintion</label>
                 <scriptCode>
 from node_manager import menu
 current_node = kwargs.get("node", None)
 menu.run_menu_callback("edit", **kwargs)
                 </scriptCode>
             </scriptItem>
-            <!-- <scriptItem id="edit_major_hda">
-                <insertAfter>edit_hda</insertAfter>
-                <expression>
-return True
-#current_node = kwargs.get("node", None)      
-#from rbl_pipe_hdamanager import menu
-#return menu.display_publish(current_node)
-                </expression>    
-                <label>Edit (New Major)</label>
-                <scriptCode>
-from node_manager import menu
-current_node = kwargs.get("node", None)
-menu.run_menu_callback("edit_major", **kwargs)
-                </scriptCode>
-            </scriptItem> -->
-            <!-- <scriptItem id="edit_minor_hda">
-                <insertAfter>edit_major_hda</insertAfter>
-                <expression>
-return True
-#current_node = kwargs.get("node", None)      
-#from rbl_pipe_hdamanager import menu
-#return menu.display_publish(current_node)
-                </expression>    
-                <label>Edit (New Minor)</label>
-                <scriptCode>
-from node_manager import menu
-current_node = kwargs.get("node", None)
-menu.run_menu_callback("edit_minor", **kwargs)
-                </scriptCode>
-            </scriptItem> -->
             <scriptItem id="discard_hda">
                 <insertAfter>edit_hda</insertAfter>
                 <expression>
@@ -70,7 +32,7 @@ current_node = kwargs.get("node", None)
 menu.run_menu_callback("discard", **kwargs)
                 </scriptCode>
             </scriptItem>
-<separatorItem/>
+            <separatorItem/> 
             <scriptItem id="publish_hda">
                 <insertAfter>discard_hda</insertAfter>
                 <expression>
@@ -85,7 +47,6 @@ current_node = kwargs.get("node", None)
 menu.run_menu_callback("prepare_publish", **kwargs)
                 </scriptCode>
             </scriptItem>
-            <!-- <removeItem id="opmenu.vhda_options"/>             -->
-            <!-- <removeItem id="opmenu.saveoptype"/> -->
-      </menu>
+        </subMenu>
+    </menu>
 </menuDocument>
