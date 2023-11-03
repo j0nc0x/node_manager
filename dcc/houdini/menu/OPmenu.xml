@@ -3,50 +3,53 @@
     <menu>
         <subMenu id="node_manager">
         <label>Node Manager</label>
-        <insertAfter>opmenu.unsynchronize</insertAfter>
-            <scriptItem id="edit_hda">
-                <insertAfter>node_manager</insertAfter>
-                <expression>
+        <context>
+        <expression>
+current_node = kwargs.get("node", None)
+from node_manager import menu
+return menu.display_node_manager(current_node)
+        </expression>
+        </context>
+        <insertAfter>opmenu.synchronize</insertAfter>
+        <scriptItem id="edit_hda">
+            <expression>
 current_node = kwargs.get("node", None)      
 from node_manager import menu
 return menu.display_edit(current_node)
-                </expression>    
-                <label>Edit Defintion</label>
-                <scriptCode>
+            </expression>    
+            <label>Edit Defintion</label>
+            <scriptCode>
 from node_manager import menu
 current_node = kwargs.get("node", None)
 menu.run_menu_callback("edit", **kwargs)
-                </scriptCode>
-            </scriptItem>
-            <scriptItem id="discard_hda">
-                <insertAfter>edit_hda</insertAfter>
-                <expression>
+            </scriptCode>
+        </scriptItem>
+        <scriptItem id="discard_hda">
+            <expression>
 current_node = kwargs.get("node", None)      
 from node_manager import menu
 return menu.display_discard(current_node)
-                </expression>    
-                <label>Discard Definition</label>
-                <scriptCode>
+            </expression>    
+            <label>Discard Definition</label>
+            <scriptCode>
 from node_manager import menu
 current_node = kwargs.get("node", None)
 menu.run_menu_callback("discard", **kwargs)
-                </scriptCode>
-            </scriptItem>
-            <separatorItem/> 
-            <scriptItem id="publish_hda">
-                <insertAfter>discard_hda</insertAfter>
-                <expression>
+            </scriptCode>
+        </scriptItem>
+        <scriptItem id="publish_hda">
+            <expression>
 current_node = kwargs.get("node", None)      
 from node_manager import menu
 return menu.display_publish(current_node)
-                </expression>    
-                <label>Publish Definition</label>
-                <scriptCode>
+            </expression>    
+            <label>Publish Definition</label>
+            <scriptCode>
 from node_manager import menu
 current_node = kwargs.get("node", None)
 menu.run_menu_callback("prepare_publish", **kwargs)
-                </scriptCode>
-            </scriptItem>
+            </scriptCode>
+        </scriptItem>
         </subMenu>
     </menu>
 </menuDocument>

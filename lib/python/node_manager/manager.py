@@ -202,6 +202,10 @@ class NodeManager(object):
         Returns:
             (bool): Is the node a Node Manager node?
         """
+        # We can reject nodes straight away if they are not digital assets.
+        if not nodes.is_digital_asset(current_node.path()):
+            return False
+
         definition = nodes.definition_from_node(current_node.path())
         if not definition:
             raise RuntimeError("Couldn't find definition for {node}".format(node=current_node))
