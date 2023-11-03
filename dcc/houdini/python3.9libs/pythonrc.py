@@ -22,7 +22,6 @@ if utils.using_rez():
     manager.initialise_node_manager(
         background=hou.isUIAvailable(),
         load_plugin="GitLoad",
-        edit_plugin="EditDirectory",
         release_plugin="GitRelease",
     )
 else:
@@ -33,7 +32,6 @@ else:
     os.environ["NODE_MANAGER_BASE"] = "/Users/jcox/hdas"
     manager.initialise_node_manager(
         background=hou.isUIAvailable(),
-        edit_plugin="EditDirectory",
     )
 
     # # Git based load
@@ -41,6 +39,5 @@ else:
     # manager.initialise_node_manager(
     #     background=hou.isUIAvailable(),
     #     load_plugin="GitLoad",
-    #     edit_plugin="EditDirectory",
     #     release_plugin="GitRelease",
     # )
