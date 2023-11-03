@@ -26,10 +26,10 @@ class NodeManagerPlugin(object):
     name = plugin_name
     plugin_type = plugin_class
 
-    def __init__(self, repo):
+    def __init__(self):
         """Initialise the DefaultRelease plugin."""
-        self.repo = repo
         self.manager = utils.get_manager()
+        self.repo = self.get_release_repo()
         logger.debug("Initialise Release.")
 
     def get_release_repo(self):
@@ -82,19 +82,18 @@ class NodeManagerPlugin(object):
 
         logger.debug("Release comment: {comment}".format(comment=release_comment))
 
-        repo = self.get_release_repo()
-        logger.debug("Using release repo: {repo}".format(repo=repo.context.get("name")))
-        logger.debug("Repo path: {path}".format(path=repo.context.get("repo_path")))
+        logger.debug("Using release repo: {repo}".format(repo=self.repo.context.get("name")))
+        logger.debug("Repo path: {path}".format(path=self.repo.context.get("repo_path")))
 
         # Expand the HDA ready for release
         hda_name = utils.expanded_hda_name(definition)
-        release_path = os.path.join(repo.context.get("repo_path"), hda_name)
+        release_path = os.path.join(self.repo.context.get("repo_path"), hda_name)
         logger.debug("Using release path: {path}".format(path=release_path))
         if os.path.isfile(release_path):
             logger.warning("Exisitng file will be overwritten by release to {path}".format(path=release_path))
-            backup_directory = repo.get_repo_backup_dir()
+            backup_directory = self.repo.get_repo_backup_dir()
             if not backup_directory:
-                raise RuntimeError("No backup directory found for {repo}".format(repo=repo.context.get("name")))
+                raise RuntimeError("No backup directory found for {repo}".format(repo=self.repo.context.get("name")))
 
             backup_path = os.path.join(backup_directory, os.path.basename(node_file_path))
             # This might cause issues if the file is already loaded by Houdini
@@ -105,7 +104,7 @@ class NodeManagerPlugin(object):
         logger.debug("Definition copied to {path}".format(path=release_path))
 
         # Add newly released .hda
-        repo.process_node_definition_file(release_path, force=True)
+        self.repo.process_node_definition_file(release_path, force=True)
 
         # Uninstall the old definition
         definition_utils.uninstall_definition(definition)

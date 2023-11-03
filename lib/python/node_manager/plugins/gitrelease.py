@@ -33,13 +33,9 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
     name = plugin_name
     plugin_type = plugin_class
 
-    def __init__(self, repo):
-        """Initialise the GitRelease plugin.
-        
-        Args:
-            repo(node_manager.repositories.NodeRepository): The repository to use.
-        """
-        super(NodeManagerPlugin, self).__init__(repo)
+    def __init__(self):
+        """Initialise the GitRelease plugin."""
+        super(NodeManagerPlugin, self).__init__()
 
         self._release_dir = None
         self._node_type_name = None

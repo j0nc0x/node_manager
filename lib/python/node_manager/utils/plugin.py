@@ -105,9 +105,6 @@ def get_discover_plugin(discover_plugin_name):
     else:
         discover_plugin = "DefaultDiscover"
 
-    print(discover_plugin)
-    print(manager_instance._plugins)
-    print("---")
     for plugin_module in manager_instance._plugins:
         if plugin_module.NodeManagerPlugin.name == discover_plugin:
             return initialise_plugin(plugin_module)
@@ -158,7 +155,7 @@ def get_edit_plugin(edit_plugin_name):
             )
 
 
-def get_release_plugin(release_plugin_name, repo):
+def get_release_plugin(release_plugin_name):
     """Get the given release plugin.
 
     Args:
@@ -167,8 +164,6 @@ def get_release_plugin(release_plugin_name, repo):
     Returns:
         object: The release plugin.
     """
-    logger.debug("Get release plugin using repo {repo}".format(repo=repo))
-
     manager_instance = utils.get_manager()
     if release_plugin_name:
         publish_plugin = release_plugin_name
@@ -179,5 +174,4 @@ def get_release_plugin(release_plugin_name, repo):
         if plugin_module.NodeManagerPlugin.name == publish_plugin:
             return initialise_plugin(
                 plugin_module,
-                repo=repo,
             )

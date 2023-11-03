@@ -492,8 +492,7 @@ class NodeManager(object):
         if result and result[1]:
             release_comment = result[1]
 
-        repo = self.get_release_repo(current_node)
-        release_plugin = plugin.get_release_plugin(self.release_plugin, repo)
+        release_plugin = plugin.get_release_plugin(self.release_plugin)
         if not release_plugin:
             raise RuntimeError("Couldn't find Node Manager Release Plugin.")
 
