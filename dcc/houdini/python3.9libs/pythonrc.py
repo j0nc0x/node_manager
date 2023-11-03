@@ -35,3 +35,12 @@ else:
         background=hou.isUIAvailable(),
         edit_plugin="EditDirectory",
     )
+
+    # # Git based load
+    # os.environ["NODE_MANAGER_REPOS"] = "git@github.com:j0nc0x/hda_repo.git"
+    # manager.initialise_node_manager(
+    #     background=hou.isUIAvailable(),
+    #     load_plugin="GitLoad",
+    #     edit_plugin="EditDirectory",
+    #     release_plugin="GitRelease",
+    # )
