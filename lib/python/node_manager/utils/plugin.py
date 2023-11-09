@@ -110,7 +110,7 @@ def get_discover_plugin(discover_plugin_name):
             return initialise_plugin(plugin_module)
 
 
-def get_load_plugin(load_plugin_name, repo):
+def get_load_plugin(load_plugin_name):
     """Get the given load plugin.
 
     Args:
@@ -129,7 +129,6 @@ def get_load_plugin(load_plugin_name, repo):
         if plugin_module.NodeManagerPlugin.name == load_plugin:
             return initialise_plugin(
                 plugin_module,
-                repo=repo,
             )
 
 

@@ -27,17 +27,17 @@ if utils.using_rez():
 else:
     os.environ["NODE_MANAGER_PLUGINS_PATH"] = "/Users/jcox/source/github/node_manager/lib/python/node_manager/plugins"
 
-    # Disk based load
-    os.environ["NODE_MANAGER_REPOS"] = "/Users/jcox/hdas"
-    os.environ["NODE_MANAGER_BASE"] = "/Users/jcox/hdas"
-    manager.initialise_node_manager(
-        background=hou.isUIAvailable(),
-    )
-
-    # # Git based load
-    # os.environ["NODE_MANAGER_REPOS"] = "git@github.com:j0nc0x/hda_repo.git"
+    # # Disk based load
+    # os.environ["NODE_MANAGER_REPOS"] = "/Users/jcox/hdas"
+    # os.environ["NODE_MANAGER_BASE"] = "/Users/jcox/hdas"
     # manager.initialise_node_manager(
     #     background=hou.isUIAvailable(),
-    #     load_plugin="GitLoad",
-    #     release_plugin="GitRelease",
     # )
+
+    # Git based load
+    os.environ["NODE_MANAGER_REPOS"] = "git@github.com:j0nc0x/hda_repo.git"
+    manager.initialise_node_manager(
+        background=hou.isUIAvailable(),
+        load_plugin="GitLoad",
+        release_plugin="GitRelease",
+    )

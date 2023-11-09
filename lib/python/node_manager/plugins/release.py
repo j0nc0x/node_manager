@@ -29,21 +29,8 @@ class NodeManagerPlugin(object):
     def __init__(self):
         """Initialise the DefaultRelease plugin."""
         self.manager = utils.get_manager()
-        self.repo = self.get_release_repo()
+        self.repo = self.manager.get_release_repo()
         logger.debug("Initialise Release.")
-
-    def get_release_repo(self):
-        """Get the release repository for the given definition.
-
-        Returns:
-            object: The release repository.
-        """
-        # Here we will need to get the actual repo that should be used for the given
-        # definition. For now we will cheat and just use the first repo.
-        for node_repo in self.manager.node_repos:
-            return self.manager.node_repos.get(node_repo)
-
-        raise RuntimeError("No release repository found.")
 
     def get_release_definition(self, current_node):
         """Get the release definition for the given node.

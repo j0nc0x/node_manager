@@ -50,9 +50,6 @@ class NodeRepo(object):
         # self.build_repo()
         # self.manager.stats["build"] = time.time() - start
 
-        self.load_plugin = self.get_load_plugin()
-        self.node_manager_definition_files = self.initialise_repo()
-
         self.editable = editable
         self.asset_subdirectory = "hda"
         self.node_types = dict()
@@ -87,7 +84,6 @@ class NodeRepo(object):
         logger.debug("Using load plugin: {plugin}".format(plugin=self.manager.load_plugin))
         load_plugin = plugin.get_load_plugin(
             self.manager.load_plugin,
-            self,
         )
         if not load_plugin:
             raise RuntimeError("Couldn't find Node Manager Load Plugin.")
@@ -100,7 +96,8 @@ class NodeRepo(object):
         Returns:
             list(NodeRepo): A list of NodeRepo objects.
         """
-        return self.load_plugin.load()
+        load_plugin = self.get_load_plugin()
+        self.node_manager_definition_files = load_plugin.load()
 
     def config_path(self):
         """
@@ -200,7 +197,7 @@ class NodeRepo(object):
             )
         )
         if force:
-            self.node_manager_definition_files = self.initialise_repo()
+            self.initialise_repo()
 
         for definition_file in self.node_manager_definition_files:
             logger.debug("Processing {path}".format(path=definition_file))

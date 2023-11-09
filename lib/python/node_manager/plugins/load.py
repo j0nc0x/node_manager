@@ -16,23 +16,19 @@ class NodeManagerPlugin(object):
     name = "DefaultLoad"
     plugin_type = "load"
 
-    def __init__(self, repo):
-        """ 
-        """
-        self.repo = repo
+    def __init__(self):
+        """Initialise the DefaultLoad plugin."""
         self.manager = utils.get_manager()
-        self.repo.context["repo_load_path"] = self.repo.context.get("repo_path")
+        self.repo = self.manager.get_release_repo()
         self.extensions = [
             ".hda",
             ".hdanc",
             ".otl",
             ".otlnc",
         ]
-        logger.debug(
-            "Initialise DefaultLoad: {repo_path}".format(
-                repo_path=self.repo.context.get("repo_path"),
-            )
-        )
+        if self.repo  and self.repo.context:
+            self.repo.context["repo_load_path"] = self.repo.context.get("repo_path")
+        logger.debug("Initialise DefaultLoad.")
 
     def get_node_definition_files(self):
         """Get a list of node definition files in the given directory.

@@ -190,7 +190,9 @@ class NodeManager(object):
     def load_all(self, force=False):
         """Load all node definitions from the repositories."""
         for repo_name in self.node_repos:
-            self.node_repos.get(repo_name).load_nodes(force=force)
+            node_repo = self.node_repos.get(repo_name)
+            node_repo.initialise_repo()
+            node_repo.load_nodes(force=force)
 
     def is_node_manager_node(self, current_node, compare_path=True):
         """Check if the given node is a Node Manager node.
@@ -348,17 +350,23 @@ class NodeManager(object):
                 return repo
         return None
 
-    def get_release_repo(self, current_node):
+    def get_release_repo(self):
         """Get the release repository for the given node.
 
-        Args:
-            current_node(hou.Node): The node to get the release repository for.
-        """
-        if len(self.node_repos) == 1:
-            a= next(iter(self.node_repos.values()))
-            return a
+        Returns:
+            node_manager.repo.NodeRepo: The release repository.
 
-        raise NotImplementedError("Multiple repo support not currently implemented.")
+        Raises:
+            NotImplementedError: Multiple repo support not currently implemented.
+            RuntimeError: No repos found.
+        """
+        if len(self.node_repos) > 1:
+            raise NotImplementedError("Multiple repo support not currently implemented.")
+
+        if self.node_repos:
+            return next(iter(self.node_repos.values()))
+
+        raise RuntimeError("No repos found.")
 
     def is_latest_version(self, current_node):
         """

@@ -20,9 +20,9 @@ logger = logging.getLogger(__name__)
 class NodeManagerPlugin(load.NodeManagerPlugin):
     name = "GitLoad"
 
-    def __init__(self, repo):
+    def __init__(self):
         """Initialise the GitLoad plugin."""
-        super(NodeManagerPlugin, self).__init__(repo)
+        super(NodeManagerPlugin, self).__init__()
         self.repo.context["git_repo_root"] = self.git_repo_root()
         self.repo.context["git_repo_clone"] = self.git_repo_clone_dir()
         self.repo.context["repo_load_path"] = os.path.join(
@@ -81,10 +81,6 @@ class NodeManagerPlugin(load.NodeManagerPlugin):
         """Build the Node Manager repository."""
         repo_root = self.repo.context.get("git_repo_clone")
         repo_build = self.repo.context.get("repo_load_path")
-        logger.debug("-----")
-        logger.debug("Repo root: {path}".format(path=repo_root))
-        logger.debug("Repo build: {path}".format(path=repo_build))
-        logger.debug("-----")
         if not os.path.exists(repo_build):
             os.makedirs(repo_build)
             logger.debug("Created temp directory: {path}".format(path=repo_build))
