@@ -18,11 +18,11 @@ logging.basicConfig(
 
 
 if utils.using_rez():
-    os.environ["NODE_MANAGER_REPOS"] = "http://gitea.ad.dupevfx.com/joco/houdini_hdas.git"
+    os.environ["NODE_MANAGER_REPOS"] = "git@gitea.ad.dupevfx.com:joco/houdini_hdas.git"
     manager.initialise_node_manager(
         background=hou.isUIAvailable(),
         load_plugin="GitLoad",
-        release_plugin="GitRelease",
+        release_plugin="RezRelease",
     )
 else:
     os.environ["NODE_MANAGER_PLUGINS_PATH"] = "/Users/jcox/source/github/node_manager/lib/python/node_manager/plugins"
