@@ -115,77 +115,34 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         """
         return os.path.join(self._git_dir(), "config", "config.json")
 
-    def _generate_release_version(self, version, major, minor, patch):
-        """Generate the release version for the current release.
+    def version_from_package(self):
+        if os.path.isfile(self.package_py_path()):
+            old_package_py_path = self.package_py_path()
+        else:
+            old_package_py_path = os.path.join(os.environ.get("REZ_NODE_MANAGER_ROOT"), "data", "default_package.py")
 
-        Args:
-            version(str): The current version.
-            major(bool): Increment the major version.
-            minor(bool): Increment the minor version.
-            patch(bool): Increment the patch version.
+        logger.debug("Using package.py: {path}".format(path=old_package_py_path))
 
-        Returns:
-            (str): The release version.
-        """
-        if major + minor + patch != 1:
-            raise RuntimeError("Invalid version increment.")
+        with open(old_package_py_path) as old_file:
+            for line in old_file:
+                if line.startswith("version"):
+                    versions = re.findall('"([^"]*)"', line)
+                    if len(versions) != 1:
+                        raise RuntimeError(
+                            "Invalid package.py. Found {num} version strings. "
+                            "Should only be one.".format(num=len(versions))
+                        )
 
-        release_version = None
-        parsed_version = parse(version)
-        if patch:
-            release_version = "{major}.{minor}.{patch}".format(
-                major=parsed_version.major,
-                minor=parsed_version.minor,
-                patch=parsed_version.micro + 1,
-            )
-        elif minor:
-            release_version = "{major}.{minor}.{patch}".format(
-                major=parsed_version.major,
-                minor=parsed_version.minor + 1,
-                patch=0,
-            )
-        elif major:
-            release_version = "{major}.{minor}.{patch}".format(
-                major=parsed_version.major + 1,
-                minor=0,
-                patch=0,
-            )
+                    return versions[0]
 
-        return release_version
+        raise RuntimeError("Couldn't find version in package.py")
 
-    def _get_release_version(self, conf_version, major, minor, patch, release_tags):
-        """Get the release version for the current release.
-
-        Args:
-            conf_version(str): The version from the config file.
-            major(bool): Increment the major version.
-            minor(bool): Increment the minor version.
-            patch(bool): Increment the patch version.
-            release_tags(list): A list of release tags already in the repo.
-    
-        Returns:
-            (str): The release version.
-        """
-        limit = 10
-        i = 0
-        release_version = self._generate_release_version(conf_version, major, minor, patch)
-        while release_version in release_tags:
-            i += 1
-            release_version = self._generate_release_version(release_version, major, minor, patch)
-
-            if i > limit:
-                raise RuntimeError("Failed to generate release version after {iteration} iterations.".format(iteration=i))
-
-        if i:
-            logger.warning("Release version took {iteration} iterations to generate.".format(iteration=i + 1))
-
-        return release_version
-
-    def process_release(self, branch, package_name, comment=None):
+    def process_release(self, definition, branch, package_name, comment=None):
         """
         Run the HDA release process.
 
         Args:
+            definition(hou.HDADefinition): The definition to release.
             branch(str): The name of the branch to release to.
             package_name(str): The name of the package to release to.
             comment(str, optional): The comment to use for the release.
@@ -196,10 +153,6 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         Raises:
             RuntimeError: The rez package released wasn't successful.
         """
-        patch = False
-        minor = False
-        major = False
-
         config_path = self._config_path()
 
         # Create the branch
@@ -209,26 +162,12 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         # Check if expanded node directory already exists, delete it if it does
         hda_path = self._node_path()
         if os.path.exists(hda_path):
-            patch = True
             shutil.rmtree(hda_path)
             logger.debug(
                 "Removed directory already exists, removing: {path}".format(
                     path=hda_path
                 )
             )
-        else:
-            namespace = utils.node_type_namespace(self._node_type_name)
-            name = utils.node_type_name(self._node_type_name)
-            version = utils.node_type_version(self._node_type_name)
-            regex = re.compile(".*{namespace}\.{name}\.{major}\.(\d*).hda".format(namespace=namespace, name=name, major=parse(version).major))
-            if not os.path.exists(self._node_root()):
-                major = True
-            else:
-                same_major_version = [path for path in os.listdir(self._node_root()) if regex.match(path)]
-                if same_major_version:
-                    minor = True
-                else:
-                    major = True
 
         repo_conf_data = {}
         if os.path.isfile(config_path):
@@ -237,9 +176,10 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         else:
             logger.warning("No config found at {path}, skipping.".format(path=config_path))
 
+        package_version = self.version_from_package()
+
         # Get the release version
-        release_tags = [str(tag) for tag in self._git_repo().tags]
-        self.release_version = self._get_release_version(repo_conf_data.get("version", "0.0.0"), major, minor, patch, release_tags)
+        self.release_version = self.manager.get_release_version(definition, package_version)
 
         # Copy the expanaded HDA into it's correct location
         shutil.copytree(self._expand_dir(), hda_path)
@@ -268,17 +208,6 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
             with open(old_package_py_path) as old_file:
                 for line in old_file:
                     if line.startswith("version"):
-                        versions = re.findall('"([^"]*)"', line)
-                        if len(versions) != 1:
-                            raise RuntimeError(
-                                "Invalid package.py. Found {num} version strings. "
-                                "Should only be one.".format(num=len(versions))
-                            )
-
-                        version = parse(versions[0])
-                        self.release_version = "{major}.{minor}.{patch}".format(
-                            major=version.major, minor=version.minor + 1, patch=0
-                        )
                         updated_line = 'version = "{version}"\n'.format(
                             version=self.release_version
                         )
@@ -389,7 +318,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         self._node_type_name = node_type_name
         self.node_name = hda_name
 
-        return self.process_release(branch, package, comment=release_comment)
+        return self.process_release(definition, branch, package, comment=release_comment)
 
         # # rez-release
         # subprocess_env = rezclean.get_base_env()
