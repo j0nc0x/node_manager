@@ -115,77 +115,12 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         """
         return os.path.join(self._git_dir(), "config", "config.json")
 
-    def _generate_release_version(self, version, major, minor, patch):
-        """Generate the release version for the current release.
-
-        Args:
-            version(str): The current version.
-            major(bool): Increment the major version.
-            minor(bool): Increment the minor version.
-            patch(bool): Increment the patch version.
-
-        Returns:
-            (str): The release version.
-        """
-        if major + minor + patch != 1:
-            raise RuntimeError("Invalid version increment.")
-
-        release_version = None
-        parsed_version = parse(version)
-        if patch:
-            release_version = "{major}.{minor}.{patch}".format(
-                major=parsed_version.major,
-                minor=parsed_version.minor,
-                patch=parsed_version.micro + 1,
-            )
-        elif minor:
-            release_version = "{major}.{minor}.{patch}".format(
-                major=parsed_version.major,
-                minor=parsed_version.minor + 1,
-                patch=0,
-            )
-        elif major:
-            release_version = "{major}.{minor}.{patch}".format(
-                major=parsed_version.major + 1,
-                minor=0,
-                patch=0,
-            )
-
-        return release_version
-
-    def _get_release_version(self, conf_version, major, minor, patch, release_tags):
-        """Get the release version for the current release.
-
-        Args:
-            conf_version(str): The version from the config file.
-            major(bool): Increment the major version.
-            minor(bool): Increment the minor version.
-            patch(bool): Increment the patch version.
-            release_tags(list): A list of release tags already in the repo.
-    
-        Returns:
-            (str): The release version.
-        """
-        limit = 10
-        i = 0
-        release_version = self._generate_release_version(conf_version, major, minor, patch)
-        while release_version in release_tags:
-            i += 1
-            release_version = self._generate_release_version(release_version, major, minor, patch)
-
-            if i > limit:
-                raise RuntimeError("Failed to generate release version after {iteration} iterations.".format(iteration=i))
-
-        if i:
-            logger.warning("Release version took {iteration} iterations to generate.".format(iteration=i + 1))
-
-        return release_version
-
-    def process_release(self, branch, comment=None):
+    def process_release(self, definition, branch, comment=None):
         """
         Run the HDA release process.
 
         Args:
+            definition(hou.HDADefinition): The definition to release.
             branch(str): The name of the branch to release to.
             comment(str, optional): The comment to use for the release.
 
@@ -195,39 +130,21 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         Raises:
             RuntimeError: The rez package released wasn't successful.
         """
-        patch = False
-        minor = False
-        major = False
-
         config_path = self._config_path()
 
         # Create the branch
         current = self._git_repo().create_head(branch)
         current.checkout()
 
-        # Check if expanded node directory already exists, delete it if it does
+        # # Check if expanded node directory already exists, delete it if it does
         hda_path = self._node_path()
         if os.path.exists(hda_path):
-            patch = True
             shutil.rmtree(hda_path)
             logger.debug(
                 "Removed directory already exists, removing: {path}".format(
                     path=hda_path
                 )
             )
-        else:
-            namespace = utils.node_type_namespace(self._node_type_name)
-            name = utils.node_type_name(self._node_type_name)
-            version = utils.node_type_version(self._node_type_name)
-            regex = re.compile(".*{namespace}\.{name}\.{major}\.(\d*).hda".format(namespace=namespace, name=name, major=parse(version).major))
-            if not os.path.exists(self._node_root()):
-                major = True
-            else:
-                same_major_version = [path for path in os.listdir(self._node_root()) if regex.match(path)]
-                if same_major_version:
-                    minor = True
-                else:
-                    major = True
 
         repo_conf_data = {}
         if os.path.isfile(config_path):
@@ -237,8 +154,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
             logger.warning("No config found at {path}, skipping.".format(path=config_path))
 
         # Get the release version
-        release_tags = [str(tag) for tag in self._git_repo().tags]
-        self.release_version = self._get_release_version(repo_conf_data.get("version", "0.0.0"), major, minor, patch, release_tags)
+        self.release_version = self.manager.get_release_version(definition, repo_conf_data.get("version", "0.0.0"))
 
         # Copy the expanaded HDA into it's correct location
         shutil.copytree(self._expand_dir(), hda_path)
@@ -352,4 +268,4 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         self._node_type_name = node_type_name
         self.node_name = hda_name
 
-        return self.process_release(branch=branch, comment=release_comment)
+        return self.process_release(definition, branch, comment=release_comment)

@@ -403,6 +403,74 @@ class NodeManager(object):
 
         return True
 
+    def get_release_version(self, definition, package_version):
+        """
+        Get the release version for the given definition.
+
+        Args:
+            definition(hou.HDADefinition): The definition to get the release
+                version for.
+            package_version(str): The package version to use as a base.
+
+        Returns:
+            str: The release version.
+
+        Raises:
+            RuntimeError: Invalid version increment.
+        """
+        major = False
+        minor = False
+        patch = False
+
+        release_repo = self.get_release_repo()
+        current_name = definition.nodeTypeName()
+        category = definition.nodeTypeCategory().name()
+        index = utils.node_type_index(current_name, category)
+        current_version = utils.node_type_version(current_name)
+        nodetype = release_repo.node_types.get(index)
+        if nodetype:
+            version = nodetype.versions.get(current_version)
+            if version:
+                patch = True
+                logger.debug("Version exists - patch release.")
+            else:
+                same_major_version = [version for version in nodetype.versions if version.startswith(current_version.split(".")[0])]
+                if same_major_version:
+                    minor = True
+                    logger.debug("Same major version - minor release.")
+                else:
+                    major = True
+                    logger.debug("Different major version - major release.")
+        else:
+            logger.debug("New node type - major release.")
+            major = True
+
+        if major + minor + patch != 1:
+            raise RuntimeError("Invalid version increment.")
+
+        release_version = None
+        parsed_version = parse(package_version)
+        if patch:
+            release_version = "{major}.{minor}.{patch}".format(
+                major=parsed_version.major,
+                minor=parsed_version.minor,
+                patch=parsed_version.micro + 1,
+            )
+        elif minor:
+            release_version = "{major}.{minor}.{patch}".format(
+                major=parsed_version.major,
+                minor=parsed_version.minor + 1,
+                patch=0,
+            )
+        elif major:
+            release_version = "{major}.{minor}.{patch}".format(
+                major=parsed_version.major + 1,
+                minor=0,
+                patch=0,
+            )
+
+        return release_version
+
     def edit_definition(self, current_node, major=False, minor=False):
         """Make a definition editable.
 
