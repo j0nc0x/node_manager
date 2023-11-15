@@ -234,6 +234,34 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         new_tag = self._git_repo().create_tag(self.release_version, message="Release {version}".format(version=self.release_version))
         self._git_repo().remotes.origin.push(new_tag)
 
+        # rez-release
+        subprocess_env = os.environ.copy()
+        logger.debug("rez-release starting")
+        process = subprocess.Popen(
+            ["rez-release", "--skip-repo-errors"],
+            cwd=self._git_dir(),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=subprocess_env,
+        )
+        process.wait()
+
+        # verify release
+        if process.returncode != 0:
+        # Non-zero return code
+            try:
+                _stdout = process.stdout.read()
+                _stderr = process.stderr.read()
+            except Exception as e:
+                _stdout = ""
+                _stderr = str(e)
+            raise RuntimeError(
+                "rez-release didn't complete successfully: {} :: {} :: {}".format(
+                    process.returncode, _stdout, _stderr
+                )
+            )
+        logger.debug("rez-release complete")
+
         # merge to master
         self._git_repo().git.reset("--hard")
         main = self._git_repo().heads.main
@@ -319,68 +347,6 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         self.node_name = hda_name
 
         return self.process_release(definition, branch, package, comment=release_comment)
-
-        # # rez-release
-        # subprocess_env = rezclean.get_base_env()
-        # # In case we're operating in a custom Rez environment:
-        # subprocess_env["REZ_CONFIG_FILE"] = os.getenv("REZ_CONFIG_FILE")
-        # process = subprocess.Popen(
-        #     "rez-release",
-        #     cwd=self.package_root(),
-        #     stdout=subprocess.PIPE,
-        #     stderr=subprocess.PIPE,
-        #     env=subprocess_env,
-        # )
-        # process.wait()
-
-        # # verify release
-        # if process.returncode != 0:
-        #     # Non-zero return code
-        #     try:
-        #         _stdout = process.stdout.read()
-        #         _stderr = process.stderr.read()
-        #     except Exception as e:
-        #         _stdout = ""
-        #         _stderr = str(e)
-        #     raise RuntimeError(
-        #         "rez-release didn't complete successfully: {} :: {} :: {}".format(
-        #             process.returncode, _stdout, _stderr
-        #         )
-        #     )
-
-        # release_path = self.release_hda_path()
-        # # Using open instead of os.path.exists as we seemed to be getting false
-        # # negatives with that approach - caching issue perhaps.
-        # try:
-        #     with os.path.open(release_path, "r") as fh:
-        #         pass
-        #     exists = True
-        # except Exception:
-        #     exists = False
-        # if exists:
-        #     raise RuntimeError(
-        #         "Error when verifying the release, expected to find released hda at: "
-        #         "{path}".format(path=release_path)
-        #     )
-
-        # # merge to master
-        # cloned_repo.git.reset("--hard")
-        # master = cloned_repo.heads.master
-        # master.checkout()
-        # cloned_repo.git.pull()
-        # cloned_repo.git.merge(current, "--no-ff")
-        # cloned_repo.git.push()
-
-        # # clean up release dir
-        # shutil.rmtree(self.release_dir)
-        # logger.debug(
-        #     "Cleaned up release directory {path}".format(path=self.release_dir)
-        # )
-
-        # # success
-        # logger.info("Release successful for {hda}.".format(hda=self.hda_name))
-
-        # return self.release_hda_path()
 
     def package_py_path(self):
         """
