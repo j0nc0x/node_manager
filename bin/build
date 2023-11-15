@@ -20,7 +20,7 @@ if os.path.exists(build_path):
     print("Removing old build: {build_path}".format(build_path=build_path))
     shutil.rmtree(build_path)
 
-for name in [name for name in os.listdir(source_path) if name not in ["build", "package.py"]]:
+for name in [name for name in os.listdir(source_path) if name not in ignore_list]:
     path = os.path.join(source_path, name)
     print("Building {path}".format(path=path))
     if os.path.isdir(path):

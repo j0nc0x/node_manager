@@ -13,6 +13,6 @@ requires = [
 ]
 
 def commands():
-    env.NODE_MANAGER_REPOS.prepend("{root}/dcc/houdini/hdas")
+    env.NODE_MANAGER_REPOS.prepend("{root}/dcc/houdini/hda")
 
-build_command = "$REZ_NODE_MANAGER_ROOT/bin/build {install}"
+build_command = "$REZ_NODE_MANAGER_ROOT/bin/build_hda {install}"
