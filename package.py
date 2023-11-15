@@ -14,7 +14,7 @@ requires = [
     "packaging",
 ]
 
-build_command = "python {root}/bin/build {install}"
+build_command = "{root}/bin/build {install}"
 
 
 def commands():
