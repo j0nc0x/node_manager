@@ -42,6 +42,19 @@ if os.path.isdir(hdas_source_path):
 else:
     raise RuntimeError("No HDA directory found: {hdas_path}".format(hdas_path=hdas_source_path))
 
+hdas_config_path = os.path.join(source_path, "config")
+hdas_config_build_path = os.path.join(build_path, "config")
+
+if not os.path.isdir(hdas_config_build_path):
+    os.makedirs(hdas_config_build_path)
+    print("Created build directory: {path}".format(path=hdas_config_build_path))
+
+if os.path.isdir(hdas_config_path):
+    for filename in os.listdir(hdas_config_path):
+        path = os.path.join(hdas_config_path, filename)
+        print("Processing {path}".format(path=path))
+        shutil.copyfile(path, os.path.join(hdas_config_build_path, filename))
+
 if install == "1":
     if os.path.exists(install_path):
         print("Removing old install: {install_path}".format(install_path=install_path))
