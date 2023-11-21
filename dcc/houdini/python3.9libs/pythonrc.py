@@ -18,10 +18,9 @@ logging.basicConfig(
 
 
 if utils.using_rez():
-    os.environ["NODE_MANAGER_REPOS"] = "git@gitea.ad.dupevfx.com:joco/houdini_hdas.git"
     manager.initialise_node_manager(
         background=hou.isUIAvailable(),
-        load_plugin="GitLoad",
+        load_plugin="RezLoad",
         release_plugin="RezRelease",
     )
 else:
