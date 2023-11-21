@@ -10,43 +10,43 @@ from node_manager import menu
 return menu.display_node_manager(current_node)
         </expression>
         </context>
-        <insertAfter>opmenu.synchronize</insertAfter>
+        <insertAfter>opmenu.vhda_options</insertAfter>
         <scriptItem id="edit_hda">
             <expression>
-current_node = kwargs.get("node", None)      
+current_node = kwargs.get("node", None)
 from node_manager import menu
 return menu.display_edit(current_node)
             </expression>    
             <label>Edit Defintion</label>
             <scriptCode>
-from node_manager import menu
 current_node = kwargs.get("node", None)
+from node_manager import menu
 menu.run_menu_callback("edit", **kwargs)
             </scriptCode>
         </scriptItem>
         <scriptItem id="discard_hda">
             <expression>
-current_node = kwargs.get("node", None)      
+current_node = kwargs.get("node", None)
 from node_manager import menu
 return menu.display_discard(current_node)
             </expression>    
             <label>Discard Definition</label>
             <scriptCode>
-from node_manager import menu
 current_node = kwargs.get("node", None)
+from node_manager import menu
 menu.run_menu_callback("discard", **kwargs)
             </scriptCode>
         </scriptItem>
         <scriptItem id="publish_hda">
             <expression>
-current_node = kwargs.get("node", None)      
+current_node = kwargs.get("node", None)
 from node_manager import menu
 return menu.display_publish(current_node)
             </expression>    
             <label>Publish Definition</label>
             <scriptCode>
-from node_manager import menu
 current_node = kwargs.get("node", None)
+from node_manager import menu
 menu.run_menu_callback("prepare_publish", **kwargs)
             </scriptCode>
         </scriptItem>
