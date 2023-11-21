@@ -585,10 +585,10 @@ class NodeManager(object):
             # # Remove released definition
             # repo.remove_definition(definition)
 
-            # # Success
-            # hou.ui.displayMessage(
-            #     "HDA release successful!", title="HDA Manager: Publish HDA"
-            # )
+            # Success
+            dialog.display_message(
+                "HDA release successful!", title="HDA Manager: Publish HDA"
+            )
 
 
 

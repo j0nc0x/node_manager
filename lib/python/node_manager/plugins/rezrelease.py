@@ -11,6 +11,9 @@ from tempfile import mkstemp
 
 from packaging.version import parse
 
+from git import Repo
+from git.exc import NoSuchPathError, InvalidGitRepositoryError
+
 import hou
 
 from node_manager import utils
@@ -31,6 +34,8 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
 
     name = plugin_name
     plugin_type = plugin_class
+    packages_root = "/mnt/apps/rez_packages"
+    package = "houdini_hdas"
 
     def __init__(self):
         """Initialise the RezRelease plugin."""
@@ -39,6 +44,9 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         self._release_dir = None
         self._node_type_name = None
         self.node_name = None
+
+        self.repo.context["git_repo_root"] = self.git_repo_root()
+        self.repo.context["git_repo_clone"] = self.git_repo_clone_dir()
 
         logger.debug("Initialise Release.")
 
@@ -136,6 +144,34 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
                     return versions[0]
 
         raise RuntimeError("Couldn't find version in package.py")
+
+    def release_package_path(self):
+        """
+        Get the path to the package to be released.
+
+        Returns:
+            (str): The rez package path.
+
+        Raises:
+            RuntimeError: The release version isn't set.
+        """
+        if not self.release_version:
+            raise RuntimeError("The release version hasn't yet been set.")
+
+        return os.path.join(
+            self.packages_root, self.package, self.release_version
+        )
+
+    def release_hda_path(self):
+        """
+        Get the path the HDA will be released to.
+
+        Returns:
+            (str): The path on disk where the HDA will be released.
+        """
+        return os.path.join(
+            self.release_package_path(), "dcc", "houdini", "hda", self.node_name
+        )
 
     def process_release(self, definition, branch, package_name, comment=None):
         """
@@ -260,6 +296,13 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
                     process.returncode, _stdout, _stderr
                 )
             )
+        release_path = self.release_hda_path()
+        if not os.path.isfile(release_path):
+            raise RuntimeError(
+                "Error when verifying the release, expected to find released hda at: "
+                "{path}".format(path=release_path)
+            )
+
         logger.debug("rez-release complete")
 
         # merge to master
@@ -285,6 +328,48 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
 
         return True
 
+    def git_repo_root(self):
+        """Get the git repo root directory.
+
+        Returns:
+            str: The path to the HDA repo on disk."""
+        return os.path.join(self.manager.context.get("manager_base_dir"), self.repo.context.get("name"))
+
+    def git_repo_clone_dir(self):
+        """Get the git repo clone directory.
+
+        Returns:
+            str: The path to the HDA repo on disk."""
+        return os.path.join(self.repo.context.get("git_repo_root"), self.repo.context.get("name"))
+
+    def clone_repo(self):
+        """Clone the Node Manager repository.
+
+        Returns:
+            git.Repo: The cloned repository.
+        """
+        cloned_repo = None
+        repo_root = self.repo.context.get("git_repo_clone")
+        try:
+            cloned_repo = Repo(repo_root)
+            cloned_repo.git.pull()
+            logger.debug("Loaded repo from {path}".format(path=repo_root))
+        except (NoSuchPathError, InvalidGitRepositoryError) as error:
+            logger.debug("Couldn't load repo from {path}".format(path=repo_root))
+
+        if not cloned_repo:
+            logger.debug(
+                "Couldn't load repo from {path}, clone instead.".format(
+                    path=repo_root,
+                )
+            )
+            if not os.path.isdir(repo_root):
+                os.makedirs(repo_root)
+                logger.debug("Created repo directory: {path}".format(path=repo_root))
+            cloned_repo = Repo.clone_from(self.repo.context.get("git_repo_path"), repo_root, depth=1)
+
+        return cloned_repo
+
     def release(self, current_node, release_comment=None):
         """
         Publish a definition being edited by the HDA manager.
@@ -300,6 +385,9 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
             bool: Was the release successful.
         """
         logger.info("Beginning HDA release.")
+
+        if not self.repo.context.get("git_repo"):
+            self.repo.context["git_repo"] = self.clone_repo()
 
         # Get the release definitionq
         definition = self.get_release_definition(current_node)
@@ -346,7 +434,12 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         self._node_type_name = node_type_name
         self.node_name = hda_name
 
-        return self.process_release(definition, branch, package, comment=release_comment)
+        self.process_release(definition, branch, package, comment=release_comment)
+
+        # Update the repo path so that we can load the new HDA
+        self.repo.context["repo_path"] = self.release_package_path()
+
+        return True
 
     def package_py_path(self):
         """
