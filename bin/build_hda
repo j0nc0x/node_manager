@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+"""Simple Rez HDA Build Script."""
+
 import os
 import shutil
 import subprocess
