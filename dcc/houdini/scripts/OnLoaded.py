@@ -7,7 +7,7 @@ import logging
 from node_manager.utils import callbacks
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("node_manager.dcc.houdini.scripts.OnLoaded")
 
 
 current_node = kwargs.get("node", None)
