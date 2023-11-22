@@ -241,8 +241,7 @@ class NodeManager(object):
                 for.
 
         Returns:
-            node_type_version(rbl_pipe_hdamanager.nodetypeversion.NodeTypeVersion): The
-                nodetype looked-up.
+            node_manager.nodetypeversion.NodeTypeVersion: The nodetypeversion
         """
         nodetype = self.nodetype_from_definition(definition)
         if nodetype:
@@ -261,8 +260,7 @@ class NodeManager(object):
                 looking up the HDA Manager nodetype.
 
         Returns:
-            node_type(rbl_pipe_hdamanager.nodetype.NodeType): The nodetype
-                looked-up.
+            node_manager.nodetype.NodeType: The nodetype for the given definition.
         """
         logger.debug(
             "Looking up Node Manager NodeType for {definition}".format(
@@ -294,8 +292,7 @@ class NodeManager(object):
             definition(hou.HDADefinition): The definition to lookup the repo from.
 
         Returns:
-            hda_repo(rbl_pipe_hdamanager.repo.HDARepo): The HDA repo instance for the
-                given namespace.
+            node_manager.repo.NodeRepo: The HDA repo instance for the given definition.
         """
         logger.debug(
             "Looking up Node Manager Repo from definition: {definition}".format(
@@ -336,8 +333,7 @@ class NodeManager(object):
             path(str): The path to lookup the repo from.
 
         Returns:
-            hda_repo(rbl_pipe_hdamanager.repo.HDARepo): The HDA repo instance for the
-                given namespace.
+            node_manager.repo.NodeRepo: The HDA repo instance for the given path.
         """
         logger.debug("Checking if {path} is in a repo.".format(path=path))
         for repo_name in self.node_repos:
