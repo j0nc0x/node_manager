@@ -5,7 +5,7 @@
 import logging
 
 from node_manager import nodetypeversion
-from node_manager import utils
+from node_manager.utils import nodetypeutils
 from node_manager.utils import definition as definitionutils
 
 logger = logging.getLogger(__name__)
@@ -85,7 +85,7 @@ class NodeType(object):
         """
         path = definition.libraryFilePath()
         current_name = definition.nodeTypeName()
-        version = utils.node_type_version(current_name)
+        version = nodetypeutils.node_type_version(current_name)
         if not version:
             version = "no version"
 

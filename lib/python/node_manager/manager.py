@@ -23,6 +23,7 @@ from node_manager.utils import plugin
 from node_manager.utils import callbacks
 from node_manager.utils import definition as definitionutils
 from node_manager.utils import nodes
+from node_manager.utils import nodetypeutils
 
 logger = logging.getLogger(__name__)
 
@@ -246,7 +247,7 @@ class NodeManager(object):
         nodetype = self.nodetype_from_definition(definition)
         if nodetype:
             current_name = definition.nodeTypeName()
-            version = utils.node_type_version(current_name)
+            version = nodetypeutils.node_type_version(current_name)
             return nodetype.versions.get(version)
 
         return None
@@ -268,9 +269,6 @@ class NodeManager(object):
                 definition=definition.nodeTypeName(),
             )
         )
-        # namespace = utils.node_type_namespace(
-        #     definition.nodeTypeName(),
-        # )
         repo = self.repo_from_definition(definition)
         logger.debug(
             "Repo {repo} found from definition {definition}".format(
@@ -394,7 +392,7 @@ class NodeManager(object):
 
             # get current version
             nodeTypeName = definition.nodeTypeName()
-            current_version = parse(utils.node_type_version(nodeTypeName))
+            current_version = parse(nodetypeutils.node_type_version(nodeTypeName))
 
             # compare versions
             if current_version < latest_version:
@@ -425,7 +423,7 @@ class NodeManager(object):
         current_name = definition.nodeTypeName()
         category = definition.nodeTypeCategory().name()
         index = utils.node_type_index(current_name, category)
-        current_version = utils.node_type_version(current_name)
+        current_version = nodetypeutils.node_type_version(current_name)
         nodetype = release_repo.node_types.get(index)
         if nodetype:
             version = nodetype.versions.get(current_version)

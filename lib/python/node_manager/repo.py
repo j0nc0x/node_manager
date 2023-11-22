@@ -11,6 +11,7 @@ import hou
 
 from node_manager import nodetype
 from node_manager import utils
+from node_manager.utils import nodetypeutils
 from node_manager.utils import plugin
 
 
@@ -160,9 +161,9 @@ class NodeRepo(object):
         current_name = definition.nodeTypeName()
         category = definition.nodeTypeCategory().name()
         index = utils.node_type_index(current_name, category)
-        name = utils.node_type_name(current_name)
-        namespace = utils.node_type_namespace(current_name)
-        version = utils.node_type_version(current_name)
+        name = nodetypeutils.node_type_name(current_name)
+        namespace = nodetypeutils.node_type_namespace(current_name)
+        version = nodetypeutils.node_type_version(current_name)
 
         # Add the node_type to our dictionary if it doesn't already exist
         if index not in self.node_types:

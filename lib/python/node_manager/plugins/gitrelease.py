@@ -10,11 +10,10 @@ import shutil
 import subprocess
 import time
 
-from packaging.version import parse
-
 import hou
 
 from node_manager import utils
+from node_manager.utils import nodetypeutils
 from node_manager.plugins import release
 
 plugin_name = "GitRelease"
@@ -230,7 +229,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         node_file_path = definition.libraryFilePath()
         if not release_comment:
             release_comment = "Updated {name}".format(
-                name=utils.node_type_name(node_file_path)
+                name=nodetypeutils.node_type_name(node_file_path)
             )
 
         # Define the release directory
