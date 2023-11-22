@@ -565,7 +565,7 @@ class NodeManager(object):
 
         if success:
             self.load_all(force=True)
-            callbacks.node_changed(nodeutils.node_at_path(path))
+            callbackutils.node_changed(nodeutils.node_at_path(path))
 
             # # Add newly released .hda
             # repo = self.manager.repo_from_hda_file(released_path)
