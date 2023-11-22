@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Default Release Plugin."""
+"""Default Release Plugin that will release a node definition to a directory on disk."""
 
 import logging
 import os

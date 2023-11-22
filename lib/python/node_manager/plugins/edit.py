@@ -108,7 +108,6 @@ class NodeManagerPlugin(object):
             edit_directory = self.manager.context.get("manager_edit_dir")
 
         # Copy and install definition modifying the nodetypename
-        # edit_repo = self.manager.repo_from_definition(definition)
         updated_node_type_name = definitionutils.create_definition_copy(
             definition,
             edit_directory,

@@ -58,8 +58,6 @@ class NodeType(object):
         )
         install = True
         path = definition.libraryFilePath()
-        # if force or self.num_versions() < self.manager.depth:
-        #     install = True
 
         node_type_version = nodetypeversion.NodeTypeVersion(
             path, definition=definition, install=install

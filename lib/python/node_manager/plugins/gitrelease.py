@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Git Release Plugin."""
+"""Git Release Plugin that will release a node definition in expaned form to Git source control."""
 
 import json
 import logging
@@ -60,7 +60,6 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         Returns:
             (str): The release directory.
         """
-        logger.debug(self.repo.context)
         return os.path.join(self.repo.context.get("git_repo_root"), "release")
 
     def _git_repo(self):

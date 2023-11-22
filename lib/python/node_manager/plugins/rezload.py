@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Rez Load Plugin."""
+"""Rez Load Plugin that will load a set of node definitions from a rez package directory."""
 
 
 import json
@@ -28,8 +28,6 @@ class NodeManagerPlugin(object):
             ".otl",
             ".otlnc",
         ]
-        logger.debug("!!!!!!!!!!!!!!!!!!!!!!!!!")
-        logger.debug(self.repo.context.get("repo_path"))
         if self.repo  and self.repo.context:
             self.repo.context["repo_load_path"] = os.path.join(self.repo.context.get("repo_path"), "dcc", "houdini", "hda")
 

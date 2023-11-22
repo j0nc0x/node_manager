@@ -1,6 +1,6 @@
 #!/usr/bin/env pythonß
 
-"""Git Load plugin."""
+"""Git Load plugin that will load node defintions stored in a Git repository."""
 
 import logging
 import os
@@ -39,14 +39,16 @@ class NodeManagerPlugin(load.NodeManagerPlugin):
         """Get the git repo root directory.
 
         Returns:
-            str: The path to the HDA repo on disk."""
+            str: The path to the HDA repo on disk.
+        """
         return os.path.join(self.manager.context.get("manager_base_dir"), self.repo.context.get("name"))
 
     def git_repo_clone_dir(self):
         """Get the git repo clone directory.
 
         Returns:
-            str: The path to the HDA repo on disk."""
+            str: The path to the HDA repo on disk.
+        """
         return os.path.join(self.repo.context.get("git_repo_root"), self.repo.context.get("name"))
 
     def clone_repo(self):
@@ -100,7 +102,6 @@ class NodeManagerPlugin(load.NodeManagerPlugin):
                 path,
                 hda_path,
             ]
-            logger.debug(hotl_cmd)
             result = subprocess.call(hotl_cmd)
             if result != 0:
                 raise RuntimeError(

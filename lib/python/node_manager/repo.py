@@ -105,38 +105,12 @@ class NodeRepo(object):
         """
         return os.path.join(self.context.get("git_repo_clone"), "config", "config.json")
 
-    # def repo_root(self):
-    #     """Get the root of the HDA repo on the filesystem.
-
-    #     Returns:
-    #         (str): The path to the HDA repo on disk.
-    #     """
-    #     # if self.editable:
-    #     #     return self.repo_path
-
-    #     return os.path.dirname(self.library_path)
-
     def get_name(self):
         """Get the repo name.
 
         Returns:
             (str): The name of the Node repo.
         """
-        # repo_conf_path = self.config_path()
-        # repo_conf_data = None
-        # with open(repo_conf_path, "r") as repo_conf:
-        #     repo_conf_data = json.load(repo_conf)
-
-        # if not repo_conf_data:
-        #     logger.warning(
-        #         "Repo conf failed to load from {path}".format(
-        #             path=repo_conf_path,
-        #         )
-        #     )
-        #     return
-
-        # name = repo_conf_data.get("name")
-    
         name = self.context.get("repo_path").split("/")[-1]
         logger.debug(
             "Calculating repo name from {path} as {name}".format(

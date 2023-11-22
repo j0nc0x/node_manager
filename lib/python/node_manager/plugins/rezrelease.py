@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+"""Rez release Plugin that will release a node definition to Git source control, releasing as a rez package."""
+
 import json
 import logging
 import os
@@ -123,6 +125,15 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         return os.path.join(self._git_dir(), "config", "config.json")
 
     def version_from_package(self):
+        """Get the current version from the rez package.
+
+        Returns:
+            str: The current package version as defined in the package.py.
+
+        Raises:
+            RuntimeError: Invalid number of package versions found in package.py.
+            RuntimeError: No package version found.
+        """
         if os.path.isfile(self.package_py_path()):
             old_package_py_path = self.package_py_path()
         else:

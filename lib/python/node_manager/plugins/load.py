@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Default Load Plugin."""
+"""Default Load Plugin that will load node definitions from a directory on disk."""
 
 import logging
 import os
