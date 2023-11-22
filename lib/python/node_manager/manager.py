@@ -19,11 +19,7 @@ else:
     do_work_in_background_thread = None
 
 from node_manager import utils
-from node_manager.utils import plugin
-from node_manager.utils import callbacks
-from node_manager.utils import definitionutils
-from node_manager.utils import nodetypeutils
-from node_manager.utils import nodeutils
+from node_manager.utils import callbackutils, definitionutils, nodetypeutils, nodeutils, pluginutils
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +89,7 @@ class NodeManager(object):
 
     def load(self):
         """Load the HDA Manager."""
-        self._plugins = plugin.import_plugins()
+        self._plugins = pluginutils.import_plugins()
 
         self.context = {}
         self.context["manager_temp_dir"] = mkdtemp(prefix="node-manager-")
@@ -113,7 +109,7 @@ class NodeManager(object):
         Returns:
             list(NodeRepo): A list of NodeRepo objects.
         """
-        discover_plugin = plugin.get_discover_plugin(self.discover_plugin, )
+        discover_plugin = pluginutils.get_discover_plugin(self.discover_plugin, )
         if not discover_plugin:
             raise RuntimeError("Couldn't find Node Manager Discover Plugin.")
 
@@ -487,14 +483,14 @@ class NodeManager(object):
         if major and minor:
             raise RuntimeError("Can't edit definition as both major and minor.")
 
-        edit_plugin = plugin.get_edit_plugin(self.edit_plugin)
+        edit_plugin = pluginutils.get_edit_plugin(self.edit_plugin)
         if not edit_plugin:
             raise RuntimeError("Couldn't find Node Manager Edit Plugin.")
 
         edit_plugin.edit_definition(current_node, major=major, minor=minor)
 
         # Force node callback to run
-        callbacks.node_changed(nodeutils.node_at_path(path))
+        callbackutils.node_changed(nodeutils.node_at_path(path))
 
     def discard_definition(self, current_node):
         """
@@ -514,7 +510,7 @@ class NodeManager(object):
             )
 
             # Force node callback to run
-            callbacks.node_changed(current_node)
+            callbackutils.node_changed(current_node)
         else:
             raise RuntimeError("Can't discard definition from NodeManager HDA repo.")
 
@@ -561,7 +557,7 @@ class NodeManager(object):
         if result and result[1]:
             release_comment = result[1]
 
-        release_plugin = plugin.get_release_plugin(self.release_plugin)
+        release_plugin = pluginutils.get_release_plugin(self.release_plugin)
         if not release_plugin:
             raise RuntimeError("Couldn't find Node Manager Release Plugin.")
 

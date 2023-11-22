@@ -4,7 +4,7 @@
 
 import logging
 
-from node_manager.utils import callbacks
+from node_manager.utils import callbackutils
 
 
 logger = logging.getLogger("node_manager.dcc.houdini.scripts.OnCreated")
@@ -13,4 +13,4 @@ logger = logging.getLogger("node_manager.dcc.houdini.scripts.OnCreated")
 current_node = kwargs.get("node", None)
 logger.debug("OnCreated: {node}".format(node=current_node.name()))
 
-callbacks.node_changed(current_node)
+callbackutils.node_changed(current_node)

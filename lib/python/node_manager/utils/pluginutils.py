@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+"""Plugin Utilities."""
+
 import importlib
 import logging
 import os

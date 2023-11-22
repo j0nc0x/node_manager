@@ -2,7 +2,6 @@
 
 """Handle Node Repos."""
 
-import json
 import logging
 import os
 import time
@@ -12,7 +11,7 @@ import hou
 from node_manager import nodetype
 from node_manager import utils
 from node_manager.utils import nodetypeutils
-from node_manager.utils import plugin
+from node_manager.utils import pluginutils
 
 
 logger = logging.getLogger(__name__)
@@ -83,7 +82,7 @@ class NodeRepo(object):
             (obj): The load plugin for this repo.
         """
         logger.debug("Using load plugin: {plugin}".format(plugin=self.manager.load_plugin))
-        load_plugin = plugin.get_load_plugin(
+        load_plugin = pluginutils.get_load_plugin(
             self.manager.load_plugin,
         )
         if not load_plugin:
