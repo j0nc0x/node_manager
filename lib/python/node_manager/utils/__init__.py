@@ -26,15 +26,6 @@ def get_manager():
     return manager_instance
 
 
-def using_rez():
-    """Check if the current session is using Rez.
-
-    Returns:
-        (bool): Is the current session using Rez?
-    """
-    return os.environ.get("REZ_NODE_MANAGER_BASE") is not None
-
-
 def display_message(
     text,
     buttons=("OK",),
