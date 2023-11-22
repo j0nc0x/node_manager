@@ -11,7 +11,7 @@ import hou
 
 from node_manager import utils
 from node_manager.utils import definition as definition_utils
-from node_manager.dependencies import nodes
+from node_manager.utils import nodes
 
 logger = logging.getLogger(__name__)
 

@@ -7,8 +7,7 @@ import logging
 import hou
 
 from node_manager import utils
-from node_manager.utils import node
-from node_manager.dependencies import nodes
+from node_manager.utils import nodes
 
 
 logger = logging.getLogger(__name__)
@@ -51,4 +50,4 @@ def node_changed(current_node):
     # We created or loaded a NodeManager node
     logger.debug("NodeCreatedOrLoaded: {node}".format(node=current_node.name()))
     manager = utils.get_manager()
-    node.node_comment(current_node, published=manager.is_node_manager_node(current_node))
+    nodes.node_comment(current_node, published=manager.is_node_manager_node(current_node))

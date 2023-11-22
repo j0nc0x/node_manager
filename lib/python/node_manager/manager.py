@@ -22,7 +22,7 @@ from node_manager import utils
 from node_manager.utils import plugin
 from node_manager.utils import callbacks
 from node_manager.utils import definition as definitionutils
-from node_manager.dependencies import nodes
+from node_manager.utils import nodes
 
 logger = logging.getLogger(__name__)
 

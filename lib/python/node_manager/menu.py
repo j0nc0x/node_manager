@@ -8,7 +8,7 @@ import sys
 import hdefereval
 
 from node_manager import manager
-from node_manager.dependencies import nodes
+from node_manager.utils import nodes
 
 logger = logging.getLogger(__name__)
 
