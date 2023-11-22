@@ -8,7 +8,7 @@ import sys
 import hdefereval
 
 from node_manager import manager
-from node_manager.utils import nodes
+from node_manager.utils import nodeutils
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ def get_node_manager():
 
 def display_node_manager(current_node):
     # We can reject nodes straight away if they are not digital assets.
-    if nodes.is_digital_asset(current_node.path()):
+    if nodeutils.is_digital_asset(current_node.path()):
         return True
     else:
         return False

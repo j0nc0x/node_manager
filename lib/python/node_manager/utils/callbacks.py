@@ -7,7 +7,7 @@ import logging
 import hou
 
 from node_manager import utils
-from node_manager.utils import nodes
+from node_manager.utils import nodeutils
 
 
 logger = logging.getLogger(__name__)
@@ -39,7 +39,7 @@ def node_changed(current_node):
         logger.debug("UI available, cosmetic callbacks enabled.")
 
     # Is the node a digital asset?
-    if not nodes.is_digital_asset(current_node.path()):
+    if not nodeutils.is_digital_asset(current_node.path()):
         logger.debug(
             "Skipping node that isn't digital asset: {node}".format(
                 node=current_node.name(),
@@ -50,4 +50,4 @@ def node_changed(current_node):
     # We created or loaded a NodeManager node
     logger.debug("NodeCreatedOrLoaded: {node}".format(node=current_node.name()))
     manager = utils.get_manager()
-    nodes.node_comment(current_node, published=manager.is_node_manager_node(current_node))
+    nodeutils.node_comment(current_node, published=manager.is_node_manager_node(current_node))

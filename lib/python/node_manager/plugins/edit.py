@@ -11,7 +11,7 @@ import hou
 
 from node_manager import utils
 from node_manager.utils import definitionutils
-from node_manager.utils import nodes
+from node_manager.utils import nodeutils
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class NodeManagerPlugin(object):
                 minor=minor,
             )
         )
-        definition = nodes.definition_from_node(current_node.path())
+        definition = nodeutils.definition_from_node(current_node.path())
 
         dialog_message = (
             "You are about to edit a hda that is not the lastest version, do "

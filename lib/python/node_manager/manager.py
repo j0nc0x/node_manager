@@ -22,8 +22,8 @@ from node_manager import utils
 from node_manager.utils import plugin
 from node_manager.utils import callbacks
 from node_manager.utils import definitionutils
-from node_manager.utils import nodes
 from node_manager.utils import nodetypeutils
+from node_manager.utils import nodeutils
 
 logger = logging.getLogger(__name__)
 
@@ -205,10 +205,10 @@ class NodeManager(object):
             (bool): Is the node a Node Manager node?
         """
         # We can reject nodes straight away if they are not digital assets.
-        if not nodes.is_digital_asset(current_node.path()):
+        if not nodeutils.is_digital_asset(current_node.path()):
             return False
 
-        definition = nodes.definition_from_node(current_node.path())
+        definition = nodeutils.definition_from_node(current_node.path())
         if not definition:
             raise RuntimeError("Couldn't find definition for {node}".format(node=current_node))
         
@@ -371,7 +371,7 @@ class NodeManager(object):
         Returns:
             (bool): Is the definition at the latest version.
         """
-        definition = nodes.definition_from_node(current_node.path())
+        definition = nodeutils.definition_from_node(current_node.path())
 
         # get all versions
         nodetype = self.nodetype_from_definition(definition)
@@ -494,7 +494,7 @@ class NodeManager(object):
         edit_plugin.edit_definition(current_node, major=major, minor=minor)
 
         # Force node callback to run
-        callbacks.node_changed(nodes.node_at_path(path))
+        callbacks.node_changed(nodeutils.node_at_path(path))
 
     def discard_definition(self, current_node):
         """
@@ -508,7 +508,7 @@ class NodeManager(object):
         """    
         if not self.is_node_manager_node(current_node):
             # Uninstall the definition
-            definition = nodes.definition_from_node(current_node.path())
+            definition = nodeutils.definition_from_node(current_node.path())
             definitionutils.uninstall_definition(
                 definition, backup_dir=self.context.get("backup_dir")
             )
@@ -569,7 +569,7 @@ class NodeManager(object):
 
         if success:
             self.load_all(force=True)
-            callbacks.node_changed(nodes.node_at_path(path))
+            callbacks.node_changed(nodeutils.node_at_path(path))
 
             # # Add newly released .hda
             # repo = self.manager.repo_from_hda_file(released_path)

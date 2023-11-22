@@ -9,7 +9,7 @@ import hou
 
 from node_manager import utils
 from node_manager.utils import definitionutils
-from node_manager.utils import nodes
+from node_manager.utils import nodeutils
 from node_manager.utils import nodetypeutils
 
 plugin_name = "DefaultRelease"
@@ -42,7 +42,7 @@ class NodeManagerPlugin(object):
         Returns:
             hou.HDADefinition: The release definition.
         """
-        definition = nodes.definition_from_node(current_node.path())
+        definition = nodeutils.definition_from_node(current_node.path())
         definition.updateFromNode(current_node)
         return definition
 
