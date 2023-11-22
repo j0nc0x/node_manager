@@ -521,6 +521,27 @@ class NodeManager(object):
         Args:
             current_node(hou.Node): The node we are attempting to publish from.
         """
+        # # Make sure we don't already have plugins loaded from elsewhere
+        # pyblish.api.deregister_all_paths()
+        # pyblish.api.deregister_all_plugins()
+
+        # # Make the node to be published available for collection
+        # HDAManager.publish_node = current_node
+
+        # # Register the application host
+        # pyblish.api.register_host("houdini")
+
+        # # Register the plugins
+        # repo_root = os.path.abspath(__file__).rsplit("/lib/python", 1)[0]
+        # plugins = "lib/python/rbl_pipe_hdamanager/pyblish_plugins"
+        # pyblish.api.register_plugin_path(os.path.join(repo_root, plugins))
+
+        # # Launch the UI
+        # validator = houdinipyblishui.HoudiniPyblishUI(
+        #     title="HDA Manager Validator",
+        #     size=(800, 500),
+        # )
+        # HDAManager.validator_ui = validator.launch_ui()
         path = current_node.path()
 
         result = hou.ui.readInput(
