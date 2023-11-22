@@ -10,7 +10,7 @@ from packaging.version import parse
 import hou
 
 from node_manager import utils
-from node_manager.utils import definition as definition_utils
+from node_manager.utils import definitionutils
 from node_manager.utils import nodes
 
 logger = logging.getLogger(__name__)
@@ -109,7 +109,7 @@ class NodeManagerPlugin(object):
 
         # Copy and install definition modifying the nodetypename
         # edit_repo = self.manager.repo_from_definition(definition)
-        updated_node_type_name = definition_utils.create_definition_copy(
+        updated_node_type_name = definitionutils.create_definition_copy(
             definition,
             edit_directory,
             version=new_version,

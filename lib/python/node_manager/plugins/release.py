@@ -8,7 +8,7 @@ import os
 import hou
 
 from node_manager import utils
-from node_manager.utils import definition as definition_utils
+from node_manager.utils import definitionutils
 from node_manager.utils import nodes
 from node_manager.utils import nodetypeutils
 
@@ -95,7 +95,7 @@ class NodeManagerPlugin(object):
         self.repo.process_node_definition_file(release_path, force=True)
 
         # Uninstall the old definition
-        definition_utils.uninstall_definition(definition)
+        definitionutils.uninstall_definition(definition)
 
         # Success
         hou.ui.displayMessage(

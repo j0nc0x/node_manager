@@ -6,7 +6,7 @@ import logging
 
 from node_manager import nodetypeversion
 from node_manager.utils import nodetypeutils
-from node_manager.utils import definition as definitionutils
+from node_manager.utils import definitionutils
 
 logger = logging.getLogger(__name__)
 
