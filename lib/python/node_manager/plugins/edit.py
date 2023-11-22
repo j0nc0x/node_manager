@@ -11,7 +11,6 @@ import hou
 
 from node_manager import utils
 from node_manager.utils import definition as definition_utils
-from node_manager.dependencies import dialog
 from node_manager.dependencies import nodes
 
 logger = logging.getLogger(__name__)
@@ -53,7 +52,7 @@ class NodeManagerPlugin(object):
             "you want to continue?"
         )
 
-        if not self.manager.is_latest_version(current_node) and dialog.display_message(
+        if not self.manager.is_latest_version(current_node) and utils.display_message(
             dialog_message, ("Ok", "Cancel"), title="Warning"
         ):
             logger.info("Making definition editable aborted by user.")
