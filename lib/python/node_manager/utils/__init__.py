@@ -338,7 +338,6 @@ def expanded_hda_name(definition):
     This function is used by the HDA manager to set the name of the directory a
     hou.HDADefinition is expanded to
     hou.nodeTypeCategory.name()_hou.nodeTypeName(namespace)_hou.nodeTypeName(name).hda
-    ie. Lop_rebellion.pipeline_sgreference.hda.
 
     Args:
         definition(hou.HDADefinition): The HDA definition to get the expanded name for.
