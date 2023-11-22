@@ -108,3 +108,28 @@ def node_type_version(node_type_name, new_version=None):
         return name_sections[-1]
 
     return None
+
+
+def node_type_name_from_components(definition, namespace=None, name=None, version=None):
+    """Generate a node type name based on its components.
+
+    Generate a new nodeTypeName for the given hou.HDADefinition updating the namespace,
+    name and version if provided.
+
+    Args:
+        definition(hou.HDADefinition): The HDA definition to generate the node type name
+            for.
+        namespace(:obj:`str`,optional): The new namespace to use for the definition.
+        name(:obj:`str`,optional): The new name to use for the definition.
+        version(:obj:`str`,optional): The new version to use for the definition.
+
+    Returns:
+        (str): The updated node type name.
+    """
+    current_name = definition.nodeTypeName()
+    new_namespace = node_type_namespace(current_name, new_namespace=namespace)
+    new_name = node_type_name(current_name, new_name=name)
+    new_version = node_type_version(current_name, new_version=version)
+    return "{namespace}::{name}::{version}".format(
+        namespace=new_namespace, name=new_name, version=new_version
+    )

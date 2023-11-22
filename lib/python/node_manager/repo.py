@@ -277,7 +277,7 @@ class NodeRepo(object):
 
         # See if we are updating the NodeTypeName
         if namespace or name or version:
-            new_name = utils.node_type_name_from_components(
+            new_name = nodetypeutils.node_type_name_from_components(
                 definition, namespace=namespace, name=name, version=version
             )
             logger.debug("Using new name: {new_name}".format(new_name=new_name))

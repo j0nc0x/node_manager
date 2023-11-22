@@ -9,6 +9,7 @@ import shutil
 import hou
 
 from node_manager import utils
+from node_manager.utils import nodetypeutils
 
 
 logger = logging.getLogger(__name__)
@@ -112,7 +113,7 @@ def create_definition_copy(definition, edit_dir, namespace=None, name=None, vers
 
     # See if we are updating the NodeTypeName
     if namespace or name or version:
-        new_name = utils.node_type_name_from_components(
+        new_name = nodetypeutils.node_type_name_from_components(
             definition, namespace=namespace, name=name, version=version
         )
         logger.debug("Using new name: {new_name}".format(new_name=new_name))
