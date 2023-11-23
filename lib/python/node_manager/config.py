@@ -4,7 +4,5 @@
 
 
 node_manager_config = {
-    "background": True,
-    "load_plugin": "RezLoad",
-    "release_plugin": "RezRelease",
+    "background": False,
 }
