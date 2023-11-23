@@ -215,7 +215,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
 
     def release(self, current_node, release_comment=None):
         """
-        Publish a definition being edited by the HDA manager.
+        Publish a definition being edited by the Node manager.
 
         Args:
             current_node(hou.Node): The node to publish the definition for.

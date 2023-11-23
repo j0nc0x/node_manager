@@ -207,7 +207,7 @@ def editable_hda_path_from_components(definition, edit_dir, namespace=None, name
 def expanded_hda_name(definition):
     """Get the expanded HDA name.
 
-    This function is used by the HDA manager to set the name of the directory a
+    This function is used by the Node manager to set the name of the directory a
     hou.HDADefinition is expanded to
     hou.nodeTypeCategory.name()_hou.nodeTypeName(namespace)_hou.nodeTypeName(name).hda
 

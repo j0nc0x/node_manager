@@ -32,7 +32,7 @@ class NodeRepo(object):
         """Initialise the HDA repo.
 
         Args:
-            manager(HDAManager): An instance of the HDA manager currently being used.
+            manager(HDAManager): An instance of the Node manager currently being used.
             repo_path(str): The path on disk to where the HDA repository is located.
             editable(:obj:`bool`,optional): Are the HDAs in this repository editable?
         """
@@ -266,7 +266,7 @@ class NodeRepo(object):
         definition.copyToHDAFile(editable_path, new_name=new_name)
         logger.debug("Definition saved to {path}".format(path=editable_path))
 
-        # Add the newly written HDA to the HDA Manager
+        # Add the newly written HDA to the Node Manager
         self.process_node_definition_file(editable_path, force=True)
 
         return new_name

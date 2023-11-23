@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""HDA manager."""
+"""Houdini Node Manager."""
 
 import getpass
 import logging
@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 
 class NodeManager(object):
-    """Main HDA Manager Class."""
+    """Main Node Manager Class."""
 
     instance = None
     config = config.node_manager_config
@@ -66,7 +66,7 @@ class NodeManager(object):
         self.stats = {}
 
     def load(self):
-        """Load the HDA Manager."""
+        """Load the Node Manager."""
         self._plugins = pluginutils.import_plugins()
 
         self.context = {}
@@ -98,11 +98,11 @@ class NodeManager(object):
         return discover_plugin.discover()
 
     def get_base_dir(self):
-        """Get the base directory for the HDA Manager from the
+        """Get the base directory for the Node Manager from the
         NODE_MANAGER_BASE env var.
 
         Returns:
-            str: The base directory for the HDA Manager.
+            str: The base directory for the Node Manager.
         """
         base_dir = os.getenv("NODE_MANAGER_BASE")
         if not base_dir:
@@ -111,14 +111,14 @@ class NodeManager(object):
         return base_dir
 
     def get_edit_dir(self, create_on_disk=True):
-        """Get the edit directory for the HDA Manager.
+        """Get the edit directory for the Node Manager.
 
         Args:
             create_on_disk(bool): Should the directory be created on disk if
                 it doesn't exist?
 
         Returns:
-            str: The edit directory for the HDA Manager.
+            str: The edit directory for the Node Manager.
         """
         edit_dir = os.path.join(
             self.context.get("manager_base_dir"), "edit", getpass.getuser()
@@ -128,7 +128,11 @@ class NodeManager(object):
         return edit_dir
 
     def git_dir(self):
-        """ """
+        """Get the git directory for the Node Manager.
+
+        Returns:
+            str: The git directory for the Node Manager.
+        """
         return os.path.join(self.context.get("manager_temp_dir"), "git")
 
     def load_all(self, force=False):
@@ -226,7 +230,7 @@ class NodeManager(object):
 
         Args:
             definition(hou.HDADefinition): The HDA definition to use when
-                looking up the HDA Manager nodetype.
+                looking up the Node Manager nodetype.
 
         Returns:
             node_manager.nodetype.NodeType: The nodetype for the given definition.
@@ -454,7 +458,7 @@ class NodeManager(object):
 
     def discard_definition(self, current_node):
         """
-        Discard a definition being edited by the HDA manager.
+        Discard a definition being edited by the Node manager.
 
         Args:
             current_node(hou.Node): The node we are attempting to discard.
@@ -517,7 +521,7 @@ class NodeManager(object):
 
             # Success
             utils.display_message(
-                "HDA release successful!", title="HDA Manager: Publish HDA"
+                "HDA release successful!", title="Node Manager: Publish HDA"
             )
 
 

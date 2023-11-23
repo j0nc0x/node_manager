@@ -112,8 +112,4 @@ class NodeManagerPlugin(object):
         # Uninstall the old definition
         definitionutils.uninstall_definition(definition)
 
-        # Success
-        hou.ui.displayMessage(
-            "HDA release successful!", title="HDA Manager: Publish HDA"
-        )
         return True
