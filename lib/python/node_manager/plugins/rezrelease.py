@@ -35,8 +35,6 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
 
     name = plugin_name
     plugin_type = plugin_class
-    packages_root = "/mnt/apps/rez_packages"
-    package = "houdini_hdas"
 
     def __init__(self):
         """Initialise the RezRelease plugin."""
@@ -169,8 +167,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         """
         if not self.release_version:
             raise RuntimeError("The release version hasn't yet been set.")
-
-        return os.path.join(self.packages_root, self.package, self.release_version)
+        return os.path.join(self.manager.config.get("rez_packages_root"), self.manager.config.get("rez_package_name"), self.release_version)
 
     def release_hda_path(self):
         """
@@ -282,7 +279,6 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
 
         # Move the new package.py into place
         if os.path.exists(self.package_py_path()):
-            # shutil.copymode(self.package_py_path(), abs_path)
             os.remove(self.package_py_path())
         shutil.move(abs_path, self.package_py_path())
 
