@@ -543,21 +543,22 @@ class NodeManager(object):
         success = release_plugin.release(current_node, release_comment=release_comment)
 
         if success:
+            # Get the old definition.
+            definition = nodeutils.definition_from_node(current_node.path())
+
+            # Force the newly released definition to be loaded
             self.load_all(force=True)
             callbackutils.node_changed(nodeutils.node_at_path(path))
 
-            # # Add newly released .hda
-            # repo = self.manager.repo_from_hda_file(released_path)
-            # repo.process_hda_file(released_path, force=True)
-
-            # # Remove released definition
-            # repo.remove_definition(definition)
+            # Remove the editable definition
+            definitionutils.uninstall_definition(
+                definition, backup_dir=self.context.get("backup_dir")
+            )
 
             # Success
             utils.display_message(
                 "HDA release successful!", title="HDA Manager: Publish HDA"
             )
-
 
 
 def null_decorator(function):
