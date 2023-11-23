@@ -156,7 +156,11 @@ class NodeRepo(object):
             self.process_definition(definition, force=force)
 
     def load_nodes(self, force=False):
-        """Load all definitions contained by this repository."""
+        """Load all definitions contained by this repository.
+
+        Args:
+            force(:obj:`bool`,optional): Force the HDA to be installed.
+        """
         logger.debug(
             "Reading from {directory}".format(
                 directory=self.context.get("git_repo_temp"),
