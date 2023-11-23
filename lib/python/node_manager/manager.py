@@ -76,7 +76,6 @@ class NodeManager(object):
         self.context["manager_backup_dir"] = os.path.join(
             self.context.get("manager_edit_dir"), "backup"
         )
-        # self.setup_callbacks()
         self.releases = list()
         self.node_repos = self.initialise_repos()
         start = time.time()
