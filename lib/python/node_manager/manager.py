@@ -162,6 +162,17 @@ class NodeManager(object):
             node_repo.initialise_repo()
             node_repo.load_nodes(force=force)
 
+        # Also load any definitions in the edit directory
+        for node_definition_file in os.listdir(self.context.get("manager_edit_dir")):
+            if node_definition_file.endswith(".hda"):
+                node_definition_path = os.path.join(self.context.get("manager_edit_dir"), node_definition_file)
+                hou.hda.installFile(
+                    node_definition_path,
+                    oplibraries_file="Scanned Asset Library Directories",
+                    force_use_assets=True,
+                )
+                logger.debug("Installed from Node Manager edit directory: {path}".format(path=node_definition_path))
+
     def is_node_manager_node(self, current_node, compare_path=True):
         """Check if the given node is a Node Manager node.
 
