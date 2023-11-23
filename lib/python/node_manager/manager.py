@@ -87,6 +87,9 @@ class NodeManager(object):
 
         Returns:
             list(NodeRepo): A list of NodeRepo objects.
+
+        Raises:
+            RuntimeError: Couldn't find Node Manager Discover Plugin.
         """
         discover_plugin = pluginutils.get_discover_plugin(
             self.discover_plugin,
@@ -522,6 +525,8 @@ class NodeManager(object):
             utils.display_message(
                 "HDA release successful!", title="Node Manager: Publish HDA"
             )
+        else:
+            logger.warning("HDA release failed.")
 
 
 def null_decorator(function):
