@@ -87,6 +87,41 @@ class NodeManager(object):
 
         return discover_plugin.discover()
 
+    # def save(self, current_node):
+    #     definition = current_node.type().definition()
+    #     save_path = definition.libraryFilePath()
+    #     install = False
+    #     if save_path.startswith(self.temp_dir):
+    #         logger.info("Saving HDA to node manager edit directory.")
+    #         hda_filename = os.path.basename(save_path)
+    #         save_path = os.path.join(self.edit_dir, hda_filename)
+    #         install = True
+
+    #     definition.updateFromNode(current_node)
+    #     definition.save(save_path)
+
+    #     if install:
+    #         hou.hda.installFile(
+    #             save_path,
+    #             oplibraries_file="Scanned Asset Library Directories",
+    #             force_use_assets=True,
+    #         )
+
+    # def save_hda_callback(self, asset_definition, **kwargs):
+    #     print("before save HDA")
+    #     print(asset_definition)
+    #     print(kwargs)
+
+    # def setup_callbacks(self):
+    #     """
+    #     """
+    #     hou.hda.addEventCallback((hou.hdaEventType.BeforeAssetSaved, ), self.save_hda_callback)
+
+    # def is_initialised(self):
+    #     """
+    #     """
+    #     return self.initialised
+
     def get_base_dir(self):
         """Get the base directory for the HDA Manager from the
         NODE_MANAGER_BASE env var.
