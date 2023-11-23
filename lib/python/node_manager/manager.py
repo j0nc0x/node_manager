@@ -73,7 +73,9 @@ class NodeManager(object):
         self.context["manager_temp_dir"] = mkdtemp(prefix="node-manager-")
         self.context["manager_base_dir"] = self.get_base_dir()
         self.context["manager_edit_dir"] = self.get_edit_dir()
-        self.context["manager_backup_dir"] = os.path.join(self.context.get("manager_edit_dir"), "backup")
+        self.context["manager_backup_dir"] = os.path.join(
+            self.context.get("manager_edit_dir"), "backup"
+        )
         # self.setup_callbacks()
         self.releases = list()
         self.node_repos = self.initialise_repos()
@@ -87,7 +89,9 @@ class NodeManager(object):
         Returns:
             list(NodeRepo): A list of NodeRepo objects.
         """
-        discover_plugin = pluginutils.get_discover_plugin(self.discover_plugin, )
+        discover_plugin = pluginutils.get_discover_plugin(
+            self.discover_plugin,
+        )
         if not discover_plugin:
             raise RuntimeError("Couldn't find Node Manager Discover Plugin.")
 
@@ -116,14 +120,15 @@ class NodeManager(object):
         Returns:
             str: The edit directory for the HDA Manager.
         """
-        edit_dir = os.path.join(self.context.get("manager_base_dir"), "edit", getpass.getuser())
+        edit_dir = os.path.join(
+            self.context.get("manager_base_dir"), "edit", getpass.getuser()
+        )
         if create_on_disk:
             os.makedirs(edit_dir, exist_ok=True)
         return edit_dir
 
     def git_dir(self):
-        """
-        """
+        """ """
         return os.path.join(self.context.get("manager_temp_dir"), "git")
 
     def load_all(self, force=False):
@@ -136,13 +141,19 @@ class NodeManager(object):
         # Also load any definitions in the edit directory
         for node_definition_file in os.listdir(self.context.get("manager_edit_dir")):
             if node_definition_file.endswith(".hda"):
-                node_definition_path = os.path.join(self.context.get("manager_edit_dir"), node_definition_file)
+                node_definition_path = os.path.join(
+                    self.context.get("manager_edit_dir"), node_definition_file
+                )
                 hou.hda.installFile(
                     node_definition_path,
                     oplibraries_file="Scanned Asset Library Directories",
                     force_use_assets=True,
                 )
-                logger.debug("Installed from Node Manager edit directory: {path}".format(path=node_definition_path))
+                logger.debug(
+                    "Installed from Node Manager edit directory: {path}".format(
+                        path=node_definition_path
+                    )
+                )
 
     def is_node_manager_node(self, current_node, compare_path=True):
         """Check if the given node is a Node Manager node.
@@ -160,10 +171,14 @@ class NodeManager(object):
 
         definition = nodeutils.definition_from_node(current_node.path())
         if not definition:
-            raise RuntimeError("Couldn't find definition for {node}".format(node=current_node))
-        
+            raise RuntimeError(
+                "Couldn't find definition for {node}".format(node=current_node)
+            )
+
         nodetypeversion = self.nodetypeversion_from_definition(definition)
-        logger.debug("Nodetypeversion: {nodetypeversion}".format(nodetypeversion=nodetypeversion))
+        logger.debug(
+            "Nodetypeversion: {nodetypeversion}".format(nodetypeversion=nodetypeversion)
+        )
         if not nodetypeversion:
             logger.debug("{node} is not a Node Manager node.".format(node=current_node))
             return False
@@ -174,7 +189,11 @@ class NodeManager(object):
             return True
 
         # Otherwise lets compare the definition paths on disk
-        matched_definitions = [version  for version in nodetypeversion if version.definition.libraryFilePath() == definition.libraryFilePath()]
+        matched_definitions = [
+            version
+            for version in nodetypeversion
+            if version.definition.libraryFilePath() == definition.libraryFilePath()
+        ]
         if matched_definitions:
             logger.debug("{node} is a Node Manager node.".format(node=current_node))
             return True
@@ -289,7 +308,9 @@ class NodeManager(object):
             RuntimeError: No repos found.
         """
         if len(self.node_repos) > 1:
-            raise NotImplementedError("Multiple repo support not currently implemented.")
+            raise NotImplementedError(
+                "Multiple repo support not currently implemented."
+            )
 
         if self.node_repos:
             return next(iter(self.node_repos.values()))
@@ -313,11 +334,7 @@ class NodeManager(object):
 
         # If nodetype exists check that it is the latest version
         if nodetype:
-            versions = [
-                parse(version)
-                for version
-                in nodetype.all_versions().keys()
-            ]
+            versions = [parse(version) for version in nodetype.all_versions().keys()]
             versions_sorted = sorted(versions, reverse=True)
             latest_version = versions_sorted[0]
 
@@ -362,7 +379,11 @@ class NodeManager(object):
                 patch = True
                 logger.debug("Version exists - patch release.")
             else:
-                same_major_version = [version for version in nodetype.versions if version.startswith(current_version.split(".")[0])]
+                same_major_version = [
+                    version
+                    for version in nodetype.versions
+                    if version.startswith(current_version.split(".")[0])
+                ]
                 if same_major_version:
                     minor = True
                     logger.debug("Same major version - minor release.")
@@ -440,7 +461,7 @@ class NodeManager(object):
 
         Raises:
             RuntimeError: Cant discard from read-only HDA repo.
-        """    
+        """
         if not self.is_node_manager_node(current_node):
             # Uninstall the definition
             definition = nodeutils.definition_from_node(current_node.path())
@@ -510,7 +531,7 @@ def null_decorator(function):
 
 
 def deferred_decorator(callback_returning_decorator):
-    """ Borrowing from SideFX: $HFS/houdini/python3.9libs/sas/localassets.py
+    """Borrowing from SideFX: $HFS/houdini/python3.9libs/sas/localassets.py
     This decorator defers another decorator from being called until the
     decorated function is actually called.
 
@@ -542,6 +563,7 @@ def deferred_decorator(callback_returning_decorator):
 
             # Call the actual decorated function.
             return decorated_function(*args, **kwargs)
+
         return wrapper
 
     return new_decorator

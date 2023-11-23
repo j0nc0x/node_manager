@@ -69,10 +69,14 @@ class NodeRepo(object):
         Returns:
             str: The path to the HDA repo backup directory.
         """
-        backup_directory = os.path.join(self.context.get("repo_path"), ".node_manager_backup")
+        backup_directory = os.path.join(
+            self.context.get("repo_path"), ".node_manager_backup"
+        )
         if not os.path.isdir(backup_directory):
             os.mkdir(backup_directory)
-            logger.debug("Created backup directory: {path}".format(path=backup_directory))
+            logger.debug(
+                "Created backup directory: {path}".format(path=backup_directory)
+            )
         return backup_directory
 
     def get_load_plugin(self):
@@ -81,7 +85,9 @@ class NodeRepo(object):
         Returns:
             (obj): The load plugin for this repo.
         """
-        logger.debug("Using load plugin: {plugin}".format(plugin=self.manager.load_plugin))
+        logger.debug(
+            "Using load plugin: {plugin}".format(plugin=self.manager.load_plugin)
+        )
         load_plugin = pluginutils.get_load_plugin(
             self.manager.load_plugin,
         )
@@ -100,8 +106,7 @@ class NodeRepo(object):
         self.node_manager_definition_files = load_plugin.load()
 
     def config_path(self):
-        """
-        """
+        """ """
         return os.path.join(self.context.get("git_repo_clone"), "config", "config.json")
 
     def get_name(self):
@@ -159,9 +164,7 @@ class NodeRepo(object):
         """
         definitions = hou.hda.definitionsInFile(path)
         for definition in definitions:
-            self.process_definition(
-                definition, force=force
-            )
+            self.process_definition(definition, force=force)
 
     def load_nodes(self, force=False):
         """Load all definitions contained by this repository."""
@@ -244,7 +247,10 @@ class NodeRepo(object):
         )
         # Write the HDA to the edit_dir
         editable_path = utils.editable_hda_path_from_components(
-            definition, self.manager.context.get("manager_edit_dir"), namespace=namespace, name=name
+            definition,
+            self.manager.context.get("manager_edit_dir"),
+            namespace=namespace,
+            name=name,
         )
         logger.debug("Editable path: {path}".format(path=editable_path))
 

@@ -23,8 +23,9 @@ def cosmetic_callbacks_enabled():
     except hou.NotAvailable:
         logger.info("Caught error, network editor not available.")
         enabled = False
-        
+
     return enabled
+
 
 def node_changed(current_node):
     """Handle a node being created or loaded.
@@ -53,4 +54,6 @@ def node_changed(current_node):
 
     # We created or loaded a NodeManager node
     logger.debug("NodeCreatedOrLoaded: {node}".format(node=current_node.name()))
-    nodeutils.node_comment(current_node, published=manager.is_node_manager_node(current_node))
+    nodeutils.node_comment(
+        current_node, published=manager.is_node_manager_node(current_node)
+    )

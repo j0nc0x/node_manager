@@ -43,7 +43,7 @@ def edit(current_node):
 
 def display_edit(current_node):
     """Should the edit menu be displayed for the given node.
-    
+
     Args:
         current_node(hou.Node): The node to check.
 
@@ -149,9 +149,8 @@ def run_menu_callback(method_name, node, **kwargs):
         node(hou.Node): The houdini node the menu callback was called from.
     """
     current_module = sys.modules[__name__]
-    if (
-        hasattr(current_module, method_name)
-        and callable(getattr(current_module, method_name))
+    if hasattr(current_module, method_name) and callable(
+        getattr(current_module, method_name)
     ):
         method = getattr(current_module, method_name)
         hdefereval.executeDeferred(method, node)

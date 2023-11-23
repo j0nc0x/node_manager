@@ -76,7 +76,9 @@ def cleanup_embedded_definitions(nodetype):
             )
 
 
-def create_definition_copy(definition, edit_dir, namespace=None, name=None, version=None):
+def create_definition_copy(
+    definition, edit_dir, namespace=None, name=None, version=None
+):
     """Create a copy of a node definition.
 
     Update the nodeTypeName if required.

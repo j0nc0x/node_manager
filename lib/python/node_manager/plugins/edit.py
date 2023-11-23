@@ -26,9 +26,7 @@ class NodeManagerPlugin(object):
         """Initialise the plugin."""
         self.manager = utils.get_manager()
 
-        logger.debug(
-            "Initialise DefaultEdit."
-        )
+        logger.debug("Initialise DefaultEdit.")
 
     def edit_definition(self, current_node, major=False, minor=False):
         """Edit the definition of the given node.
@@ -62,9 +60,7 @@ class NodeManagerPlugin(object):
         if major or minor:
             logger.debug("Major or Minor version updated for editable node.")
             current_version = utils.node_type_version(definition.nodeTypeName())
-            logger.debug(
-                "Current version is {version}".format(version=current_version)
-            )
+            logger.debug("Current version is {version}".format(version=current_version))
             current_version_components = len(current_version.split("."))
             logger.debug(
                 "Current version has {components} components".format(
@@ -82,9 +78,7 @@ class NodeManagerPlugin(object):
                 )
             )
             if current_version_components == 3:
-                logger.debug(
-                    "Current version is major.minor.patch, adding patch."
-                )
+                logger.debug("Current version is major.minor.patch, adding patch.")
                 new_version = "{new_version}.{micro}".format(
                     new_version=new_version,
                     micro=version.micro,
@@ -99,8 +93,14 @@ class NodeManagerPlugin(object):
         # First determine if we can work where the node is currently located
         manager_node = self.manager.is_node_manager_node(current_node)
         node_editable = os.access(definition.libraryFilePath(), os.W_OK)
-        directory_editable = os.access(os.path.dirname(definition.libraryFilePath()), os.W_OK)
-        if manager_node == False and node_editable == True and directory_editable == True:
+        directory_editable = os.access(
+            os.path.dirname(definition.libraryFilePath()), os.W_OK
+        )
+        if (
+            manager_node == False
+            and node_editable == True
+            and directory_editable == True
+        ):
             # We can edit this definition in its current location, no need to make a copy
             logger.info("Node editable in its current location on disk.")
             edit_directory = os.path.dirname(definition.libraryFilePath())
