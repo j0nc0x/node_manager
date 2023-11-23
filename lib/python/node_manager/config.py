@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""A very lo-tech temp placeholder for a config."""
+"""A very low-tech temp placeholder for a config."""
 
 
 node_manager_config = {
