@@ -2,14 +2,10 @@
 Manage and track Houdini HDAs and Nuke Gizmos/Snippets
 
 ### General Design Points
-=======
 ## Design Points
-=======
 - Should feel like the user is just referencing node definitions from a directory on disk. Minimise extra steps.
 - All node changes tracked through source control.
 - Use standard UIs and workflows where possible.
-
-=======
 
 ### Storing / loading the HDAs
 
@@ -109,7 +105,6 @@ Ideally it would be desirable to feedback to the user whether nodes are in an ed
 - Node message.
 - Node colour.
 
-=======
 ## Requirements:
 - `GitPython`: https://pypi.org/project/GitPython/
 - `packaging`: https://pypi.org/project/packaging/
@@ -139,4 +134,3 @@ Publish plugins allow customisation of the way changed node definitions can be p
 - `DefaultPublish`: Disk based publish, where the node definition file is moved back to the repo it was loaded from. After completion the definition being used in the current session switched to use the new version.
 
 - `GitPublish`: The node definition is expanded to disk and then pushed to source control for the repo it was loaded from. After completion the defintion used in the current session is switched to use the newly commited version.
-=======
