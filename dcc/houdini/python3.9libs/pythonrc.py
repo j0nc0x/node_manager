@@ -5,8 +5,6 @@
 import logging
 import sys
 
-import hou
-
 from node_manager import manager
 
 # Setting up logging here, but this can be skipped if it is handled elsewhere.
@@ -17,8 +15,4 @@ logging.basicConfig(
 )
 
 # Initialise the Node Manager
-manager.initialise_node_manager(
-    background=hou.isUIAvailable(),
-    load_plugin="RezLoad",
-    release_plugin="RezRelease",
-)
+manager.initialise_node_manager()

@@ -18,6 +18,7 @@ if hou.isUIAvailable():
 else:
     do_work_in_background_thread = None
 
+from node_manager import config
 from node_manager import utils
 from node_manager.utils import callbackutils, definitionutils, nodetypeutils, nodeutils, pluginutils
 
@@ -28,62 +29,33 @@ class NodeManager(object):
     """Main HDA Manager Class."""
 
     instance = None
+    config = config.node_manager_config
 
     @classmethod
-    def init(
-        cls,
-        discover_plugin=None,
-        load_plugin=None,
-        edit_plugin=None,
-        release_plugin=None,
-    ):
+    def init(cls):
         """
         Initialise the HDAManager if it isn't already initialised, storing the instance in the class.
-
-        Args:
-            discover_plugin(str, optional): The name of the discover plugin to use.
-            load_plugin(str, optional): The name of the load plugin to use.
-            edit_plugin(str, optional): The name of the edit plugin to use.
-            release_plugin(str, optional): The name of the release plugin to use.
 
         Returns:
             (HDAManager): The HDAManager instance.
         """
         if cls.instance is None:
             start = time.time()
-            cls.instance = cls(
-                discover_plugin=discover_plugin,
-                load_plugin=load_plugin,
-                edit_plugin=edit_plugin,
-                release_plugin=release_plugin,
-            )
+            cls.instance = cls()
             cls.instance.stats["init"] = time.time() - start
         return cls.instance
 
-    def __init__(
-        self,
-        discover_plugin=None,
-        load_plugin=None,
-        edit_plugin=None,
-        release_plugin=None,
-    ):
-        """Initialise the NodeManager class.
-
-        Args:
-            discover_plugin(str, optional): The name of the discover plugin to use.
-            load_plugin(str, optional): The name of the load plugin to use.
-            edit_plugin(str, optional): The name of the edit plugin to use.
-            release_plugin(str, optional): The name of the release plugin to use.
-        """
+    def __init__(self):
+        """Initialise the NodeManager class."""
         logger.info("Initialising Node Manager")
 
         self.node_repos = {}
 
         # Define which plugins to use.
-        self.discover_plugin = discover_plugin
-        self.load_plugin = load_plugin
-        self.edit_plugin = edit_plugin
-        self.release_plugin = release_plugin
+        self.discover_plugin = self.config.get("discover_plugin")
+        self.load_plugin = self.config.get("load_plugin")
+        self.edit_plugin = self.config.get("edit_plugin")
+        self.release_plugin = self.config.get("release_plugin")
 
         self.stats = {}
 
@@ -609,99 +581,33 @@ def deferred_decorator(callback_returning_decorator):
 
 
 @deferred_decorator(lambda: do_work_in_background_thread)
-def initialise_in_background(
-    discover_plugin=None,
-    load_plugin=None,
-    edit_plugin=None,
-    release_plugin=None,
-):
-    """Initialise the Node Manager in the Houdini background thread.
-
-    Args:
-        discover_plugin(str, optional): The name of the discover plugin to use.
-        load_plugin(str, optional): The name of the load plugin to use.
-        edit_plugin(str, optional): The name of the edit plugin to use.
-        release_plugin(str, optional): The name of the release plugin to use.
-    """
+def initialise_in_background():
+    """Initialise the Node Manager in the Houdini background thread."""
     logger.debug("Beginning initialisation using background thread.")
     yield
-    manager_instance = NodeManager.init(
-        discover_plugin=discover_plugin,
-        load_plugin=load_plugin,
-        edit_plugin=edit_plugin,
-        release_plugin=release_plugin,
-    )
+    manager_instance = NodeManager.init()
     manager_instance.load()
     yield
     logger.debug("Initialisation complete.")
 
 
-def initialise_in_foreground(
-    discover_plugin=None,
-    load_plugin=None,
-    edit_plugin=None,
-    release_plugin=None,
-):
-    """Initialise the Node Manager in the Houdini main thread.
-
-    Args:
-        discover_plugin(str, optional): The name of the discover plugin to use.
-        load_plugin(str, optional): The name of the load plugin to use.
-        edit_plugin(str, optional): The name of the edit plugin to use.
-        release_plugin(str, optional): The name of the release plugin to use.
-    """
+def initialise_in_foreground():
+    """Initialise the Node Manager in the Houdini main thread."""
     logger.debug("Beginning initialisation using main thread.")
-    manager_instance = NodeManager.init(
-        discover_plugin=discover_plugin,
-        load_plugin=load_plugin,
-        edit_plugin=edit_plugin,
-        release_plugin=release_plugin,
-    )
+    manager_instance = NodeManager.init()
     manager_instance.load()
 
 
-def initialise_node_manager(
-        background=True,
-        discover_plugin=None,
-        load_plugin=None,
-        edit_plugin=None,
-        release_plugin=None,
-    ):
-    """Initialise the Node Manager.
-
-    Args:
-        background(bool): Should the Node Manager be initialised in the
-            background thread?
-        discover_plugin(str, optional): The name of the discover plugin to use.
-        load_plugin(str, optional): The name of the load plugin to use.
-        edit_plugin(str, optional): The name of the edit plugin to use.
-        release_plugin(str, optional): The name of the release plugin to use.
-    """
-    logger.debug(
-        "Initialising Node Manager using discover plugin: {discover_plugin}, "
-        "load_plugin: {load_plugin}, edit_plugin: {edit_plugin}, release_plugin: {release_plugin}.".format(
-            discover_plugin=discover_plugin,
-            load_plugin=load_plugin,
-            edit_plugin=edit_plugin,
-            release_plugin=release_plugin,
-        )
-    )
+def initialise_node_manager():
+    """Initialise the Node Manager."""
+    logger.debug("Initialising Node Manager.")
+    background = config.node_manager_config.get("background") and hou.isUIAvailable()
     if background and not do_work_in_background_thread:
         logger.warning(
             "Attempted to use background thread but UI not available, "
             "reverting to main thread."
         )
     if background and do_work_in_background_thread:
-        initialise_in_background(
-            discover_plugin=discover_plugin,
-            load_plugin=load_plugin,
-            edit_plugin=edit_plugin,
-            release_plugin=release_plugin,
-        )
+        initialise_in_background()
     else:
-        initialise_in_foreground(
-            discover_plugin=discover_plugin,
-            load_plugin=load_plugin,
-            edit_plugin=edit_plugin,
-            release_plugin=release_plugin,
-        )
+        initialise_in_foreground()

@@ -26,7 +26,7 @@ def get_manager():
     """
     manager_instance = manager.NodeManager.instance
     if not manager_instance:
-        raise RuntimeError("Node Manager not initialised.")
+        logger.warning("Node Manager not initialised.")
     return manager_instance
 
 
