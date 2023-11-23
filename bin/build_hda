@@ -1,0 +1,65 @@
+#!/usr/bin/env python
+
+"""Simple Rez HDA Build Script."""
+
+import os
+import shutil
+import subprocess
+
+from distutils.dir_util import copy_tree
+
+
+install = os.environ["REZ_BUILD_INSTALL"]
+source_path = os.environ["REZ_BUILD_SOURCE_PATH"]
+build_path = os.environ["REZ_BUILD_PATH"]
+install_path = os.environ["REZ_BUILD_INSTALL_PATH"]
+
+if os.path.exists(build_path):
+    print("Removing old build: {build_path}".format(build_path=build_path))
+    shutil.rmtree(build_path)
+
+hdas_source_path = os.path.join(source_path, "dcc", "houdini", "hda")
+hdas_build_path = os.path.join(build_path, "dcc", "houdini", "hda")
+
+if not os.path.isdir(hdas_build_path):
+    os.makedirs(hdas_build_path)
+    print("Created build directory: {path}".format(path=hdas_build_path))
+
+if os.path.isdir(hdas_source_path):
+    for hda in os.listdir(hdas_source_path):
+        path = os.path.join(hdas_source_path, hda)
+        print("Processing {path}".format(path=path))
+        hda_path = os.path.join(hdas_build_path, hda)
+        hotl_cmd = [
+            "hotl",
+            "-l",
+            path,
+            hda_path,
+        ]
+        result = subprocess.call(hotl_cmd, cwd="/tmp")
+        if result != 0:
+            raise RuntimeError(
+                "Failed to build HDA: {hda}".format(hda=hda)
+            )
+else:
+    raise RuntimeError("No HDA directory found: {hdas_path}".format(hdas_path=hdas_source_path))
+
+hdas_config_path = os.path.join(source_path, "config")
+hdas_config_build_path = os.path.join(build_path, "config")
+
+if not os.path.isdir(hdas_config_build_path):
+    os.makedirs(hdas_config_build_path)
+    print("Created build directory: {path}".format(path=hdas_config_build_path))
+
+if os.path.isdir(hdas_config_path):
+    for filename in os.listdir(hdas_config_path):
+        path = os.path.join(hdas_config_path, filename)
+        print("Processing {path}".format(path=path))
+        shutil.copyfile(path, os.path.join(hdas_config_build_path, filename))
+
+if install == "1":
+    if os.path.exists(install_path):
+        print("Removing old install: {install_path}".format(install_path=install_path))
+        shutil.rmtree(install_path)
+    print("Installing to {install_path}".format(install_path=install_path))
+    copy_tree(build_path, install_path)

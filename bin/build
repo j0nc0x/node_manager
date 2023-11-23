@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+
+"""Simple Rez Build Script."""
+
+import os
+import shutil
+from distutils.dir_util import copy_tree
+
+ignore_list = [
+    "build",
+    ".git",
+    ".gitignore",
+    "package.py",
+]
+
+install = os.environ["REZ_BUILD_INSTALL"]
+source_path = os.environ["REZ_BUILD_SOURCE_PATH"]
+build_path = os.environ["REZ_BUILD_PATH"]
+install_path = os.environ["REZ_BUILD_INSTALL_PATH"]
+
+if os.path.exists(build_path):
+    print("Removing old build: {build_path}".format(build_path=build_path))
+    shutil.rmtree(build_path)
+
+for name in [name for name in os.listdir(source_path) if name not in ignore_list]:
+    path = os.path.join(source_path, name)
+    print("Building {path}".format(path=path))
+    if os.path.isdir(path):
+        copy_tree(path, os.path.join(build_path, name))
+    elif os.path.isfile(path):
+        shutil.copyfile(path, os.path.join(build_path, os.path.basename(path)))
+    
+if install == "1":
+    if os.path.exists(install_path):
+        print("Removing old install: {install_path}".format(install_path=install_path))
+        shutil.rmtree(install_path)
+    print("Installing to {install_path}".format(install_path=install_path))
+    copy_tree(build_path, install_path)
