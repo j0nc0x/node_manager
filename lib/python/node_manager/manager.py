@@ -20,7 +20,13 @@ else:
 
 from node_manager import config
 from node_manager import utils
-from node_manager.utils import callbackutils, definitionutils, nodetypeutils, nodeutils, pluginutils
+from node_manager.utils import (
+    callbackutils,
+    definitionutils,
+    nodetypeutils,
+    nodeutils,
+    pluginutils,
+)
 
 logger = logging.getLogger(__name__)
 
