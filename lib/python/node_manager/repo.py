@@ -20,9 +20,6 @@ logger = logging.getLogger(__name__)
 class NodeRepo(object):
     """Node Repository - associated with a rez package that contains Node Definitions."""
 
-    # __config = utilities.get_config()
-    # packages_root = __config.get("packages_root")
-
     def __init__(
         self,
         manager,
@@ -41,14 +38,6 @@ class NodeRepo(object):
 
         self.context["repo_path"] = repo_path
         self.context["name"] = self.get_name()
-
-        start = time.time()
-        # self.git_repo = self.clone_repo()
-        # self.manager.stats["repo_clone"] = time.time() - start
-
-        # start = time.time()
-        # self.build_repo()
-        # self.manager.stats["build"] = time.time() - start
 
         self.editable = editable
         self.asset_subdirectory = "hda"

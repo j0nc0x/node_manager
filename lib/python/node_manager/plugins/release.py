@@ -5,8 +5,6 @@
 import logging
 import os
 
-import hou
-
 from node_manager import utils
 from node_manager.utils import definitionutils
 from node_manager.utils import nodeutils

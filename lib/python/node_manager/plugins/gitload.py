@@ -8,11 +8,10 @@ import subprocess
 
 import hou
 
-from node_manager import utils
-from node_manager.plugins import load
-
 from git import Repo
 from git.exc import NoSuchPathError, InvalidGitRepositoryError
+
+from node_manager.plugins import load
 
 logger = logging.getLogger(__name__)
 
