@@ -4,7 +4,6 @@
 
 import logging
 import os
-import time
 
 import hou
 
