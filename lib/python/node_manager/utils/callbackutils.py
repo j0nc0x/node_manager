@@ -32,8 +32,12 @@ def node_changed(current_node):
     Args:
         current_node(hou.Node): The node that was created or loaded.
     """
-    if not cosmetic_callbacks_enabled():
-        logger.info("UI unavailable, cosmetic callbacks disabled.")
+    manager = utils.get_manager()
+    if not manager:
+        logger.debug("Node manager not available, skipping.")
+        return
+    elif not cosmetic_callbacks_enabled():
+        logger.debug("UI unavailable, cosmetic callbacks disabled.")
         return
     else:
         logger.debug("UI available, cosmetic callbacks enabled.")
@@ -49,5 +53,4 @@ def node_changed(current_node):
 
     # We created or loaded a NodeManager node
     logger.debug("NodeCreatedOrLoaded: {node}".format(node=current_node.name()))
-    manager = utils.get_manager()
     nodeutils.node_comment(current_node, published=manager.is_node_manager_node(current_node))
