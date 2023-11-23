@@ -288,21 +288,6 @@ class NodeManager(object):
                 path=path,
             )
         )
-        
-        # for repo_name in self.node_repos:
-        #     repo = self.node_repos.get(repo_name)
-
-        # if repo:
-        #     logger.warning("Defaulted to first repository found: {repo}".format(repo=repo))
-        #     return repo
-        
-        # logger.error(
-        #     "No repo found for definition: {definition}".format(
-        #         definition=definition,
-        #     )
-        # )
-        # raise RuntimeError("No repo found for definition {definition}".format(definition=definition.nodeTypeName()))
-
 
     def repo_from_hda_file(self, path):
         """
