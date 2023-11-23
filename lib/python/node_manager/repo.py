@@ -37,7 +37,7 @@ class NodeRepo(object):
         self.context = {}
 
         self.context["repo_path"] = repo_path
-        self.context["name"] = self.get_name()
+        self.context["repo_name"] = self.get_name()
 
         self.editable = editable
         self.asset_subdirectory = "hda"
@@ -47,7 +47,7 @@ class NodeRepo(object):
 
         logger.info(
             "Initialised HDA Repo: {name} ({path})".format(
-                name=self.context.get("name"),
+                name=self.context.get("repo_name"),
                 path=self.context.get("repo_path"),
             )
         )
@@ -228,7 +228,7 @@ class NodeRepo(object):
         logger.debug(
             "Adding definition {definition} to repo {repo}".format(
                 definition=definition.nodeTypeName(),
-                repo=self.context.get("name"),
+                repo=self.context.get("repo_name"),
             )
         )
         logger.debug(
