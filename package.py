@@ -21,4 +21,3 @@ def commands():
     env.PYTHONPATH.append("{root}/lib/python")
     env.HOUDINI_MENU_PATH.set("{root}/dcc/houdini/menu:&")
     env.HOUDINI_PATH.set("{root}/dcc/houdini:&")
-    env.NODE_MANAGER_PLUGINS_PATH.append("{root}/lib/python/node_manager/plugins")

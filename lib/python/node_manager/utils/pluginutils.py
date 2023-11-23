@@ -54,9 +54,13 @@ def import_plugins():
         list: A list of initialised plugins.
     """
     plugins = []
+
+    # First add the plugins in the default location
+    plugins.extend(import_plugins_from_path(os.path.join(os.path.dirname(os.path.dirname(__file__)), "plugins")))
+
+    # Followed by any specificed in the environment
     for plugin_path in os.environ.get("NODE_MANAGER_PLUGINS_PATH", "").split(":"):
-        print(plugin_path)
-        if plugin_path:
+        if os.path.isdir(plugin_path):
             plugins.extend(import_plugins_from_path(plugin_path))
 
     return plugins
