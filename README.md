@@ -1,5 +1,5 @@
 # Node Manager
-Manage and track Houdini HDAs and Nuke Gizmos/Snippets
+Manage and track Houdini HDAs and Nuke Gizmos/Snippets.
 
 ### General Design Points
 ## Design Points
