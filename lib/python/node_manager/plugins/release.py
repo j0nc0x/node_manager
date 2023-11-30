@@ -70,7 +70,7 @@ class NodeManagerPlugin(object):
         logger.debug("Release comment: {comment}".format(comment=release_comment))
 
         logger.debug(
-            "Using release repo: {repo}".format(repo=self.repo.context.get("name"))
+            "Using release repo: {repo}".format(repo=self.repo.context.get("repo_name"))
         )
         logger.debug(
             "Repo path: {path}".format(path=self.repo.context.get("repo_path"))
@@ -90,7 +90,7 @@ class NodeManagerPlugin(object):
             if not backup_directory:
                 raise RuntimeError(
                     "No backup directory found for {repo}".format(
-                        repo=self.repo.context.get("name")
+                        repo=self.repo.context.get("repo_name")
                     )
                 )
 

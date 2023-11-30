@@ -50,7 +50,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
             (str): The package name.
         """
         if self.repo:
-            return self.repo.context.get("name")
+            return self.repo.context.get("repo_name")
         return None
 
     def release_dir(self):
