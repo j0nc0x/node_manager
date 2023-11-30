@@ -18,7 +18,7 @@ build_command = "{root}/bin/build {install}"
 
 
 def commands():
-    env.PYTHONPATH.append("{root}/lib/python")
+    env.PYTHONPATH.prepend("{root}/lib/python")
 
     # Note: '&' is used by Houdini to include the default locations for thse paths.
     # If this is handled elsewhere, either by a "houdini_config" rez package or the
