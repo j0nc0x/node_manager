@@ -26,7 +26,7 @@ class NodeManagerPlugin(load.NodeManagerPlugin):
         self.repo.context["git_repo_clone"] = self.git_repo_clone_dir()
         self.repo.context["repo_load_path"] = os.path.join(
             self.manager.context.get("manager_temp_dir"),
-            self.repo.context.get("name"),
+            self.repo.context.get("repo_name"),
         )
         logger.debug(
             "Initialise GitLoad: {repo_path}".format(
@@ -41,7 +41,7 @@ class NodeManagerPlugin(load.NodeManagerPlugin):
             str: The path to the HDA repo on disk.
         """
         return os.path.join(
-            self.manager.context.get("manager_base_dir"), self.repo.context.get("name")
+            self.manager.context.get("manager_base_dir"), self.repo.context.get("repo_name")
         )
 
     def git_repo_clone_dir(self):
@@ -51,7 +51,7 @@ class NodeManagerPlugin(load.NodeManagerPlugin):
             str: The path to the HDA repo on disk.
         """
         return os.path.join(
-            self.repo.context.get("git_repo_root"), self.repo.context.get("name")
+            self.repo.context.get("git_repo_root"), self.repo.context.get("repo_name")
         )
 
     def clone_repo(self):

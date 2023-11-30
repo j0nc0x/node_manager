@@ -57,7 +57,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
             (str): The package name.
         """
         if self.repo:
-            name = self.repo.context.get("name")
+            name = self.repo.context.get("repo_name")
             return name.split(".")[0]
         return None
 
@@ -342,7 +342,6 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         remote.push(refspec=(":{branch}".format(branch=branch)))
 
         # clean up release dir
-        # shutil.rmtree(self._release_dir)
         logger.debug(
             "(Would clean) up release directory {path}".format(path=self._release_dir)
         )
@@ -358,7 +357,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         Returns:
             str: The path to the HDA repo on disk."""
         return os.path.join(
-            self.manager.context.get("manager_base_dir"), self.repo.context.get("name")
+            self.manager.context.get("manager_base_dir"), self.repo.context.get("repo_name")
         )
 
     def git_repo_clone_dir(self):
@@ -367,7 +366,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         Returns:
             str: The path to the HDA repo on disk."""
         return os.path.join(
-            self.repo.context.get("git_repo_root"), self.repo.context.get("name")
+            self.repo.context.get("git_repo_root"), self.repo.context.get("repo_name")
         )
 
     def clone_repo(self):
