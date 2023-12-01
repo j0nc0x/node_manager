@@ -4,9 +4,9 @@
 
 import pyblish.api
 
-from rbl_pipe_core.util import filesystem
-
-from rbl_pipe_houdini.utils import nodes
+from node_manager import config
+from node_manager import utils
+from node_manager.utils import nodeutils
 
 
 class ValidateChildren(pyblish.api.InstancePlugin):
@@ -30,10 +30,14 @@ class ValidateChildren(pyblish.api.InstancePlugin):
                 if child == node:
                     # Ignore the node to be published
                     continue
-                if nodes.definition_from_node(child.path()):
+                if nodeutils.definition_from_node(child.path()):
                     # do something better than this
                     path = child.type().definition().libraryFilePath()
-                    if not filesystem.is_released(path):
+                    if not config.node_manager_config.get("released_locations", []):
+                        self.log.warning(
+                            "No released locations configured, skipping check."
+                        )
+                    elif not utils.is_released(path):
                         raise RuntimeError(
                             "HDA stored in invalid location: {path}".format(
                                 path=path,

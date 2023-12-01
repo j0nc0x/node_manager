@@ -4,7 +4,7 @@
 
 import pyblish.api
 
-from rbl_pipe_houdini.utils import nodes
+from node_manager.utils import nodeutils
 
 
 class ValidateIsHDA(pyblish.api.InstancePlugin):
@@ -24,5 +24,5 @@ class ValidateIsHDA(pyblish.api.InstancePlugin):
             RuntimeError: Node is not a HDA.
         """
         for node in instance:
-            if not nodes.definition_from_node(node.path()):
+            if not nodeutils.definition_from_node(node.path()):
                 raise RuntimeError("Node is not a HDA.")

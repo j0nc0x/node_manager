@@ -8,6 +8,7 @@ import time
 
 import hou
 
+from node_manager import config
 from node_manager import manager
 from node_manager.utils import nodetypeutils
 
@@ -228,3 +229,18 @@ def expanded_hda_name(definition):
         name=name,
         version=version,
     )
+
+
+def is_released(path):
+    """
+    Check if the given path is within a released location on disk.
+
+    Args:
+        path(str): The path we want to check.
+
+    Returns:
+        (bool): Is the path released.
+    """
+    released_locations = config.node_manager_config.get("released_locations", [])
+
+    return path.startswith(tuple(released_locations))
