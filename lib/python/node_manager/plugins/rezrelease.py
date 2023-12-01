@@ -35,8 +35,6 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
 
     name = plugin_name
     plugin_type = plugin_class
-    packages_root = "/mnt/apps/rez_packages"
-    package = "houdini_hdas"
 
     def __init__(self):
         """Initialise the RezRelease plugin."""
@@ -59,7 +57,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
             (str): The package name.
         """
         if self.repo:
-            name = self.repo.context.get("name")
+            name = self.repo.context.get("repo_name")
             return name.split(".")[0]
         return None
 
@@ -118,7 +116,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
 
     def _config_path(self):
         """Get the path to the config file.
-        
+
         Returns:
             (str): The path to the config file.
         """
@@ -137,7 +135,9 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         if os.path.isfile(self.package_py_path()):
             old_package_py_path = self.package_py_path()
         else:
-            old_package_py_path = os.path.join(os.environ.get("REZ_NODE_MANAGER_ROOT"), "data", "default_package.py")
+            old_package_py_path = os.path.join(
+                os.environ.get("REZ_NODE_MANAGER_ROOT"), "data", "default_package.py"
+            )
 
         logger.debug("Using package.py: {path}".format(path=old_package_py_path))
 
@@ -167,10 +167,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         """
         if not self.release_version:
             raise RuntimeError("The release version hasn't yet been set.")
-
-        return os.path.join(
-            self.packages_root, self.package, self.release_version
-        )
+        return os.path.join(self.manager.config.get("rez_packages_root"), self.manager.config.get("rez_package_name"), self.release_version)
 
     def release_hda_path(self):
         """
@@ -220,12 +217,16 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
             with open(config_path, "r") as repo_conf:
                 repo_conf_data = json.load(repo_conf)
         else:
-            logger.warning("No config found at {path}, skipping.".format(path=config_path))
+            logger.warning(
+                "No config found at {path}, skipping.".format(path=config_path)
+            )
 
         package_version = self.version_from_package()
 
         # Get the release version
-        self.release_version = self.manager.get_release_version(definition, package_version)
+        self.release_version = self.manager.get_release_version(
+            definition, package_version
+        )
 
         # Copy the expanaded HDA into it's correct location
         shutil.copytree(self._expand_dir(), hda_path)
@@ -247,7 +248,11 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
             if os.path.isfile(self.package_py_path()):
                 old_package_py_path = self.package_py_path()
             else:
-                old_package_py_path = os.path.join(os.environ.get("REZ_NODE_MANAGER_ROOT"), "data", "default_package.py")
+                old_package_py_path = os.path.join(
+                    os.environ.get("REZ_NODE_MANAGER_ROOT"),
+                    "data",
+                    "default_package.py",
+                )
 
             logger.debug("Using package.py: {path}".format(path=old_package_py_path))
 
@@ -261,13 +266,19 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
                     elif "<name>" in line:
                         new_file.write(line.replace("<name>", package_name))
                     elif "<description>" in line:
-                        new_file.write(line.replace("<description>", "Node Manager repo {package_name}".format(package_name=package_name)))
+                        new_file.write(
+                            line.replace(
+                                "<description>",
+                                "Node Manager repo {package_name}".format(
+                                    package_name=package_name
+                                ),
+                            )
+                        )
                     else:
                         new_file.write(line)
 
         # Move the new package.py into place
         if os.path.exists(self.package_py_path()):
-            #shutil.copymode(self.package_py_path(), abs_path)
             os.remove(self.package_py_path())
         shutil.move(abs_path, self.package_py_path())
 
@@ -277,7 +288,10 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         self._git_repo().git.push()
 
         # Push tag to repo
-        new_tag = self._git_repo().create_tag(self.release_version, message="Release {version}".format(version=self.release_version))
+        new_tag = self._git_repo().create_tag(
+            self.release_version,
+            message="Release {version}".format(version=self.release_version),
+        )
         self._git_repo().remotes.origin.push(new_tag)
 
         # rez-release
@@ -294,7 +308,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
 
         # verify release
         if process.returncode != 0:
-        # Non-zero return code
+            # Non-zero return code
             try:
                 _stdout = process.stdout.read()
                 _stderr = process.stderr.read()
@@ -324,11 +338,10 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         self._git_repo().git.push()
 
         # remove release branch
-        remote = self._git_repo().remote(name='origin')
-        remote.push(refspec=(':{branch}'.format(branch=branch)))
+        remote = self._git_repo().remote(name="origin")
+        remote.push(refspec=(":{branch}".format(branch=branch)))
 
         # clean up release dir
-        #shutil.rmtree(self._release_dir)
         logger.debug(
             "(Would clean) up release directory {path}".format(path=self._release_dir)
         )
@@ -343,14 +356,18 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
 
         Returns:
             str: The path to the HDA repo on disk."""
-        return os.path.join(self.manager.context.get("manager_base_dir"), self.repo.context.get("name"))
+        return os.path.join(
+            self.manager.context.get("manager_base_dir"), self.repo.context.get("repo_name")
+        )
 
     def git_repo_clone_dir(self):
         """Get the git repo clone directory.
 
         Returns:
             str: The path to the HDA repo on disk."""
-        return os.path.join(self.repo.context.get("git_repo_root"), self.repo.context.get("name"))
+        return os.path.join(
+            self.repo.context.get("git_repo_root"), self.repo.context.get("repo_name")
+        )
 
     def clone_repo(self):
         """Clone the Node Manager repository.
@@ -376,13 +393,15 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
             if not os.path.isdir(repo_root):
                 os.makedirs(repo_root)
                 logger.debug("Created repo directory: {path}".format(path=repo_root))
-            cloned_repo = Repo.clone_from(self.repo.context.get("git_repo_path"), repo_root, depth=1)
+            cloned_repo = Repo.clone_from(
+                self.repo.context.get("git_repo_path"), repo_root, depth=1
+            )
 
         return cloned_repo
 
     def release(self, current_node, release_comment=None):
         """
-        Publish a definition being edited by the HDA manager.
+        Publish a definition being edited by the Node manager.
 
         Args:
             current_node(hou.Node): The node to publish the definition for.
@@ -420,7 +439,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         # reverting to subprocess.
         cmd = [
             "hotl",
-            "-x" if hou.isApprentice() else "-tp", # Maybe we should error-check this?
+            "-x" if hou.isApprentice() else "-tp",  # Maybe we should error-check this?
             expand_dir,
             definition.libraryFilePath(),
         ]

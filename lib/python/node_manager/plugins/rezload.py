@@ -28,8 +28,10 @@ class NodeManagerPlugin(object):
             ".otl",
             ".otlnc",
         ]
-        if self.repo  and self.repo.context:
-            self.repo.context["repo_load_path"] = os.path.join(self.repo.context.get("repo_path"), "dcc", "houdini", "hda")
+        if self.repo and self.repo.context:
+            self.repo.context["repo_load_path"] = os.path.join(
+                self.repo.context.get("repo_path"), "dcc", "houdini", "hda"
+            )
 
         self.repo_conf_data = self.load_config()
 
@@ -39,7 +41,7 @@ class NodeManagerPlugin(object):
 
     def _config_path(self):
         """Get the path to the config file.
-        
+
         Returns:
             (str): The path to the config file.
         """
@@ -52,14 +54,18 @@ class NodeManagerPlugin(object):
             (dict): The repo config data.
         """
         config_path = self._config_path()
-        logger.debug("Loading config from: {config_path}".format(config_path=config_path))
+        logger.debug(
+            "Loading config from: {config_path}".format(config_path=config_path)
+        )
 
         repo_conf_data = {}
         if os.path.isfile(config_path):
             with open(config_path, "r") as repo_conf:
                 repo_conf_data = json.load(repo_conf)
         else:
-            logger.warning("No config found at {path}, skipping.".format(path=config_path))
+            logger.warning(
+                "No config found at {path}, skipping.".format(path=config_path)
+            )
         logger.debug("Config data: {data}".format(data=repo_conf_data))
         return repo_conf_data
 
@@ -83,5 +89,7 @@ class NodeManagerPlugin(object):
             list: A list of node definition files.
         """
         node_definition_files = self.get_node_definition_files()
-        logger.debug("Loading node definition files: {files}".format(files=node_definition_files))
+        logger.debug(
+            "Loading node definition files: {files}".format(files=node_definition_files)
+        )
         return node_definition_files

@@ -8,11 +8,10 @@ import subprocess
 
 import hou
 
-from node_manager import utils
-from node_manager.plugins import load
-
 from git import Repo
 from git.exc import NoSuchPathError, InvalidGitRepositoryError
+
+from node_manager.plugins import load
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +26,7 @@ class NodeManagerPlugin(load.NodeManagerPlugin):
         self.repo.context["git_repo_clone"] = self.git_repo_clone_dir()
         self.repo.context["repo_load_path"] = os.path.join(
             self.manager.context.get("manager_temp_dir"),
-            self.repo.context.get("name"),
+            self.repo.context.get("repo_name"),
         )
         logger.debug(
             "Initialise GitLoad: {repo_path}".format(
@@ -41,7 +40,9 @@ class NodeManagerPlugin(load.NodeManagerPlugin):
         Returns:
             str: The path to the HDA repo on disk.
         """
-        return os.path.join(self.manager.context.get("manager_base_dir"), self.repo.context.get("name"))
+        return os.path.join(
+            self.manager.context.get("manager_base_dir"), self.repo.context.get("repo_name")
+        )
 
     def git_repo_clone_dir(self):
         """Get the git repo clone directory.
@@ -49,7 +50,9 @@ class NodeManagerPlugin(load.NodeManagerPlugin):
         Returns:
             str: The path to the HDA repo on disk.
         """
-        return os.path.join(self.repo.context.get("git_repo_root"), self.repo.context.get("name"))
+        return os.path.join(
+            self.repo.context.get("git_repo_root"), self.repo.context.get("repo_name")
+        )
 
     def clone_repo(self):
         """Clone the Node Manager repository.
@@ -75,7 +78,9 @@ class NodeManagerPlugin(load.NodeManagerPlugin):
             if not os.path.isdir(repo_root):
                 os.makedirs(repo_root)
                 logger.debug("Created repo directory: {path}".format(path=repo_root))
-            cloned_repo = Repo.clone_from(self.repo.context.get("repo_path"), repo_root, depth=1)
+            cloned_repo = Repo.clone_from(
+                self.repo.context.get("repo_path"), repo_root, depth=1
+            )
 
         return cloned_repo
 
@@ -89,7 +94,11 @@ class NodeManagerPlugin(load.NodeManagerPlugin):
         expanded_hda_dir = os.path.join(repo_root, "dcc", "houdini", "hda")
 
         if not os.path.isdir(expanded_hda_dir):
-            logger.warning("Nothing to build, no HDA directory found: {path}".format(path=expanded_hda_dir))
+            logger.warning(
+                "Nothing to build, no HDA directory found: {path}".format(
+                    path=expanded_hda_dir
+                )
+            )
             return
 
         for hda in os.listdir(expanded_hda_dir):
@@ -98,15 +107,15 @@ class NodeManagerPlugin(load.NodeManagerPlugin):
             logger.info("Processing {source}".format(source=path))
             hotl_cmd = [
                 "hotl",
-                "-c" if hou.isApprentice() else "-l", # Maybe we should error-check this?
+                "-c"
+                if hou.isApprentice()
+                else "-l",  # Maybe we should error-check this?
                 path,
                 hda_path,
             ]
             result = subprocess.call(hotl_cmd)
             if result != 0:
-                raise RuntimeError(
-                    "Failed to build HDA: {hda}".format(hda=hda)
-                )
+                raise RuntimeError("Failed to build HDA: {hda}".format(hda=hda))
 
     def load(self):
         """Load the Node Manager repository."""

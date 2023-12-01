@@ -26,7 +26,7 @@ class NodeManagerPlugin(object):
             ".otl",
             ".otlnc",
         ]
-        if self.repo  and self.repo.context:
+        if self.repo and self.repo.context:
             self.repo.context["repo_load_path"] = self.repo.context.get("repo_path")
         logger.debug("Initialise DefaultLoad.")
 
@@ -50,5 +50,7 @@ class NodeManagerPlugin(object):
             list: A list of node definition files.
         """
         node_definition_files = self.get_node_definition_files()
-        logger.debug("Loading node definition files: {files}".format(files=node_definition_files))
+        logger.debug(
+            "Loading node definition files: {files}".format(files=node_definition_files)
+        )
         return node_definition_files

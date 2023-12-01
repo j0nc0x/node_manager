@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""HDA manager."""
+"""Houdini Node Manager."""
 
 import getpass
 import logging
@@ -18,85 +18,64 @@ if hou.isUIAvailable():
 else:
     do_work_in_background_thread = None
 
+from node_manager import config
 from node_manager import utils
-from node_manager.utils import callbackutils, definitionutils, nodetypeutils, nodeutils, pluginutils
+from node_manager.utils import (
+    callbackutils,
+    definitionutils,
+    nodetypeutils,
+    nodeutils,
+    pluginutils,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class NodeManager(object):
-    """Main HDA Manager Class."""
+    """Main Node Manager Class."""
 
     instance = None
+    config = config.node_manager_config
 
     @classmethod
-    def init(
-        cls,
-        discover_plugin=None,
-        load_plugin=None,
-        edit_plugin=None,
-        release_plugin=None,
-    ):
+    def init(cls):
         """
         Initialise the HDAManager if it isn't already initialised, storing the instance in the class.
-
-        Args:
-            discover_plugin(str, optional): The name of the discover plugin to use.
-            load_plugin(str, optional): The name of the load plugin to use.
-            edit_plugin(str, optional): The name of the edit plugin to use.
-            release_plugin(str, optional): The name of the release plugin to use.
 
         Returns:
             (HDAManager): The HDAManager instance.
         """
         if cls.instance is None:
             start = time.time()
-            cls.instance = cls(
-                discover_plugin=discover_plugin,
-                load_plugin=load_plugin,
-                edit_plugin=edit_plugin,
-                release_plugin=release_plugin,
-            )
+            cls.instance = cls()
             cls.instance.stats["init"] = time.time() - start
         return cls.instance
 
-    def __init__(
-        self,
-        discover_plugin=None,
-        load_plugin=None,
-        edit_plugin=None,
-        release_plugin=None,
-    ):
-        """Initialise the NodeManager class.
-
-        Args:
-            discover_plugin(str, optional): The name of the discover plugin to use.
-            load_plugin(str, optional): The name of the load plugin to use.
-            edit_plugin(str, optional): The name of the edit plugin to use.
-            release_plugin(str, optional): The name of the release plugin to use.
-        """
+    def __init__(self):
+        """Initialise the NodeManager class."""
         logger.info("Initialising Node Manager")
 
         self.node_repos = {}
 
         # Define which plugins to use.
-        self.discover_plugin = discover_plugin
-        self.load_plugin = load_plugin
-        self.edit_plugin = edit_plugin
-        self.release_plugin = release_plugin
+        self.discover_plugin = self.config.get("discover_plugin")
+        self.load_plugin = self.config.get("load_plugin")
+        self.edit_plugin = self.config.get("edit_plugin")
+        self.release_plugin = self.config.get("release_plugin")
 
         self.stats = {}
 
     def load(self):
-        """Load the HDA Manager."""
+        """Load the Node Manager."""
         self._plugins = pluginutils.import_plugins()
 
         self.context = {}
         self.context["manager_temp_dir"] = mkdtemp(prefix="node-manager-")
         self.context["manager_base_dir"] = self.get_base_dir()
         self.context["manager_edit_dir"] = self.get_edit_dir()
-        self.context["manager_backup_dir"] = os.path.join(self.context.get("manager_edit_dir"), "backup")
-        # self.setup_callbacks()
+        self.context["manager_backup_dir"] = os.path.join(
+            self.context.get("manager_edit_dir"), "backup"
+        )
         self.releases = list()
         self.node_repos = self.initialise_repos()
         start = time.time()
@@ -108,54 +87,24 @@ class NodeManager(object):
 
         Returns:
             list(NodeRepo): A list of NodeRepo objects.
+
+        Raises:
+            RuntimeError: Couldn't find Node Manager Discover Plugin.
         """
-        discover_plugin = pluginutils.get_discover_plugin(self.discover_plugin, )
+        discover_plugin = pluginutils.get_discover_plugin(
+            self.discover_plugin,
+        )
         if not discover_plugin:
             raise RuntimeError("Couldn't find Node Manager Discover Plugin.")
 
         return discover_plugin.discover()
 
-    # def save(self, current_node):
-    #     definition = current_node.type().definition()
-    #     save_path = definition.libraryFilePath()
-    #     install = False
-    #     if save_path.startswith(self.temp_dir):
-    #         logger.info("Saving HDA to node manager edit directory.")
-    #         hda_filename = os.path.basename(save_path)
-    #         save_path = os.path.join(self.edit_dir, hda_filename)
-    #         install = True
-
-    #     definition.updateFromNode(current_node)
-    #     definition.save(save_path)
-
-    #     if install:
-    #         hou.hda.installFile(
-    #             save_path,
-    #             oplibraries_file="Scanned Asset Library Directories",
-    #             force_use_assets=True,
-    #         )
-
-    # def save_hda_callback(self, asset_definition, **kwargs):
-    #     print("before save HDA")
-    #     print(asset_definition)
-    #     print(kwargs)
-
-    # def setup_callbacks(self):
-    #     """
-    #     """
-    #     hou.hda.addEventCallback((hou.hdaEventType.BeforeAssetSaved, ), self.save_hda_callback)
-
-    # def is_initialised(self):
-    #     """
-    #     """
-    #     return self.initialised
-
     def get_base_dir(self):
-        """Get the base directory for the HDA Manager from the
+        """Get the base directory for the Node Manager from the
         NODE_MANAGER_BASE env var.
 
         Returns:
-            str: The base directory for the HDA Manager.
+            str: The base directory for the Node Manager.
         """
         base_dir = os.getenv("NODE_MANAGER_BASE")
         if not base_dir:
@@ -164,22 +113,27 @@ class NodeManager(object):
         return base_dir
 
     def get_edit_dir(self, create_on_disk=True):
-        """Get the edit directory for the HDA Manager.
+        """Get the edit directory for the Node Manager.
 
         Args:
             create_on_disk(bool): Should the directory be created on disk if
                 it doesn't exist?
 
         Returns:
-            str: The edit directory for the HDA Manager.
+            str: The edit directory for the Node Manager.
         """
-        edit_dir = os.path.join(self.context.get("manager_base_dir"), "edit", getpass.getuser())
+        edit_dir = os.path.join(
+            self.context.get("manager_base_dir"), "edit", getpass.getuser()
+        )
         if create_on_disk:
             os.makedirs(edit_dir, exist_ok=True)
         return edit_dir
 
     def git_dir(self):
-        """
+        """Get the git directory for the Node Manager.
+
+        Returns:
+            str: The git directory for the Node Manager.
         """
         return os.path.join(self.context.get("manager_temp_dir"), "git")
 
@@ -189,6 +143,23 @@ class NodeManager(object):
             node_repo = self.node_repos.get(repo_name)
             node_repo.initialise_repo()
             node_repo.load_nodes(force=force)
+
+        # Also load any definitions in the edit directory
+        for node_definition_file in os.listdir(self.context.get("manager_edit_dir")):
+            if node_definition_file.endswith(".hda"):
+                node_definition_path = os.path.join(
+                    self.context.get("manager_edit_dir"), node_definition_file
+                )
+                hou.hda.installFile(
+                    node_definition_path,
+                    oplibraries_file="Scanned Asset Library Directories",
+                    force_use_assets=True,
+                )
+                logger.debug(
+                    "Installed from Node Manager edit directory: {path}".format(
+                        path=node_definition_path
+                    )
+                )
 
     def is_node_manager_node(self, current_node, compare_path=True):
         """Check if the given node is a Node Manager node.
@@ -206,10 +177,14 @@ class NodeManager(object):
 
         definition = nodeutils.definition_from_node(current_node.path())
         if not definition:
-            raise RuntimeError("Couldn't find definition for {node}".format(node=current_node))
-        
+            raise RuntimeError(
+                "Couldn't find definition for {node}".format(node=current_node)
+            )
+
         nodetypeversion = self.nodetypeversion_from_definition(definition)
-        logger.debug("Nodetypeversion: {nodetypeversion}".format(nodetypeversion=nodetypeversion))
+        logger.debug(
+            "Nodetypeversion: {nodetypeversion}".format(nodetypeversion=nodetypeversion)
+        )
         if not nodetypeversion:
             logger.debug("{node} is not a Node Manager node.".format(node=current_node))
             return False
@@ -220,7 +195,11 @@ class NodeManager(object):
             return True
 
         # Otherwise lets compare the definition paths on disk
-        matched_definitions = [version  for version in nodetypeversion if version.definition.libraryFilePath() == definition.libraryFilePath()]
+        matched_definitions = [
+            version
+            for version in nodetypeversion
+            if version.definition.libraryFilePath() == definition.libraryFilePath()
+        ]
         if matched_definitions:
             logger.debug("{node} is a Node Manager node.".format(node=current_node))
             return True
@@ -253,7 +232,7 @@ class NodeManager(object):
 
         Args:
             definition(hou.HDADefinition): The HDA definition to use when
-                looking up the HDA Manager nodetype.
+                looking up the Node Manager nodetype.
 
         Returns:
             node_manager.nodetype.NodeType: The nodetype for the given definition.
@@ -305,21 +284,6 @@ class NodeManager(object):
                 path=path,
             )
         )
-        
-        # for repo_name in self.node_repos:
-        #     repo = self.node_repos.get(repo_name)
-
-        # if repo:
-        #     logger.warning("Defaulted to first repository found: {repo}".format(repo=repo))
-        #     return repo
-        
-        # logger.error(
-        #     "No repo found for definition: {definition}".format(
-        #         definition=definition,
-        #     )
-        # )
-        # raise RuntimeError("No repo found for definition {definition}".format(definition=definition.nodeTypeName()))
-
 
     def repo_from_hda_file(self, path):
         """
@@ -350,7 +314,9 @@ class NodeManager(object):
             RuntimeError: No repos found.
         """
         if len(self.node_repos) > 1:
-            raise NotImplementedError("Multiple repo support not currently implemented.")
+            raise NotImplementedError(
+                "Multiple repo support not currently implemented."
+            )
 
         if self.node_repos:
             return next(iter(self.node_repos.values()))
@@ -374,11 +340,7 @@ class NodeManager(object):
 
         # If nodetype exists check that it is the latest version
         if nodetype:
-            versions = [
-                parse(version)
-                for version
-                in nodetype.all_versions().keys()
-            ]
+            versions = [parse(version) for version in nodetype.all_versions().keys()]
             versions_sorted = sorted(versions, reverse=True)
             latest_version = versions_sorted[0]
 
@@ -423,7 +385,11 @@ class NodeManager(object):
                 patch = True
                 logger.debug("Version exists - patch release.")
             else:
-                same_major_version = [version for version in nodetype.versions if version.startswith(current_version.split(".")[0])]
+                same_major_version = [
+                    version
+                    for version in nodetype.versions
+                    if version.startswith(current_version.split(".")[0])
+                ]
                 if same_major_version:
                     minor = True
                     logger.debug("Same major version - minor release.")
@@ -494,14 +460,14 @@ class NodeManager(object):
 
     def discard_definition(self, current_node):
         """
-        Discard a definition being edited by the HDA manager.
+        Discard a definition being edited by the Node manager.
 
         Args:
             current_node(hou.Node): The node we are attempting to discard.
 
         Raises:
             RuntimeError: Cant discard from read-only HDA repo.
-        """    
+        """
         if not self.is_node_manager_node(current_node):
             # Uninstall the definition
             definition = nodeutils.definition_from_node(current_node.path())
@@ -564,21 +530,24 @@ class NodeManager(object):
         success = release_plugin.release(current_node, release_comment=release_comment)
 
         if success:
+            # Get the old definition.
+            definition = nodeutils.definition_from_node(current_node.path())
+
+            # Force the newly released definition to be loaded
             self.load_all(force=True)
             callbackutils.node_changed(nodeutils.node_at_path(path))
 
-            # # Add newly released .hda
-            # repo = self.manager.repo_from_hda_file(released_path)
-            # repo.process_hda_file(released_path, force=True)
-
-            # # Remove released definition
-            # repo.remove_definition(definition)
+            # Remove the editable definition
+            definitionutils.uninstall_definition(
+                definition, backup_dir=self.context.get("backup_dir")
+            )
 
             # Success
             utils.display_message(
-                "HDA release successful!", title="HDA Manager: Publish HDA"
+                "HDA release successful!", title="Node Manager: Publish HDA"
             )
-
+        else:
+            logger.warning("HDA release failed.")
 
 
 def null_decorator(function):
@@ -591,7 +560,7 @@ def null_decorator(function):
 
 
 def deferred_decorator(callback_returning_decorator):
-    """ Borrowing from SideFX: $HFS/houdini/python3.9libs/sas/localassets.py
+    """Borrowing from SideFX: $HFS/houdini/python3.9libs/sas/localassets.py
     This decorator defers another decorator from being called until the
     decorated function is actually called.
 
@@ -623,105 +592,40 @@ def deferred_decorator(callback_returning_decorator):
 
             # Call the actual decorated function.
             return decorated_function(*args, **kwargs)
+
         return wrapper
 
     return new_decorator
 
 
 @deferred_decorator(lambda: do_work_in_background_thread)
-def initialise_in_background(
-    discover_plugin=None,
-    load_plugin=None,
-    edit_plugin=None,
-    release_plugin=None,
-):
-    """Initialise the Node Manager in the Houdini background thread.
-
-    Args:
-        discover_plugin(str, optional): The name of the discover plugin to use.
-        load_plugin(str, optional): The name of the load plugin to use.
-        edit_plugin(str, optional): The name of the edit plugin to use.
-        release_plugin(str, optional): The name of the release plugin to use.
-    """
+def initialise_in_background():
+    """Initialise the Node Manager in the Houdini background thread."""
     logger.debug("Beginning initialisation using background thread.")
     yield
-    manager_instance = NodeManager.init(
-        discover_plugin=discover_plugin,
-        load_plugin=load_plugin,
-        edit_plugin=edit_plugin,
-        release_plugin=release_plugin,
-    )
+    manager_instance = NodeManager.init()
     manager_instance.load()
     yield
     logger.debug("Initialisation complete.")
 
 
-def initialise_in_foreground(
-    discover_plugin=None,
-    load_plugin=None,
-    edit_plugin=None,
-    release_plugin=None,
-):
-    """Initialise the Node Manager in the Houdini main thread.
-
-    Args:
-        discover_plugin(str, optional): The name of the discover plugin to use.
-        load_plugin(str, optional): The name of the load plugin to use.
-        edit_plugin(str, optional): The name of the edit plugin to use.
-        release_plugin(str, optional): The name of the release plugin to use.
-    """
+def initialise_in_foreground():
+    """Initialise the Node Manager in the Houdini main thread."""
     logger.debug("Beginning initialisation using main thread.")
-    manager_instance = NodeManager.init(
-        discover_plugin=discover_plugin,
-        load_plugin=load_plugin,
-        edit_plugin=edit_plugin,
-        release_plugin=release_plugin,
-    )
+    manager_instance = NodeManager.init()
     manager_instance.load()
 
 
-def initialise_node_manager(
-        background=True,
-        discover_plugin=None,
-        load_plugin=None,
-        edit_plugin=None,
-        release_plugin=None,
-    ):
-    """Initialise the Node Manager.
-
-    Args:
-        background(bool): Should the Node Manager be initialised in the
-            background thread?
-        discover_plugin(str, optional): The name of the discover plugin to use.
-        load_plugin(str, optional): The name of the load plugin to use.
-        edit_plugin(str, optional): The name of the edit plugin to use.
-        release_plugin(str, optional): The name of the release plugin to use.
-    """
-    logger.debug(
-        "Initialising Node Manager using discover plugin: {discover_plugin}, "
-        "load_plugin: {load_plugin}, edit_plugin: {edit_plugin}, release_plugin: {release_plugin}.".format(
-            discover_plugin=discover_plugin,
-            load_plugin=load_plugin,
-            edit_plugin=edit_plugin,
-            release_plugin=release_plugin,
-        )
-    )
+def initialise_node_manager():
+    """Initialise the Node Manager."""
+    logger.debug("Initialising Node Manager.")
+    background = config.node_manager_config.get("background") and hou.isUIAvailable()
     if background and not do_work_in_background_thread:
         logger.warning(
             "Attempted to use background thread but UI not available, "
             "reverting to main thread."
         )
     if background and do_work_in_background_thread:
-        initialise_in_background(
-            discover_plugin=discover_plugin,
-            load_plugin=load_plugin,
-            edit_plugin=edit_plugin,
-            release_plugin=release_plugin,
-        )
+        initialise_in_background()
     else:
-        initialise_in_foreground(
-            discover_plugin=discover_plugin,
-            load_plugin=load_plugin,
-            edit_plugin=edit_plugin,
-            release_plugin=release_plugin,
-        )
+        initialise_in_foreground()

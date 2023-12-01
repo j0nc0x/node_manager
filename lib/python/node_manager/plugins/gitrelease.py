@@ -50,7 +50,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
             (str): The package name.
         """
         if self.repo:
-            return self.repo.context.get("name")
+            return self.repo.context.get("repo_name")
         return None
 
     def release_dir(self):
@@ -107,7 +107,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
 
     def _config_path(self):
         """Get the path to the config file.
-        
+
         Returns:
             (str): The path to the config file.
         """
@@ -149,10 +149,14 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
             with open(config_path, "r") as repo_conf:
                 repo_conf_data = json.load(repo_conf)
         else:
-            logger.warning("No config found at {path}, skipping.".format(path=config_path))
+            logger.warning(
+                "No config found at {path}, skipping.".format(path=config_path)
+            )
 
         # Get the release version
-        self.release_version = self.manager.get_release_version(definition, repo_conf_data.get("version", "0.0.0"))
+        self.release_version = self.manager.get_release_version(
+            definition, repo_conf_data.get("version", "0.0.0")
+        )
 
         # Copy the expanaded HDA into it's correct location
         shutil.copytree(self._expand_dir(), hda_path)
@@ -180,7 +184,10 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         self._git_repo().git.push()
 
         # Push tag to repo
-        new_tag = self._git_repo().create_tag(self.release_version, message="Release {version}".format(version=self.release_version))
+        new_tag = self._git_repo().create_tag(
+            self.release_version,
+            message="Release {version}".format(version=self.release_version),
+        )
         self._git_repo().remotes.origin.push(new_tag)
 
         # merge to master
@@ -192,11 +199,11 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         self._git_repo().git.push()
 
         # remove release branch
-        remote = self._git_repo().remote(name='origin')
-        remote.push(refspec=(':{branch}'.format(branch=branch)))
+        remote = self._git_repo().remote(name="origin")
+        remote.push(refspec=(":{branch}".format(branch=branch)))
 
         # clean up release dir
-        #shutil.rmtree(self._release_dir)
+        # shutil.rmtree(self._release_dir)
         logger.debug(
             "(Would clean) up release directory {path}".format(path=self._release_dir)
         )
@@ -208,7 +215,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
 
     def release(self, current_node, release_comment=None):
         """
-        Publish a definition being edited by the HDA manager.
+        Publish a definition being edited by the Node manager.
 
         Args:
             current_node(hou.Node): The node to publish the definition for.
@@ -243,7 +250,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         # reverting to subprocess.
         cmd = [
             "hotl",
-            "-x" if hou.isApprentice() else "-tp", # Maybe we should error-check this?
+            "-x" if hou.isApprentice() else "-tp",  # Maybe we should error-check this?
             expand_dir,
             definition.libraryFilePath(),
         ]

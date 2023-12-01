@@ -1,8 +1,7 @@
 # Node Manager
-Manage and track Houdini HDAs and Nuke Gizmos/Snippets
+Manage and track Houdini HDAs (and in the future, Nuke Gizmos/Snippets).
 
 ### General Design Points
-=======
 ## Design Points
 - Should feel like the user is just referencing node definitions from a directory on disk. Minimise extra steps.
 - All node changes tracked through source control.
@@ -106,7 +105,6 @@ Ideally it would be desirable to feedback to the user whether nodes are in an ed
 - Node message.
 - Node colour.
 
-=======
 ## Requirements:
 - `GitPython`: https://pypi.org/project/GitPython/
 - `packaging`: https://pypi.org/project/packaging/

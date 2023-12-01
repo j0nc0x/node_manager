@@ -5,8 +5,6 @@
 import logging
 import os
 
-import hou
-
 from node_manager import utils
 from node_manager.utils import definitionutils
 from node_manager.utils import nodeutils
@@ -24,6 +22,7 @@ logger = logging.getLogger(
 
 class NodeManagerPlugin(object):
     """Default Release Plugin."""
+
     name = plugin_name
     plugin_type = plugin_class
 
@@ -70,24 +69,38 @@ class NodeManagerPlugin(object):
 
         logger.debug("Release comment: {comment}".format(comment=release_comment))
 
-        logger.debug("Using release repo: {repo}".format(repo=self.repo.context.get("name")))
-        logger.debug("Repo path: {path}".format(path=self.repo.context.get("repo_path")))
+        logger.debug(
+            "Using release repo: {repo}".format(repo=self.repo.context.get("repo_name"))
+        )
+        logger.debug(
+            "Repo path: {path}".format(path=self.repo.context.get("repo_path"))
+        )
 
         # Expand the HDA ready for release
         hda_name = utils.expanded_hda_name(definition)
         release_path = os.path.join(self.repo.context.get("repo_path"), hda_name)
         logger.debug("Using release path: {path}".format(path=release_path))
         if os.path.isfile(release_path):
-            logger.warning("Exisitng file will be overwritten by release to {path}".format(path=release_path))
+            logger.warning(
+                "Exisitng file will be overwritten by release to {path}".format(
+                    path=release_path
+                )
+            )
             backup_directory = self.repo.get_repo_backup_dir()
             if not backup_directory:
-                raise RuntimeError("No backup directory found for {repo}".format(repo=self.repo.context.get("name")))
+                raise RuntimeError(
+                    "No backup directory found for {repo}".format(
+                        repo=self.repo.context.get("repo_name")
+                    )
+                )
 
-            backup_path = os.path.join(backup_directory, os.path.basename(node_file_path))
+            backup_path = os.path.join(
+                backup_directory, os.path.basename(node_file_path)
+            )
             # This might cause issues if the file is already loaded by Houdini
             os.rename(release_path, backup_path)
             logger.warning("Previous file backed up to {path}".format(path=backup_path))
-            
+
         definition.copyToHDAFile(release_path)
         logger.debug("Definition copied to {path}".format(path=release_path))
 
@@ -97,8 +110,4 @@ class NodeManagerPlugin(object):
         # Uninstall the old definition
         definitionutils.uninstall_definition(definition)
 
-        # Success
-        hou.ui.displayMessage(
-            "HDA release successful!", title="HDA Manager: Publish HDA"
-        )
         return True

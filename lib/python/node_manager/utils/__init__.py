@@ -26,7 +26,7 @@ def get_manager():
     """
     manager_instance = manager.NodeManager.instance
     if not manager_instance:
-        raise RuntimeError("Node Manager not initialised.")
+        logger.warning("Node Manager not initialised.")
     return manager_instance
 
 
@@ -179,10 +179,14 @@ def editable_hda_path_from_components(definition, edit_dir, namespace=None, name
     if nodetypeutils.valid_node_type_name(current_name):
         # If the name is valid, use it
         logger.debug("Using valid node type name: %s", current_name)
-        new_namespace = nodetypeutils.node_type_namespace(current_name, new_namespace=namespace)
+        new_namespace = nodetypeutils.node_type_namespace(
+            current_name, new_namespace=namespace
+        )
         new_name = nodetypeutils.node_type_name(current_name, new_name=name)
         full_name = "{namespace}{name}".format(
-            namespace="{namespace}_".format(namespace=new_namespace) if new_namespace else "",
+            namespace="{namespace}_".format(namespace=new_namespace)
+            if new_namespace
+            else "",
             name=new_name,
         )
     else:
@@ -203,7 +207,7 @@ def editable_hda_path_from_components(definition, edit_dir, namespace=None, name
 def expanded_hda_name(definition):
     """Get the expanded HDA name.
 
-    This function is used by the HDA manager to set the name of the directory a
+    This function is used by the Node manager to set the name of the directory a
     hou.HDADefinition is expanded to
     hou.nodeTypeCategory.name()_hou.nodeTypeName(namespace)_hou.nodeTypeName(name).hda
 
