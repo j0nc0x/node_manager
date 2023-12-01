@@ -7,19 +7,17 @@ import logging
 import os
 import time
 
+from packaging.version import parse
+
 from tempfile import mkdtemp
 
 import hou
 
-from packaging.version import parse
-
-if hou.isUIAvailable():
-    from hdefereval import do_work_in_background_thread
-else:
-    do_work_in_background_thread = None
+import pyblish.api
 
 from node_manager import config
 from node_manager import utils
+from node_manager.pyblish import houdinipyblishui
 from node_manager.utils import (
     callbackutils,
     definitionutils,
@@ -27,6 +25,11 @@ from node_manager.utils import (
     nodeutils,
     pluginutils,
 )
+
+if hou.isUIAvailable():
+    from hdefereval import do_work_in_background_thread
+else:
+    do_work_in_background_thread = None
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +39,7 @@ class NodeManager(object):
 
     instance = None
     config = config.node_manager_config
+    publish_node = None
 
     @classmethod
     def init(cls):
@@ -487,27 +491,31 @@ class NodeManager(object):
         Args:
             current_node(hou.Node): The node we are attempting to publish from.
         """
-        # # Make sure we don't already have plugins loaded from elsewhere
-        # pyblish.api.deregister_all_paths()
-        # pyblish.api.deregister_all_plugins()
+        # Make sure we don't already have plugins loaded from elsewhere
+        pyblish.api.deregister_all_paths()
+        pyblish.api.deregister_all_plugins()
 
-        # # Make the node to be published available for collection
-        # HDAManager.publish_node = current_node
+        # Make the node to be published available for collection
+        self.publish_node = current_node
+        logger.debug("Publish node = {node}".format(node=self.publish_node))
 
-        # # Register the application host
-        # pyblish.api.register_host("houdini")
+        # Register the application host
+        pyblish.api.register_host("houdini")
 
-        # # Register the plugins
-        # repo_root = os.path.abspath(__file__).rsplit("/lib/python", 1)[0]
-        # plugins = "lib/python/rbl_pipe_hdamanager/pyblish_plugins"
-        # pyblish.api.register_plugin_path(os.path.join(repo_root, plugins))
+        # Register the plugins
+        module_root = os.path.dirname(os.path.abspath(__file__))
+        plugins_path = os.path.join(module_root, "pyblish", "plugins")
+        logger.debug("Registering Pyblish plugins from: {path}".format(path=plugins_path))
+        pyblish.api.register_plugin_path(plugins_path)
 
-        # # Launch the UI
-        # validator = houdinipyblishui.HoudiniPyblishUI(
-        #     title="HDA Manager Validator",
-        #     size=(800, 500),
-        # )
-        # HDAManager.validator_ui = validator.launch_ui()
+        # Launch the UI
+        validator = houdinipyblishui.HoudiniPyblishUI(
+            title="HDA Manager Validator",
+            size=(800, 500),
+        )
+        self.validator_ui = validator.launch_ui()
+
+    def publish_definition(self, current_node):
         path = current_node.path()
 
         result = hou.ui.readInput(
