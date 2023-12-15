@@ -4,7 +4,7 @@
 
 import pyblish.api
 
-from rbl_pipe_hdamanager import utils
+from node_manager import utils
 
 
 class ValidateNamespace(pyblish.api.InstancePlugin):
