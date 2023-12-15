@@ -2,6 +2,7 @@
 
 """Node manager utils."""
 
+import getpass
 import logging
 import os
 import time
@@ -244,3 +245,48 @@ def is_released(path):
     released_locations = config.node_manager_config.get("released_locations", [])
 
     return path.startswith(tuple(released_locations))
+
+
+def _expand_namespaces(namespace):
+    """
+    Expand namespace tokens in the given list of namespace templates.
+
+    ie. dev.{user} becomes dev.jon
+
+    Args:
+        namespace(list): A list of namespace templates we want to expand.
+
+    Returns:
+        list: The expanded namespace templates.
+    """
+    expanded_namespaces = []
+    for namespace_template in namespace:
+        if "{user}" in namespace_template:
+            expanded_namespaces.append(
+                namespace_template.format(user=getpass.getuser())
+            )
+        else:
+            expanded_namespaces.append(namespace_template)
+
+    return expanded_namespaces
+
+
+def validate_namespace(namespace):
+    """
+    Check if the given namespace is valid for the current NodeManager session.
+
+    Args:
+        namespace(str): The namespace we want to check.
+
+    Returns:
+        bool: Is the namespace valid?
+    """
+    allowed_namespaces = config.node_manager_config.get("namespaces", [])
+
+    if not allowed_namespaces:
+        raise RuntimeError("No namespaces defined in config.")
+
+    if namespace in _expand_namespaces(allowed_namespaces):
+        return True
+    else:
+        return False

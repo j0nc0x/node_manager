@@ -5,6 +5,7 @@
 import pyblish.api
 
 from node_manager import utils
+from node_manager.utils import nodetypeutils
 
 
 class ValidateNamespace(pyblish.api.InstancePlugin):
@@ -24,11 +25,19 @@ class ValidateNamespace(pyblish.api.InstancePlugin):
             RuntimeError: Invalid namespace found.
         """
         for node in instance:
-            definition = node.type().definition()
-            man = utils.get_manager()
-            if not man.valid_namespace(definition):
+            node_type_name = node.type().name()
+            namespace = nodetypeutils.node_type_namespace(node_type_name)
+            self.log.info("Checking namespace for {node} is {namespace}".format(node=node_type_name, namespace=namespace))
+
+            valid_namespace = True
+            try: 
+                valid_namespace =  utils.validate_namespace(namespace)
+            except RuntimeError:
+                self.log.warning("No namespaces defined for the current session. Skipping validation.")
+
+            if not valid_namespace:
                 raise RuntimeError(
                     "Invalid namespace for {node}".format(
-                        node=node.type().name(),
+                        node=node_type_name,
                     )
                 )
