@@ -2,13 +2,17 @@
 
 """Validate definition is saved."""
 
-from rbl_pipe_core.pyblish import validatewithautofix
+import pyblish.api
+
+from node_manager.pyblish.autofix import AutoFixAction
 
 
-class ValidateSaved(validatewithautofix.ValidateWithAutoFix):
+class ValidateSaved(pyblish.api.InstancePlugin):
     """Validate if the collected node's definition is saved and ready to publish."""
 
     label = "Houdini HDA - Saved"
+    order = pyblish.api.ValidatorOrder
+    actions = [AutoFixAction]
 
     def process(self, instance):
         """Pyblish process method.
