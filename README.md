@@ -32,9 +32,10 @@ Using rez for deployment is recommended, but the following steps can be used to 
 - Clone this repository.
 - Configure `NodeManager` using the config (see below).
 - Update your environment with the following PATHS referencing `NodeManager` in the location we cloned it to:
-  - HOUDINI_MENU_PATH: `<NODE_MANAGER_ROOT>/dcc/houdini/menu`.
-  - HOUDINI_PATH: `<NODE_MANAGER_ROOT>/dcc/houdini`.
-  - PYTHONPATH: `<NODE_MANAGER_ROOT>/lib/python`.
+  - `HOUDINI_MENU_PATH`: `<NODE_MANAGER_ROOT>/dcc/houdini/menu`.
+  - `HOUDINI_PATH`: `<NODE_MANAGER_ROOT>/dcc/houdini`.
+  - `PYTHONPATH`: `<NODE_MANAGER_ROOT>/lib/python`.
+  
   It is likely you will want to append these paths if they alredy exist.
 
 ## Configure NodeManager
