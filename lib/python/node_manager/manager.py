@@ -238,7 +238,7 @@ class NodeManager(object):
             node_manager.nodetype.NodeType: The nodetype for the given definition.
         """
         logger.debug(
-            "Looking up Node Manager NodeType for {definition}".format(
+            "Looking up NodeManager NodeType for {definition}".format(
                 definition=definition.nodeTypeName(),
             )
         )
