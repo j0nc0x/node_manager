@@ -256,7 +256,11 @@ class NodeManager(object):
             index = utils.node_type_index(current_name, category)
             return repo.node_types.get(index)
 
-        logger.warning("No NodeType found.")
+        logger.debug(
+            "No NodeManager NodeType found for {defintion}".format(
+                definition=definition.nodeTypeName(),
+            )
+        )
         return None
 
     def repo_from_definition(self, definition):
