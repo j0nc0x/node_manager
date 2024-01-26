@@ -17,6 +17,10 @@ def node_comment(current_node, published=True):
         current_node(hou.Node): The node to set the comment on.
         edit(bool): Whether the node is editable or not.
     """
+    if current_node.isInsideLockedHDA():
+        logger.debug("Skipping locked node: {node}".format(node=current_node.name()))
+        return
+
     state = "Published"
     if not published:
         state = "Editable"
