@@ -49,6 +49,14 @@ Config options currently supported:
 - `release_plugin (str)`: The name of the release plugin to use. If unset us `DefaultRelease`.
 - `rez_packages_root (str)`: The main path to where rez packages are released.
 - `rez_package_name (str)`: The name of the rez package used by `NodeManager`.
+- `hda_exclude_path (list(str))`: A list of paths which will be ignored by `NodeManager` when identifying definitions it can work with. Note: this can also be set using the `$NODE_MANAGER_HDA_EXCLUDE_PATH` environment variable.
+- `include_all_hdas (bool)`: Should the NodeManager consider all HDAs, including those excluded because they are part of the SESI installation or are excluded via either of the previous methods.
+
+### Environment Variables
+Some elements of the NodeManager can be configured by setting environment variables.
+
+Currently supported variables are:
+- `$NODE_MANAGER_HDA_EXCLUDE_PATH`: A `os.pathsep` separated list of paths which will be ignored by `NodeManager` when identifying definitions it can work with. Note: this can also be set using the `$NODE_MANAGER_HDA_EXCLUDE_PATH` environment variable.
 
 ### Plugin System
 Node Manager supports a plugin system which can be used to configure the behaviour at different points of the workflow. The current stages where plugins operate are detailed below.
