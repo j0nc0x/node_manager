@@ -269,7 +269,7 @@ def is_digital_asset(node_path, include_hidden=False):
             exclude_paths_envvar_str = os.getenv("NODE_MANAGER_HDA_EXCLUDE_PATH")
             if exclude_paths_envvar_str:
                 logger.debug("Excluding HDAs from envvar: {path}".format(path=exclude_paths_envvar_str))
-                exclude_paths_envvar = exclude_paths_envvar_str.split(":")
+                exclude_paths_envvar = exclude_paths_envvar_str.split(os.pathsep)
             else:
                 exclude_paths_envvar = []
             full_exclude_paths = exclude_paths + exclude_paths_envvar
