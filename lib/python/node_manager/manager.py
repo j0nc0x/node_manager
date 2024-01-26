@@ -469,6 +469,9 @@ class NodeManager(object):
             RuntimeError: Cant discard from read-only HDA repo.
         """
         if not self.is_node_manager_node(current_node):
+            # First match the current definition to discard any unsaved changes.
+            current_node.matchCurrentDefinition()
+
             # Uninstall the definition
             definition = nodeutils.definition_from_node(current_node.path())
             definitionutils.uninstall_definition(
