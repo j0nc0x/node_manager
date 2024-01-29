@@ -7,6 +7,7 @@ import sys
 
 import hdefereval
 
+from node_manager import config
 from node_manager import manager
 from node_manager.utils import nodeutils
 
@@ -23,8 +24,18 @@ def get_node_manager():
 
 
 def display_node_manager(current_node):
-    # We can reject nodes straight away if they are not digital assets.
-    if nodeutils.is_digital_asset(current_node.path()):
+    """Should the Node Manager menu be displayed for the given node.
+
+    Args:
+        current_node(hou.Node): The node to check.
+
+    Returns:
+        bool: Should the Node Manager menu be displayed?
+    """
+    if nodeutils.is_digital_asset(
+        current_node.path(),
+        include_hidden=config.node_manager_config.get("include_all_hdas", False)
+    ):
         return True
     else:
         return False
