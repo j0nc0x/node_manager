@@ -172,7 +172,10 @@ class NodeManager(object):
             (bool): Is the node a Node Manager node?
         """
         # We can reject nodes straight away if they are not digital assets.
-        if not nodeutils.is_digital_asset(current_node.path()):
+        if not nodeutils.is_digital_asset(
+            current_node.path(),
+            include_hidden=self.config.get("include_all_hdas", False)
+        ):
             return False
 
         definition = nodeutils.definition_from_node(current_node.path())
