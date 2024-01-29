@@ -241,7 +241,7 @@ class NodeManager(object):
             node_manager.nodetype.NodeType: The nodetype for the given definition.
         """
         logger.debug(
-            "Looking up Node Manager NodeType for {definition}".format(
+            "Looking up NodeManager NodeType for {definition}".format(
                 definition=definition.nodeTypeName(),
             )
         )
@@ -259,7 +259,11 @@ class NodeManager(object):
             index = utils.node_type_index(current_name, category)
             return repo.node_types.get(index)
 
-        logger.warning("No NodeType found.")
+        logger.debug(
+            "No NodeManager NodeType found for {defintion}".format(
+                definition=definition.nodeTypeName(),
+            )
+        )
         return None
 
     def repo_from_definition(self, definition):
