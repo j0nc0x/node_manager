@@ -20,6 +20,12 @@ def node_comment(current_node, published=True):
         current_node(hou.Node): The node to set the comment on.
         edit(bool): Whether the node is editable or not.
     """
+    # Lets aim to come up with a better solution to how we handle node comments, or an alternative approach.
+    # https://github.com/j0nc0x/node_manager/issues/10
+    if current_node.isInsideLockedHDA():
+        logger.debug("Skipping locked node: {node}".format(node=current_node.name()))
+        return
+
     state = "Published"
     if not published:
         state = "Editable"
