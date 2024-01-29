@@ -6,7 +6,7 @@
 - Ignore HDAs that reside inside the Houdini installation directory.
 - Allow HDAs in other locations to be overriden by using either a config setting (`hda_exclude_path`) or an environment variable (`$NODE_MANAGER_HDA_EXCLUDE_PATH`).
 - Allow all HDAs to be considered, including those excluded by the previous point by setting a config option (include_all_hdas).
-### Bugfix
+### Bugfixes
 #### Decrease logging verbosity - No NodeType found (https://github.com/j0nc0x/node_manager/issues/5)
 - Switch `No NodeType found`. warning to debug to make it less annoying.
 - Add more detail to `No NodeType found`. log message to make it more useful for debugging.
