@@ -3,8 +3,11 @@
 """Houdini node utility functions."""
 
 import logging
+import os
 
 import hou
+
+from node_manager import config
 
 
 logger = logging.getLogger(__name__)
@@ -17,6 +20,12 @@ def node_comment(current_node, published=True):
         current_node(hou.Node): The node to set the comment on.
         edit(bool): Whether the node is editable or not.
     """
+    # Lets aim to come up with a better solution to how we handle node comments, or an alternative approach.
+    # https://github.com/j0nc0x/node_manager/issues/10
+    if current_node.isInsideLockedHDA():
+        logger.debug("Skipping locked node: {node}".format(node=current_node.name()))
+        return
+
     state = "Published"
     if not published:
         state = "Editable"
@@ -242,19 +251,44 @@ def definition_from_node(node_path):
     return None
 
 
-def is_digital_asset(node_path):
+def is_digital_asset(node_path, include_hidden=False):
     """
-    Check if the given node path is a digital asset.
+    Check if the given node path is a digital asset that the NodeManager should handle.
 
     Args:
         node_path(str): The Houdini node path to check.
+        include_hidden(bool): Should hidden HDAs be included in the check?
 
     Returns:
         (bool): Is the node at the given path a digital asset.
     """
-    if definition_from_node(node_path):
-        return True
+    definition = definition_from_node(node_path)
+    if definition:
+        if include_hidden:
+            return True
+        else:
+            library_path = definition.libraryFilePath()
+            logger.debug("Checking definition with library path: {path}".format(path=library_path))
+            exclude_paths = config.node_manager_config.get("hda_exclude_path", [])
+            logger.debug("Excluding HDAs from: {path}".format(path=exclude_paths))
 
+            exclude_paths_envvar_str = os.getenv("NODE_MANAGER_HDA_EXCLUDE_PATH")
+            if exclude_paths_envvar_str:
+                logger.debug("Excluding HDAs from envvar: {path}".format(path=exclude_paths_envvar_str))
+                exclude_paths_envvar = exclude_paths_envvar_str.split(os.pathsep)
+            else:
+                exclude_paths_envvar = []
+            full_exclude_paths = exclude_paths + exclude_paths_envvar
+
+            sesi_path = os.getenv("HFS")
+            if sesi_path:
+                logger.debug("Excluding HDAs from HFS: {path}".format(path=sesi_path))
+                full_exclude_paths.append(sesi_path)
+            else:
+                logger.warning("HFS environment variable not set.")
+            logger.info("Full exclude paths: {paths}".format(paths=full_exclude_paths))
+
+            return not library_path.startswith(tuple(full_exclude_paths))
     return False
 
 

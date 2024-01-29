@@ -6,6 +6,7 @@ import logging
 
 import hou
 
+from node_manager import config
 from node_manager import utils
 from node_manager.utils import nodeutils
 
@@ -44,9 +45,12 @@ def node_changed(current_node):
         logger.debug("UI available, cosmetic callbacks enabled.")
 
     # Is the node a digital asset?
-    if not nodeutils.is_digital_asset(current_node.path()):
+    if not nodeutils.is_digital_asset(
+        current_node.path(),
+        include_hidden=config.node_manager_config.get("include_all_hdas", False)
+    ):
         logger.debug(
-            "Skipping node that isn't digital asset: {node}".format(
+            "Skipping node that isn't a NodeManager digital asset: {node}".format(
                 node=current_node.name(),
             )
         )
