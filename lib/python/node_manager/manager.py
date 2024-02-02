@@ -176,7 +176,10 @@ class NodeManager(object):
             (bool): Is the node a Node Manager node?
         """
         # We can reject nodes straight away if they are not digital assets.
-        if not nodeutils.is_digital_asset(current_node.path()):
+        if not nodeutils.is_digital_asset(
+            current_node.path(),
+            include_hidden=self.config.get("include_all_hdas", False)
+        ):
             return False
 
         definition = nodeutils.definition_from_node(current_node.path())
@@ -242,7 +245,7 @@ class NodeManager(object):
             node_manager.nodetype.NodeType: The nodetype for the given definition.
         """
         logger.debug(
-            "Looking up Node Manager NodeType for {definition}".format(
+            "Looking up NodeManager NodeType for {definition}".format(
                 definition=definition.nodeTypeName(),
             )
         )
@@ -260,7 +263,11 @@ class NodeManager(object):
             index = utils.node_type_index(current_name, category)
             return repo.node_types.get(index)
 
-        logger.warning("No NodeType found.")
+        logger.debug(
+            "No NodeManager NodeType found for {definition}".format(
+                definition=definition.nodeTypeName(),
+            )
+        )
         return None
 
     def repo_from_definition(self, definition):
@@ -473,6 +480,9 @@ class NodeManager(object):
             RuntimeError: Cant discard from read-only HDA repo.
         """
         if not self.is_node_manager_node(current_node):
+            # First match the current definition to discard any unsaved changes.
+            current_node.matchCurrentDefinition()
+
             # Uninstall the definition
             definition = nodeutils.definition_from_node(current_node.path())
             definitionutils.uninstall_definition(
