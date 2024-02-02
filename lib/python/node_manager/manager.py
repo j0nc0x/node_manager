@@ -260,7 +260,7 @@ class NodeManager(object):
             return repo.node_types.get(index)
 
         logger.debug(
-            "No NodeManager NodeType found for {defintion}".format(
+            "No NodeManager NodeType found for {definition}".format(
                 definition=definition.nodeTypeName(),
             )
         )
