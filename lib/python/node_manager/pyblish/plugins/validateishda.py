@@ -17,12 +17,13 @@ class ValidateIsHDA(pyblish.api.InstancePlugin):
         """Pyblish process method.
 
         Args:
-            instance(:obj:`list` of :obj:`hou.Node`): The Houdini node instances we are
-                validating.
+            instance(pyblish.plugin.Instance): The pyblish instance being processed.
 
         Raises:
             RuntimeError: Node is not a HDA.
         """
-        for node in instance:
-            if not nodeutils.definition_from_node(node.path()):
-                raise RuntimeError("Node is not a HDA.")
+        node = instance.data["publish_node"]
+        assert node, "No publish node found."
+
+        if not nodeutils.definition_from_node(node.path()):
+            raise RuntimeError("Node is not a HDA.")

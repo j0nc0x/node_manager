@@ -4,7 +4,6 @@
 
 import pyblish.api
 
-from node_manager import manager
 from node_manager import utils
 
 
@@ -22,6 +21,10 @@ class CollectDefinition(pyblish.api.ContextPlugin):
         """
         manager = utils.get_manager()
         publish_node = manager.context.get("pyblish_node")
-        name = publish_node.type().name()
-        instance = context.create_instance(name)
-        instance[:] = [publish_node]
+        instance_data = {
+            "name": publish_node.type().name(),
+        }
+
+        instance = context.create_instance(instance_data.get("name"))
+        instance[:] = [instance_data]
+        instance.data["publish_node"] = publish_node

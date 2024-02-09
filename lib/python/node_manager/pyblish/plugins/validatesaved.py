@@ -18,21 +18,22 @@ class ValidateSaved(pyblish.api.InstancePlugin):
         """Pyblish process method.
 
         Args:
-            instance(:obj:`list` of :obj:`hou.Node`): The Houdini node instances we are
-                validating.
+            instance(pyblish.plugin.Instance): The pyblish instance being processed.
 
         Raises:
             RuntimeError: Node unlocked or has unsaved changes.
         """
-        for node in instance:
-            self.log.info("Validating {node} is saved.".format(node=node))
-            if node.isEditable():
-                raise RuntimeError(
-                    "Node is currently unlocked. Make sure it is saved and matches "
-                    "current definition before publishing."
-                )
-            if not node.matchesCurrentDefinition():
-                raise RuntimeError("Node has unsaved changes.")
+        node = instance.data["publish_node"]
+        assert node, "No publish node found."
+
+        self.log.info("Validating {node} is saved.".format(node=node))
+        if node.isEditable():
+            raise RuntimeError(
+                "Node is currently unlocked. Make sure it is saved and matches "
+                "current definition before publishing."
+            )
+        if not node.matchesCurrentDefinition():
+            raise RuntimeError("Node has unsaved changes.")
 
     @staticmethod
     def auto_fix(instance, action):
@@ -41,9 +42,8 @@ class ValidateSaved(pyblish.api.InstancePlugin):
         This attempts to match the node instance to its definition.
 
         Args:
-            instance(:obj:`list` of :obj:`hou.Node`): The Houdini node instances we are
-                validating.
+            instance(hou.Node): The Houdini node instances we are validating.
             action: The pyblish action taking place.
         """
-        for node in instance:
-            node.matchCurrentDefinition()
+        node = instance.data["publish_node"]
+        node.matchCurrentDefinition()

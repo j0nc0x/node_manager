@@ -17,12 +17,13 @@ class RunPublish(pyblish.api.InstancePlugin):
         """Pyblish process method.
 
         Args:
-            instance(:obj:`list` of :obj:`hou.Node`): The Houdini node instances we are
-                validating.
+            instance(pyblish.plugin.Instance): The pyblish instance being processed.
         """
+        node = instance.data["publish_node"]
+        assert node, "No publish node found."
+
         man = utils.get_manager()
-        for node in instance:
-            man.publish_definition(node)
+        man.publish_definition(node)
 
         # Clean up the UI.
         man.context["pyblish_ui"].destroy()

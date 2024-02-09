@@ -17,17 +17,18 @@ class ValidateIsLatestVersion(pyblish.api.InstancePlugin):
         """Pyblish process method.
 
         Args:
-            instance(:obj:`list` of :obj:`hou.Node`): The Houdini node instances we are
-                validating.
+            instance(pyblish.plugin.Instance): The pyblish instance being processed.
 
         Raises:
             RuntimeError: Node unlocked or has unsaved changes.
         """
-        for node in instance:
-            m = utils.get_manager()
-            if not m.is_latest_version(node):
-                raise RuntimeError(
-                    "{node} is not the latest version. Make sure to match the latest "
-                    "version or have a higher version then the lastest version before "
-                    "publishing.".format(node=node.type().name())
-                )
+        node = instance.data["publish_node"]
+        assert node, "No publish node found."
+
+        m = utils.get_manager()
+        if not m.is_latest_version(node):
+            raise RuntimeError(
+                "{node} is not the latest version. Make sure to match the latest "
+                "version or have a higher version then the lastest version before "
+                "publishing.".format(node=node.type().name())
+            )
