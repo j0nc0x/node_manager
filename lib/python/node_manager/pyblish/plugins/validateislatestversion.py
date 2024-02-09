@@ -12,6 +12,7 @@ class ValidateIsLatestVersion(pyblish.api.InstancePlugin):
 
     order = pyblish.api.ValidatorOrder
     label = "Houdini HDA - Is latest version"
+    families = ["node_manager"]
 
     def process(self, instance):
         """Pyblish process method.

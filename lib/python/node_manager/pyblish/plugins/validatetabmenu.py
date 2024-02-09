@@ -12,6 +12,7 @@ class ValidateTabMenu(pyblish.api.InstancePlugin):
 
     order = pyblish.api.ValidatorOrder
     label = "Houdini HDA - Tab Menu"
+    families = ["node_manager"]
 
     def process(self, instance):
         """Pyblish process method.

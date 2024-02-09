@@ -14,6 +14,7 @@ class ValidateChildren(pyblish.api.InstancePlugin):
 
     order = pyblish.api.ValidatorOrder
     label = "Houdini HDA - Child nodes"
+    families = ["node_manager"]
 
     def process(self, instance):
         """Pyblish process method.

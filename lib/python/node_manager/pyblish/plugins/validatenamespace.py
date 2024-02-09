@@ -14,6 +14,7 @@ class ValidateNamespace(pyblish.api.InstancePlugin):
 
     order = pyblish.api.ValidatorOrder
     label = "Houdini HDA - Namespace"
+    families = ["node_manager"]
 
     def process(self, instance):
         """Pyblish process method.

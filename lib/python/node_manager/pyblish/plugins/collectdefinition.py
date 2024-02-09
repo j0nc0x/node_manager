@@ -12,6 +12,7 @@ class CollectDefinition(pyblish.api.ContextPlugin):
 
     order = pyblish.api.CollectorOrder
     label = "Houdini HDA - Collect"
+    families = ["node_manager"]
 
     def process(self, context):
         """Pyblish process method.
@@ -23,8 +24,12 @@ class CollectDefinition(pyblish.api.ContextPlugin):
         publish_node = manager.context.get("pyblish_node")
         instance_data = {
             "name": publish_node.type().name(),
+            "family": "node_manager",
         }
 
-        instance = context.create_instance(instance_data.get("name"))
+        instance = context.create_instance(
+            instance_data.get("name"),
+            family=instance_data.get("family"),
+        )
         instance[:] = [instance_data]
         instance.data["publish_node"] = publish_node

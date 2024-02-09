@@ -12,6 +12,7 @@ class RunPublish(pyblish.api.InstancePlugin):
 
     order = pyblish.api.ExtractorOrder
     label = "Houdini HDA - Run Publish"
+    families = ["node_manager"]
 
     def process(self, instance):
         """Pyblish process method.

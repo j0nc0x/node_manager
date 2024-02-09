@@ -10,8 +10,9 @@ from node_manager.pyblish.autofix import AutoFixAction
 class ValidateSaved(pyblish.api.InstancePlugin):
     """Validate if the collected node's definition is saved and ready to publish."""
 
-    label = "Houdini HDA - Saved"
     order = pyblish.api.ValidatorOrder
+    label = "Houdini HDA - Saved"
+    families = ["node_manager"]
     actions = [AutoFixAction]
 
     def process(self, instance):
