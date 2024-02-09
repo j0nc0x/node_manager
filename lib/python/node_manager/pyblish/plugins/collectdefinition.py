@@ -21,7 +21,7 @@ class CollectDefinition(pyblish.api.ContextPlugin):
             context(pyblish.Context): The Houdini node instances we are validating.
         """
         manager = utils.get_manager()
-        publish_node = manager.publish_node
+        publish_node = manager.context.get("pyblish_node")
         name = publish_node.type().name()
         instance = context.create_instance(name)
-        instance[:] = [manager.publish_node]
+        instance[:] = [publish_node]

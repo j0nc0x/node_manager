@@ -23,4 +23,8 @@ class RunPublish(pyblish.api.InstancePlugin):
         man = utils.get_manager()
         for node in instance:
             man.publish_definition(node)
-            man.validator_ui.destroy()
+
+        # Clean up the UI.
+        man.context["pyblish_ui"].destroy()
+        man.context["pyblish_ui"] = None
+        man.context["pyblish_node"] = None
