@@ -9,5 +9,4 @@ node_manager_config = {
         "{user}",
         "{user}.dev",
     ],
-    "validate_plugin": "PyblishValidate"
 }
