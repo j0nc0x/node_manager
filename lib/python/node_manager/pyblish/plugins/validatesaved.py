@@ -25,6 +25,7 @@ class ValidateSaved(pyblish.api.InstancePlugin):
             RuntimeError: Node unlocked or has unsaved changes.
         """
         for node in instance:
+            self.log.info("Validating {node} is saved.".format(node=node))
             if node.isEditable():
                 raise RuntimeError(
                     "Node is currently unlocked. Make sure it is saved and matches "
