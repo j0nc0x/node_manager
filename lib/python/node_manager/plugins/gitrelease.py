@@ -172,6 +172,46 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         self._git_repo().git.commit(m=comment)
         self._git_repo().git.push("--set-upstream", "origin", current)
 
+        # Update the docs
+        logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        logger.info(os.listdir(hda_path))
+        logger.info(self._node_type_name)
+        definition_subdirectory = nodetypeutils.definition_subdir(
+            self._node_type_name,
+            definition.nodeTypeCategory().name(),
+        )
+
+        # Node Icon
+        icon_path = os.path.join(hda_path, definition_subdirectory, "IconSVG")
+        has_icon = False
+        logger.info("Icon sub-directory: {path}".format(path=icon_path))
+        if os.path.isfile(icon_path):
+            logger.info("Icon file found at {path}".format(path=icon_path))
+            has_icon = True
+
+        # Node Description
+        description_path = os.path.join(hda_path, definition_subdirectory, "Description")
+        has_description = False
+        logger.info("Description sub-directory: {path}".format(path=description_path))
+        if os.path.isfile(description_path):
+            logger.info("Description file found at {path}".format(path=description_path))
+            has_description = True
+
+        # Parm Help
+        parm_templates_group = definition.parmTemplateGroup()
+        parm_help = []
+        if parm_templates_group:
+            for parm_template in parm_templates_group.parmTemplates():
+                logger.info(parm_template)
+                parm_help.append(
+                    {
+                        "name": parm_template.name(),
+                        "help": parm_template.help(),
+                    }
+                )
+        if parm_help:
+            logger.info("Parm help found: {help}".format(help=parm_help))
+
         # Increment version in config
         repo_conf_data["version"] = self.release_version
         os.makedirs(os.path.dirname(config_path), exist_ok=True)

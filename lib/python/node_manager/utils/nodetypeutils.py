@@ -8,6 +8,24 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def definition_subdir(name, category):
+    """Get the definition subdirectory name.
+
+    Args:
+        name(str): The node type name.
+        category(str): The node type category.
+
+    Returns:
+        (str): The definition subdirectory name.
+    """
+    return "{namespace}_8_8{category}_1{typename}_8_8{version}".format(
+        namespace=node_type_namespace(name),
+        category=category,
+        typename=node_type_name(name),
+        version=node_type_version(name),
+    )
+
+
 def valid_node_type_name(node_type_name):
     """
     Validate the nodeTypeName for the given hou.HDADefinition.
