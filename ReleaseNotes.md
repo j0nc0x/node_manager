@@ -1,7 +1,13 @@
 # Node Manager Release Notes
 
+## 0.x.x (xx/xx/24)
+### Bugfixes
+#### Tidy up logging messages for nodes with different namespaces (https://github.com/j0nc0x/node_manager/issues/16)
+- Updating logger messages to be a bit more tidy.
+
 ## 0.2.1 (02/02/24)
 ### Bugfixes
+#### Logger message typo (https://github.com/j0nc0x/node_manager/issues/14)
 - Correcting small typo in logger message.
 
 ## 0.2.0 (29/01/24)
