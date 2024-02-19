@@ -88,6 +88,14 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         """
         return os.path.join(self._release_dir, self.node_name)
 
+    def _docs_root(self):
+        """Get the path to the docs root.
+
+        Returns:
+            (str): The path to the docs root.
+        """
+        return os.path.join(self._git_dir(), "docs", "hdas")
+
     def _node_root(self):
         """Get the path to the node root.
 
@@ -211,6 +219,65 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
                 )
         if parm_help:
             logger.info("Parm help found: {help}".format(help=parm_help))
+
+        # Update the docs.
+        docs_path = self._docs_root()
+        logger.info("Docs path: {path}".format(path=docs_path))
+        logger.info(os.path.exists(docs_path))
+        if not os.path.exists(docs_path):
+            logger.info("Creating docs path: {path}".format(path=docs_path))
+            os.makedirs(docs_path, exist_ok=True)
+            logger.info("done")
+
+        logger.info(os.path.exists(docs_path))
+
+        node_docs_path = os.path.join(docs_path, "{name}.md".format(name=self.node_name))
+        logger.info("Node docs path: {path}".format(path=node_docs_path))
+        icon_relative = os.path.relpath(icon_path, docs_path)
+        with open(node_docs_path, "w") as node_docs:
+            node_docs.write("# {name}\n".format(name=self.node_name))
+
+            icon_name = "default.svg"
+            if has_icon:
+                logger.info("Writing icon to docs.")
+                icon_name = "{name}.svg".format(name=self.node_name)
+                shutil.copyfile(icon_path, os.path.join(docs_path, icon_name))
+
+            node_docs.write(
+                "<img src={path} width=\"50\" height=\"50\">".format(
+                    path=icon_name,
+                )
+            )
+
+            node_docs.write(
+                "**Category**: {category} **Namespace**: {namespace}\n".format(
+                    category=definition.nodeTypeCategory().name(),
+                    namespace=definition.nodeTypeName(),
+                )
+            )
+
+            if has_description:
+                node_docs.write("## Description\n")
+                with open(description_path, "r") as description:
+                    node_docs.write(description.read())
+                node_docs.write("\n")
+
+            if parm_help:
+                node_docs.write("## Parameters\n")
+                node_docs.write("| Name | Help |\n")
+                node_docs.write("| --- | --- |\n")
+            for parm in parm_help:
+                node_docs.write(
+                    "| {name} | {help} |\n".format(
+                        name=parm["name"],
+                        help=parm["help"],
+                    )
+                )
+
+        # Commit and push
+        self._git_repo().git.add(A=True)
+        self._git_repo().git.commit(m="Adding docs")
+        self._git_repo().git.push()
 
         # Increment version in config
         repo_conf_data["version"] = self.release_version
