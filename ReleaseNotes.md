@@ -9,6 +9,8 @@
 ### Bugfixes
 #### Tidy up logging messages for nodes with different namespaces (https://github.com/j0nc0x/node_manager/issues/16)
 - Updating logger messages to be a bit more tidy.
+#### Simplify Pyblish setup (https://github.com/j0nc0x/node_manager/pull/25)
+- Simplify Pyblish setup by using Pyblish Lite instead of PyblishQML.
 
 ## 0.2.1 (02/02/24)
 ### Bugfixes
