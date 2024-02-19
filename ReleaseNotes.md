@@ -1,6 +1,6 @@
 # Node Manager Release Notes
 
-## 0.x.x (xx/xx/24)
+## 0.3.0 (19/02/24)
 ### Features
 #### Add Pyblish Support (https://github.com/j0nc0x/node_manager/pull/20)
 - Added validate plugins to handle validation workflow.
