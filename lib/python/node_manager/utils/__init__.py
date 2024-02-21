@@ -2,12 +2,14 @@
 
 """Node manager utils."""
 
+import getpass
 import logging
 import os
 import time
 
 import hou
 
+from node_manager import config
 from node_manager import manager
 from node_manager.utils import nodetypeutils
 
@@ -228,3 +230,42 @@ def expanded_hda_name(definition):
         name=name,
         version=version,
     )
+
+
+def is_released(path):
+    """
+    Check if the given path is within a released location on disk.
+
+    Args:
+        path(str): The path we want to check.
+
+    Returns:
+        (bool): Is the path released.
+    """
+    released_locations = config.node_manager_config.get("released_locations", [])
+
+    return path.startswith(tuple(released_locations))
+
+
+def expand_namespaces(namespaces):
+    """
+    Expand namespace tokens in the given list of namespace templates.
+
+    ie. dev.{user} becomes dev.jon
+
+    Args:
+        namespaces(list): A list of namespace templates we want to expand.
+
+    Returns:
+        list: The expanded namespace templates.
+    """
+    expanded_namespaces = []
+    for namespace_template in namespaces:
+        if "{user}" in namespace_template:
+            expanded_namespaces.append(
+                namespace_template.format(user=getpass.getuser())
+            )
+        else:
+            expanded_namespaces.append(namespace_template)
+
+    return expanded_namespaces

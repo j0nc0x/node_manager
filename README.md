@@ -46,6 +46,7 @@ Config options currently supported:
 - `background (bool)`: Should the HDAs be loaded in the background thread.
 - `discover_plugin (str)`: The name of the discover plugin to use. If unset use `DefaultDiscover`.
 - `load_plugin (str)`: The name of the load plugin to use. If unset use `DefaultLoad`.
+- `validate_plugin (str)`: The name of the validate plugin to use. If unset use `DefaultValidate`.
 - `release_plugin (str)`: The name of the release plugin to use. If unset us `DefaultRelease`.
 - `rez_packages_root (str)`: The main path to where rez packages are released.
 - `rez_package_name (str)`: The name of the rez package used by `NodeManager`.
@@ -76,7 +77,13 @@ Load plugins allow us to customise the way that a Node Manager Repo loads it's d
 
 - `DefaultLoad`: Load all node definitions found in the repository path, installing the definitions into the current session and tracking them through `NodeManager`.
 - `GitLoad`: Clone the Git Repository and then expand the Node Definitions found there into the temp directory. Install the definitions into the current session and keep track of them with the `NodeManager`.
-- `RezLoad`: Load all node definitions found in the repository path (which should be a rez package). 
+- `RezLoad`: Load all node definitions found in the repository path (which should be a rez package).
+
+#### Validate Plugins
+Validation plugins allow customisation of how a definition is validated during the release.
+
+- `DefaultValidate`: A very simple non-UI based validation covering only very basic criteria (ie. are we trying to release a HDA and is it from a node where the changes are saved).
+- `PyblishValidate`: An itegration with Pyblish allowing that to be used for validation purposes. Some basic Pyblish validation plugins are included, and these can easily be added to and extended.
 
 #### Release Plugins
 Release plugins allow customisation of the way changed node definitions can be published.
