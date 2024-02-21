@@ -1,6 +1,6 @@
 # Node Manager Release Notes
 
-## 0.3.0 (19/02/24)
+## 0.3.0 (xx/xx/24)
 ### Features
 #### Add Pyblish Support (https://github.com/j0nc0x/node_manager/pull/20)
 - Added validate plugins to handle validation workflow.
@@ -11,6 +11,8 @@
 - Updating logger messages to be a bit more tidy.
 #### Simplify Pyblish setup (https://github.com/j0nc0x/node_manager/pull/25)
 - Simplify Pyblish setup by using Pyblish Lite instead of PyblishQML.
+#### Editable definition not cleaned up on release (https://github.com/j0nc0x/node_manager/issues/19)
+- If not backup directory is configured use definition-dir/backup.
 
 ## 0.2.1 (02/02/24)
 ### Bugfixes
