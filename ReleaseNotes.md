@@ -14,6 +14,8 @@
 #### Include pyblish rez package and missing requirements (https://github.com/j0nc0x/node_manager/issues/27)
 - Include missing package dependency.
 - Include missing requirement docs.
+#### Editable definition not cleaned up on release (https://github.com/j0nc0x/node_manager/issues/19)
+- If not backup directory is configured use definition-dir/backup.
 
 ## 0.2.1 (02/02/24)
 ### Bugfixes

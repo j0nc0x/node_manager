@@ -47,16 +47,20 @@ def uninstall_definition(definition, backup_dir=None):
     path = definition.libraryFilePath()
     hou.hda.uninstallFile(path)
 
+    # If no backup directory is provided then just use a sub-directory of the current directory.
+    if not backup_dir:
+        logger.debug("No backup directory from config: {backup_dir}".format(backup_dir=backup_dir))
+        backup_dir = os.path.join(os.path.dirname(path), "backup")
+
     # Move the .hda file to backup
-    if backup_dir:
-        if not os.path.exists(backup_dir):
-            os.makedirs(backup_dir)
-        shutil.move(path, backup_dir)
-        logger.debug(
-            "{path} backed-up to {backup}.".format(
-                path=os.path.basename(path), backup=backup_dir
-            )
+    if not os.path.exists(backup_dir):
+        os.makedirs(backup_dir)
+    shutil.move(path, backup_dir)
+    logger.debug(
+        "{path} backed-up to {backup}.".format(
+            path=os.path.basename(path), backup=backup_dir
         )
+    )
 
 
 def cleanup_embedded_definitions(nodetype):
