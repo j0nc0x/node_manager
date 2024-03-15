@@ -19,6 +19,10 @@ For Git/Rez Load/Release:
 For Rez Load/Release:
 - `rez`: https://github.com/AcademySoftwareFoundation/rez
 
+For Pyblish Validation:
+- `pyblish lite`: https://github.com/pyblish/pyblish-lite
+- `pyblish base`: https://github.com/pyblish/pyblish-base
+
 ## Install NodeManager
 ### Rez
 The preferred installation method is through [rez](https://github.com/AcademySoftwareFoundation/rez). In order to deploy with rez:

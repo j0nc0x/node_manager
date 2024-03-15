@@ -12,6 +12,7 @@ requires = [
     "GitPython",
     "houdini",
     "packaging",
+    "pyblish_lite", # Required for PyblishValidate plugin. Name dependent on local rez pyblish lite configuration.
 ]
 
 build_command = "{root}/bin/build {install}"
