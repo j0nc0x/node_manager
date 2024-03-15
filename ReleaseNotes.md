@@ -12,6 +12,8 @@
 #### Simplify Pyblish setup (https://github.com/j0nc0x/node_manager/issues/24)
 - Simplify Pyblish setup by using Pyblish Lite instead of PyblishQML.
 #### Include pyblish rez package and missing requirements (https://github.com/j0nc0x/node_manager/issues/27)
+- Include missing package dependency.
+- Include missing requirement docs.
 
 ## 0.2.1 (02/02/24)
 ### Bugfixes
