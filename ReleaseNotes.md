@@ -16,6 +16,8 @@
 - Include missing requirement docs.
 #### Editable definition not cleaned up on release (https://github.com/j0nc0x/node_manager/issues/19)
 - If not backup directory is configured use definition-dir/backup.
+#### Decrease verbosity of Exclude paths log (https://github.com/j0nc0x/node_manager/issues/29)
+- Make log less verbose.
 
 ## 0.2.1 (02/02/24)
 ### Bugfixes
