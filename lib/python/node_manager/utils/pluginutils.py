@@ -163,6 +163,28 @@ def get_edit_plugin(edit_plugin_name):
             )
 
 
+def get_validate_plugin(validate_plugin_name):
+    """Get the given validate plugin.
+
+    Args:
+        validate_plugin_name(str): The name of the validate plugin to get.
+
+    Returns:
+        object: The validate plugin.
+    """
+    manager_instance = utils.get_manager()
+    if validate_plugin_name:
+        validate_plugin = validate_plugin_name
+    else:
+        validate_plugin = "DefaultValidate"
+
+    for plugin_module in manager_instance._plugins:
+        if plugin_module.NodeManagerPlugin.name == validate_plugin:
+            return initialise_plugin(
+                plugin_module,
+            )
+
+
 def get_release_plugin(release_plugin_name):
     """Get the given release plugin.
 

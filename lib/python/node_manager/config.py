@@ -5,4 +5,8 @@
 
 node_manager_config = {
     "background": False,
+    "namespaces": [
+        "{user}",
+        "{user}.dev",
+    ],
 }

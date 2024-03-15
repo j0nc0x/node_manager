@@ -37,10 +37,27 @@ class NodeType(object):
         self.namespace = namespace
         self.versions = dict()
         logger.info(
-            "Initialised NodeType: {namespace}::{name}".format(
-                namespace=self.namespace, name=self.name
+            "Initialised NodeType: {name}".format(
+                name=self.get_name(),
             )
         )
+
+    def get_name(self, include_namespace=True):
+        """
+        Get the name of the node type.
+
+        Args:
+            include_namespace(:obj:`bool`,optional): Include the namespace in the name.
+
+        Returns:
+            (str): The name of the node type.
+        """
+        if include_namespace and self.namespace:
+            return "{namespace}::{name}".format(
+                namespace=self.namespace, name=self.name
+            )
+        else:
+            return self.name
 
     def add_version(self, version, definition, force=False):
         """
@@ -53,8 +70,8 @@ class NodeType(object):
                 the load depth.
         """
         logger.info(
-            "Adding version {version} for {namespace}::{name}".format(
-                version=version, namespace=self.namespace, name=self.name
+            "Adding version {version} for {name}".format(
+                version=version, name=self.get_name()
             )
         )
         install = True
