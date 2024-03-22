@@ -9,4 +9,6 @@ node_manager_config = {
         "{user}",
         "{user}.dev",
     ],
+    "load_plugin": "GitLoad",
+    "release_plugin": "GitRelease",
 }
