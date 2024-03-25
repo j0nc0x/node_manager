@@ -2,7 +2,7 @@
 
 name = "node_manager"
 
-version = "0.2.1"
+version = "0.3.0"
 
 description = "Houdini Node Manager"
 
