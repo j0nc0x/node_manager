@@ -211,9 +211,6 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         # success
         logger.info("Release successful for {hda}.".format(hda=self.node_name))
 
-        logger.info("Manager context: {}".format(self.manager.context))
-        logger.info("Repo context: {}".format(self.repo.context))
-
         return True
 
     def release(self, current_node, release_comment=None):
