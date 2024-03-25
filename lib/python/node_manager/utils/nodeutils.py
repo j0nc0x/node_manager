@@ -286,7 +286,7 @@ def is_digital_asset(node_path, include_hidden=False):
                 full_exclude_paths.append(sesi_path)
             else:
                 logger.warning("HFS environment variable not set.")
-            logger.info("Full exclude paths: {paths}".format(paths=full_exclude_paths))
+            logger.debug("Full exclude paths: {paths}".format(paths=full_exclude_paths))
 
             return not library_path.startswith(tuple(full_exclude_paths))
     return False
