@@ -18,6 +18,8 @@
 - If not backup directory is configured use definition-dir/backup.
 #### Decrease verbosity of Exclude paths log (https://github.com/j0nc0x/node_manager/issues/29)
 - Make log less verbose.
+#### Git / Rez Release Issues (https://github.com/j0nc0x/node_manager/issues/13)
+- Use temp when cloning to avoid problems from previous release issues.
 
 ## 0.2.1 (02/02/24)
 ### Bugfixes
