@@ -2,7 +2,7 @@
 
 name = "node_manager"
 
-version = "0.2.1"
+version = "0.3.0"
 
 description = "Houdini Node Manager"
 
@@ -12,6 +12,7 @@ requires = [
     "GitPython",
     "houdini",
     "packaging",
+    "pyblish_lite", # Required for PyblishValidate plugin. Name dependent on local rez pyblish lite configuration.
 ]
 
 build_command = "{root}/bin/build {install}"

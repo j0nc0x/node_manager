@@ -7,16 +7,11 @@ import logging
 import os
 import time
 
+from packaging.version import parse
+
 from tempfile import mkdtemp
 
 import hou
-
-from packaging.version import parse
-
-if hou.isUIAvailable():
-    from hdefereval import do_work_in_background_thread
-else:
-    do_work_in_background_thread = None
 
 from node_manager import config
 from node_manager import utils
@@ -28,6 +23,11 @@ from node_manager.utils import (
     pluginutils,
 )
 
+if hou.isUIAvailable():
+    from hdefereval import do_work_in_background_thread
+else:
+    do_work_in_background_thread = None
+
 logger = logging.getLogger(__name__)
 
 
@@ -36,6 +36,7 @@ class NodeManager(object):
 
     instance = None
     config = config.node_manager_config
+    publish_node = None
 
     @classmethod
     def init(cls):
@@ -61,6 +62,7 @@ class NodeManager(object):
         self.discover_plugin = self.config.get("discover_plugin")
         self.load_plugin = self.config.get("load_plugin")
         self.edit_plugin = self.config.get("edit_plugin")
+        self.validate_plugin = self.config.get("validate_plugin")
         self.release_plugin = self.config.get("release_plugin")
 
         self.stats = {}
@@ -76,6 +78,7 @@ class NodeManager(object):
         self.context["manager_backup_dir"] = os.path.join(
             self.context.get("manager_edit_dir"), "backup"
         )
+        self.context["manager_module_root"] = os.path.dirname(os.path.abspath(__file__))
         self.releases = list()
         self.node_repos = self.initialise_repos()
         start = time.time()
@@ -497,6 +500,15 @@ class NodeManager(object):
         Args:
             current_node(hou.Node): The node we are attempting to publish from.
         """
+        validate_plugin = pluginutils.get_validate_plugin(self.validate_plugin)
+        if not validate_plugin:
+            raise RuntimeError("Couldn't find Node Manager Validate Plugin.")
+
+        if not validate_plugin.validate(current_node):
+            logger.warning("Node is not ready to release.")
+            return
+
+    def publish_definition(self, current_node):
         path = current_node.path()
 
         result = hou.ui.readInput(

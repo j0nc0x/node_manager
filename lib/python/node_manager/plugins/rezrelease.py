@@ -357,7 +357,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         Returns:
             str: The path to the HDA repo on disk."""
         return os.path.join(
-            self.manager.context.get("manager_base_dir"), self.repo.context.get("repo_name")
+            self.manager.context.get("manager_temp_dir"), self.repo.context.get("repo_name")
         )
 
     def git_repo_clone_dir(self):
@@ -366,7 +366,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         Returns:
             str: The path to the HDA repo on disk."""
         return os.path.join(
-            self.repo.context.get("git_repo_root"), self.repo.context.get("repo_name")
+            self.repo.context.get("git_repo_root"), "clone", self.repo.context.get("repo_name")
         )
 
     def clone_repo(self):

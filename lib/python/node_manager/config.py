@@ -7,4 +7,8 @@ node_manager_config = {
     "background": False,
     "load_plugin": "GitLoad",
     "release_plugin": "GitRelease",
+    "namespaces": [
+        "{user}",
+        "{user}.dev",
+    ],
 }
