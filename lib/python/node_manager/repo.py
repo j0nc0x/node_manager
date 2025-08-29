@@ -2,6 +2,7 @@
 
 """Handle Node Repos."""
 
+import json
 import logging
 import os
 
@@ -34,6 +35,7 @@ class NodeRepo(object):
         """
         self.manager = manager
         self.context = {}
+        self.config = {}
 
         self.context["repo_path"] = repo_path
         self.context["repo_name"] = self.get_name()
@@ -92,10 +94,23 @@ class NodeRepo(object):
         """
         load_plugin = self.get_load_plugin()
         self.node_manager_definition_files = load_plugin.load()
+        self.load_config()
 
-    def config_path(self):
-        """ """
-        return os.path.join(self.context.get("git_repo_clone"), "config", "config.json")
+    def load_config(self):
+        """Load the repo config.
+        
+        Raises:
+            RuntimeError: Config file not found.
+        """
+        config_path = self.context.get("config_path")
+
+        if not os.path.isfile(config_path):
+            raise RuntimeError(f"Config file not found: {config_path}")
+
+        with open(config_path, "r") as repo_conf:
+            self.config = json.load(repo_conf)
+
+        logger.info(f"Repo config: {self.config}")
 
     def get_name(self):
         """Get the repo name.
@@ -125,6 +140,10 @@ class NodeRepo(object):
             (None)
         """
         current_name = definition.nodeTypeName()
+        for hidden_node in self.config.get("ophide", []):
+            if hidden_node in current_name:
+                logger.info(f"Skipping hidden definition: {current_name}")
+                return
         category = definition.nodeTypeCategory().name()
         index = utils.node_type_index(current_name, category)
         name = nodetypeutils.node_type_name(current_name)
@@ -160,11 +179,6 @@ class NodeRepo(object):
         Args:
             force(:obj:`bool`,optional): Force the HDA to be installed.
         """
-        logger.debug(
-            "Reading from {directory}".format(
-                directory=self.context.get("git_repo_temp"),
-            )
-        )
         if force:
             self.initialise_repo()
 
