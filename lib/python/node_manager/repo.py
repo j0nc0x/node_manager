@@ -140,10 +140,6 @@ class NodeRepo(object):
             (None)
         """
         current_name = definition.nodeTypeName()
-        for hidden_node in self.config.get("ophide", []):
-            if hidden_node in current_name:
-                logger.info(f"Skipping hidden definition: {current_name}")
-                return
         category = definition.nodeTypeCategory().name()
         index = utils.node_type_index(current_name, category)
         name = nodetypeutils.node_type_name(current_name)
@@ -155,11 +151,17 @@ class NodeRepo(object):
             hda_node_type = nodetype.NodeType(self.manager, name, namespace)
             self.node_types[index] = hda_node_type
 
+        hidden = False
+        for hidden_node in self.config.get("ophide", []):
+            if hidden_node in current_name:
+                hidden = True
+
         # Otherwise load as normal
         self.node_types[index].add_version(
             version,
             definition,
             force=force,
+            hidden=hidden,
         )
 
     def process_node_definition_file(self, path, force=False):

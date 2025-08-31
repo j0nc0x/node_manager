@@ -59,7 +59,7 @@ class NodeType(object):
         else:
             return self.name
 
-    def add_version(self, version, definition, force=False):
+    def add_version(self, version, definition, force=False, hidden=False):
         """
         Add a new NodeType version to the manager.
 
@@ -78,7 +78,7 @@ class NodeType(object):
         path = definition.libraryFilePath()
 
         node_type_version = nodetypeversion.NodeTypeVersion(
-            path, definition=definition, install=install
+            path, definition=definition, install=install, hidden=hidden,
         )
 
         if version is None:
