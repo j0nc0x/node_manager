@@ -2,7 +2,7 @@
 
 ## 0.4.0 (xx/xx/xx)
 ### Features
-#### Add Python-3.11 (https://github.com/j0nc0x/node_manager/pull/36)
+#### Add Python-3.11 (https://github.com/j0nc0x/node_manager/issues/35)
 - Added Python / Houdini version independent init.
 - Call the above init from python3.11 / python3.9 pythonrc.
 
