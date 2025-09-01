@@ -23,7 +23,7 @@ class NodeTypeVersion(object):
         hidden=False,
     ):
         """
-        Initalise the NodeTypeVersion.
+        Initialise the NodeTypeVersion.
 
         Args:
             path(str): The path to the Node definition file that containst this version.
