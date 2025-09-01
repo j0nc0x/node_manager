@@ -66,6 +66,7 @@ class NodeType(object):
         Args:
             version(str): The version to add the definition under.
             definition(hou.HDADefinition): The definition to add.
+            hidden(bool, optional): Should the definition be hidden?
         """
         logger.info(
             f"Adding version {version} for {self.get_name()}"
