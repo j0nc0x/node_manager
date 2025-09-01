@@ -76,7 +76,10 @@ class NodeType(object):
         path = definition.libraryFilePath()
 
         node_type_version = nodetypeversion.NodeTypeVersion(
-            path, definition=definition, install=install, hidden=hidden,
+            path,
+            definition=definition,
+            install=install,
+            hidden=hidden,
         )
 
         if version is None:

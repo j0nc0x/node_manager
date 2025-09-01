@@ -153,10 +153,7 @@ class NodeRepo(object):
             hda_node_type = nodetype.NodeType(self.manager, name, namespace)
             self.node_types[index] = hda_node_type
 
-        hidden = False
-        for hidden_node in self.config.get("ophide", []):
-            if hidden_node in current_name:
-                hidden = True
+        hidden = any(n in current_name for n in self.config.get("ophide", []))
 
         # Otherwise load as normal
         self.node_types[index].add_version(
