@@ -132,13 +132,11 @@ class NodeRepo(object):
 
         return name
 
-    def process_definition(self, definition, force=False):
+    def process_definition(self, definition):
         """Update the node_types dictionary usng the provided definition.
 
         Args:
             definition(hou.HDADefinition): The node definition to process.
-            force(:obj:`bool`,optional): Force the version to be processed irrespective
-                of if it already exists.
 
         Returns:
             (None)
@@ -164,20 +162,18 @@ class NodeRepo(object):
         self.node_types[index].add_version(
             version,
             definition,
-            force=force,
             hidden=hidden,
         )
 
-    def process_node_definition_file(self, path, force=False):
+    def process_node_definition_file(self, path):
         """Process the given node definition file and handle any definitions it contains.
 
         Args:
             path(str): The path to the node definition file we are processing.
-            force(:obj:`bool`,optional): Force the HDA to be installed.
         """
         definitions = hou.hda.definitionsInFile(path)
         for definition in definitions:
-            self.process_definition(definition, force=force)
+            self.process_definition(definition)
 
     def load_nodes(self, force=False):
         """Load all definitions contained by this repository.
@@ -279,6 +275,6 @@ class NodeRepo(object):
         logger.debug("Definition saved to {path}".format(path=editable_path))
 
         # Add the newly written HDA to the Node Manager
-        self.process_node_definition_file(editable_path, force=True)
+        self.process_node_definition_file(editable_path)
 
         return new_name
