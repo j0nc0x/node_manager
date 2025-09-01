@@ -25,16 +25,14 @@ class NodeManagerPlugin(load.NodeManagerPlugin):
         self.repo.context["git_repo_root"] = self.git_repo_root()
         self.repo.context["git_repo_clone"] = self.git_repo_clone_dir()
         self.repo.context["repo_load_path"] = self.repo_load_dir()
-        self.repo.context["config_path"] = self.config_path()
-        logger.info(f"Config path: {self.repo.context.get('config_path')}")
-        logger.info(f"Exists: {os.path.isfile(self.repo.context.get('config_path'))}")
+        self.repo.context["config_path"] = self._config_path()
         logger.debug(
             "Initialise GitLoad: {repo_path}".format(
                 repo_path=self.repo.context.get("repo_path"),
             )
         )
 
-    def config_path(self):
+    def _config_path(self):
         """Get the path to the config file.
 
         Returns:

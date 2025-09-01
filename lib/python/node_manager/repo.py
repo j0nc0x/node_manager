@@ -104,6 +104,10 @@ class NodeRepo(object):
         """
         config_path = self.context.get("config_path")
 
+        if not config_path:
+            logger.warning("No config path set, skipping.")
+            return
+
         if not os.path.isfile(config_path):
             raise RuntimeError(f"Config file not found: {config_path}")
 

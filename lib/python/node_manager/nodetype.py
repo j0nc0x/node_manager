@@ -70,9 +70,8 @@ class NodeType(object):
                 the load depth.
         """
         logger.info(
-            "Adding version {version} for {name}".format(
-                version=version, name=self.get_name()
-            )
+            f"Adding version {version} for {self.get_name()}"
+            f"{' <hidden>' if hidden else ''}"
         )
         install = True
         path = definition.libraryFilePath()

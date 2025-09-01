@@ -56,6 +56,6 @@ class NodeTypeVersion(object):
         self.definition.nodeType().setHidden(hidden)
 
         self.installed = True
-        logger.info("Installed file {path}".format(path=path))
+        logger.info(f"Installed file {path}{' <hidden>' if hidden else ''}")
 
         definitionutils.cleanup_embedded_definitions(self.definition.nodeType())
