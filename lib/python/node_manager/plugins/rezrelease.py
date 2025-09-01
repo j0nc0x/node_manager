@@ -394,7 +394,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
                 os.makedirs(repo_root)
                 logger.debug("Created repo directory: {path}".format(path=repo_root))
             cloned_repo = Repo.clone_from(
-                self.repo.context.get("git_repo_path"), repo_root, depth=1
+                self.repo.config.get("repo_url"), repo_root, depth=1
             )
 
         return cloned_repo
