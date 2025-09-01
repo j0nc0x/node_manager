@@ -1,5 +1,11 @@
 # Node Manager Release Notes
 
+## 0.4.0 (xx/xx/xx)
+### Features
+#### Add Python-3.11 (https://github.com/j0nc0x/node_manager/pull/36)
+- Added Python / Houdini version independent init.
+- Call the above init from python3.11 / python3.9 pythonrc.
+
 ## 0.3.0 (25/03/24)
 ### Features
 #### Add Pyblish Support (https://github.com/j0nc0x/node_manager/issues/18)
