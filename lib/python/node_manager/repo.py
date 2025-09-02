@@ -2,6 +2,7 @@
 
 """Handle Node Repos."""
 
+import json
 import logging
 import os
 
@@ -34,6 +35,7 @@ class NodeRepo(object):
         """
         self.manager = manager
         self.context = {}
+        self.config = {}
 
         self.context["repo_path"] = repo_path
         self.context["repo_name"] = self.get_name()
@@ -92,10 +94,27 @@ class NodeRepo(object):
         """
         load_plugin = self.get_load_plugin()
         self.node_manager_definition_files = load_plugin.load()
+        self.load_config()
 
-    def config_path(self):
-        """ """
-        return os.path.join(self.context.get("git_repo_clone"), "config", "config.json")
+    def load_config(self):
+        """Load the repo config.
+        
+        Raises:
+            RuntimeError: Config file not found.
+        """
+        config_path = self.context.get("config_path")
+
+        if not config_path:
+            logger.warning("No config path set, skipping.")
+            return
+
+        if not os.path.isfile(config_path):
+            raise RuntimeError(f"Config file not found: {config_path}")
+
+        with open(config_path, "r") as repo_conf:
+            self.config = json.load(repo_conf)
+
+        logger.info(f"Repo config: {self.config}")
 
     def get_name(self):
         """Get the repo name.
@@ -113,13 +132,11 @@ class NodeRepo(object):
 
         return name
 
-    def process_definition(self, definition, force=False):
+    def process_definition(self, definition):
         """Update the node_types dictionary usng the provided definition.
 
         Args:
             definition(hou.HDADefinition): The node definition to process.
-            force(:obj:`bool`,optional): Force the version to be processed irrespective
-                of if it already exists.
 
         Returns:
             (None)
@@ -136,23 +153,24 @@ class NodeRepo(object):
             hda_node_type = nodetype.NodeType(self.manager, name, namespace)
             self.node_types[index] = hda_node_type
 
+        hidden = any(n in current_name for n in self.config.get("ophide", []))
+
         # Otherwise load as normal
         self.node_types[index].add_version(
             version,
             definition,
-            force=force,
+            hidden=hidden,
         )
 
-    def process_node_definition_file(self, path, force=False):
+    def process_node_definition_file(self, path):
         """Process the given node definition file and handle any definitions it contains.
 
         Args:
             path(str): The path to the node definition file we are processing.
-            force(:obj:`bool`,optional): Force the HDA to be installed.
         """
         definitions = hou.hda.definitionsInFile(path)
         for definition in definitions:
-            self.process_definition(definition, force=force)
+            self.process_definition(definition)
 
     def load_nodes(self, force=False):
         """Load all definitions contained by this repository.
@@ -160,11 +178,6 @@ class NodeRepo(object):
         Args:
             force(:obj:`bool`,optional): Force the HDA to be installed.
         """
-        logger.debug(
-            "Reading from {directory}".format(
-                directory=self.context.get("git_repo_temp"),
-            )
-        )
         if force:
             self.initialise_repo()
 
@@ -259,6 +272,6 @@ class NodeRepo(object):
         logger.debug("Definition saved to {path}".format(path=editable_path))
 
         # Add the newly written HDA to the Node Manager
-        self.process_node_definition_file(editable_path, force=True)
+        self.process_node_definition_file(editable_path)
 
         return new_name

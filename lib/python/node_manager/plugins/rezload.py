@@ -28,14 +28,10 @@ class NodeManagerPlugin(object):
             ".otl",
             ".otlnc",
         ]
-        if self.repo and self.repo.context:
-            self.repo.context["repo_load_path"] = os.path.join(
-                self.repo.context.get("repo_path"), "dcc", "houdini", "hda"
-            )
-
-        self.repo_conf_data = self.load_config()
-
-        self.repo.context["git_repo_path"] = self.repo_conf_data.get("repo_url")
+        self.repo.context["repo_load_path"] = os.path.join(
+            self.repo.context.get("repo_path"), "dcc", "houdini", "hda"
+        )
+        self.repo.context["config_path"] = self._config_path()
 
         logger.debug("Initialise DefaultLoad.")
 
@@ -46,28 +42,6 @@ class NodeManagerPlugin(object):
             (str): The path to the config file.
         """
         return os.path.join(self.repo.context.get("repo_path"), "config", "config.json")
-
-    def load_config(self):
-        """Load the repo config file.
-
-        Returns:
-            (dict): The repo config data.
-        """
-        config_path = self._config_path()
-        logger.debug(
-            "Loading config from: {config_path}".format(config_path=config_path)
-        )
-
-        repo_conf_data = {}
-        if os.path.isfile(config_path):
-            with open(config_path, "r") as repo_conf:
-                repo_conf_data = json.load(repo_conf)
-        else:
-            logger.warning(
-                "No config found at {path}, skipping.".format(path=config_path)
-            )
-        logger.debug("Config data: {data}".format(data=repo_conf_data))
-        return repo_conf_data
 
     def get_node_definition_files(self):
         """Get a list of node definition files in the given directory.

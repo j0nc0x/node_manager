@@ -1,5 +1,16 @@
 # Node Manager Release Notes
 
+## 0.4.0 (02/09/25)
+### Features
+#### Allow definitions to be hidden (https://github.com/j0nc0x/node_manager/issues/32)
+- Standardise config loading across all Load plugins.
+- Support ophide list in config files to define hidden node types.
+- Hide node types rather than skip loading them.
+- General tidy up of unused code.
+#### Add Python-3.11 (https://github.com/j0nc0x/node_manager/issues/35)
+- Added Python / Houdini version independent init.
+- Call the above init from python3.11 / python3.9 pythonrc.
+
 ## 0.3.0 (25/03/24)
 ### Features
 #### Add Pyblish Support (https://github.com/j0nc0x/node_manager/issues/18)
