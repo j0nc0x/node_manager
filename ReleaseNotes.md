@@ -1,6 +1,6 @@
 # Node Manager Release Notes
 
-## 0.4.0 (xx/xx/xx)
+## 0.4.0 (02/09/25)
 ### Features
 #### Allow definitions to be hidden (https://github.com/j0nc0x/node_manager/issues/32)
 - Standardise config loading across all Load plugins.
