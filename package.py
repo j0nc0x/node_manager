@@ -13,10 +13,24 @@ requires = [
     "houdini",
     "packaging",
     "pyblish_lite", # Required for PyblishValidate plugin. Name dependent on local rez pyblish lite configuration.
+    "python-3.11",
 ]
 
 build_command = "{root}/bin/build {install}"
 
+tests = {
+    "unit": {
+        "command": "export HOUDINI_PATH='&' && hython -m coverage run --source=node_manager -m pytest -vv tests && hython -m coverage report",
+        "requires": [
+            "pytest",
+            "coverage",
+            "importlib_metadata",
+            "typing_extensions",
+        ],
+        "run_on": ["default", "pre_install", "pre_release"],
+        "on_variants": True,
+    }
+}
 
 def commands():
     env.PYTHONPATH.prepend("{root}/lib/python")
