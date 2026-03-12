@@ -307,6 +307,7 @@ def force_ui_update(parm_paths):
         parm = hou.parm(path)
         if not parm:
             logger.warning("Parameter not found: {path}".format(path=path))
+            continue
 
         # Force the UI to update by clicking the parm.
         parm.pressButton()
