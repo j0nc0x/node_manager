@@ -1,2 +1,59 @@
-__pycache__/
+# These are some examples of commonly ignored file patterns.
+# You should customize this list as applicable to your project.
+# Learn more about .gitignore:
+#     https://www.atlassian.com/git/tutorials/saving-changes/gitignore
+
+# Compiled Python bytecode
+*.py[cod]
+__pycache__
+
+# Log files
+*.log
+
+# Tests
+.coverage
+.pytest_cache
+TEST*.xml
+
+# Package files
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+~*
+
+# Applications
+*.app
+*.exe
+*.war
+
+# Large media files
+*.mp4
+*.tiff
+*.avi
+*.flv
+*.mov
+*.wmv
+
+# Rez build dir
 build/
+
+# JetBrains IDE
+.idea/
+
+# VSCode IDE
+.vscode/
