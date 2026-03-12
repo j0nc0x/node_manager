@@ -20,7 +20,12 @@ install_path = os.environ["REZ_BUILD_INSTALL_PATH"]
 
 if os.path.exists(build_path):
     print("Removing old build: {build_path}".format(build_path=build_path))
-    shutil.rmtree(build_path)
+    for name in [name for name in os.listdir(build_path) if name != "build.rxt"]:
+        path = os.path.join(build_path, name)
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+        elif os.path.isfile(path):
+            os.remove(path)
 
 for name in [name for name in os.listdir(source_path) if name not in ignore_list]:
     path = os.path.join(source_path, name)
