@@ -169,6 +169,15 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         # Copy the expanaded HDA into it's correct location
         shutil.copytree(self._expand_dir(), hda_path)
 
+        # Update the docs
+        self._update_docs(definition, hda_path, comment)
+
+        # Increment version in config
+        repo_conf_data["version"] = self.release_version
+        os.makedirs(os.path.dirname(config_path), exist_ok=True)
+        with open(config_path, "w") as repo_conf:
+            json.dump(repo_conf_data, repo_conf)
+
         # See if anything was updated
         changes = [change.a_path for change in self._git_repo().index.diff(None)]
         if not changes and not self._git_repo().untracked_files:
@@ -179,116 +188,6 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         self._git_repo().git.add(A=True)
         self._git_repo().git.commit(m=comment)
         self._git_repo().git.push("--set-upstream", "origin", current)
-
-        # Update the docs
-        logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        logger.info(os.listdir(hda_path))
-        logger.info(self._node_type_name)
-        definition_subdirectory = nodetypeutils.definition_subdir(
-            self._node_type_name,
-            definition.nodeTypeCategory().name(),
-        )
-
-        # Node Icon
-        icon_path = os.path.join(hda_path, definition_subdirectory, "IconSVG")
-        has_icon = False
-        logger.info("Icon sub-directory: {path}".format(path=icon_path))
-        if os.path.isfile(icon_path):
-            logger.info("Icon file found at {path}".format(path=icon_path))
-            has_icon = True
-
-        # Node Description
-        description_path = os.path.join(hda_path, definition_subdirectory, "Description")
-        has_description = False
-        logger.info("Description sub-directory: {path}".format(path=description_path))
-        if os.path.isfile(description_path):
-            logger.info("Description file found at {path}".format(path=description_path))
-            has_description = True
-
-        # Parm Help
-        parm_templates_group = definition.parmTemplateGroup()
-        parm_help = []
-        if parm_templates_group:
-            for parm_template in parm_templates_group.parmTemplates():
-                logger.info(parm_template)
-                parm_help.append(
-                    {
-                        "name": parm_template.name(),
-                        "help": parm_template.help(),
-                    }
-                )
-        if parm_help:
-            logger.info("Parm help found: {help}".format(help=parm_help))
-
-        # Update the docs.
-        docs_path = self._docs_root()
-        logger.info("Docs path: {path}".format(path=docs_path))
-        logger.info(os.path.exists(docs_path))
-        if not os.path.exists(docs_path):
-            logger.info("Creating docs path: {path}".format(path=docs_path))
-            os.makedirs(docs_path, exist_ok=True)
-            logger.info("done")
-
-        logger.info(os.path.exists(docs_path))
-
-        node_docs_path = os.path.join(docs_path, "{name}.md".format(name=self.node_name))
-        logger.info("Node docs path: {path}".format(path=node_docs_path))
-        icon_relative = os.path.relpath(icon_path, docs_path)
-        with open(node_docs_path, "w") as node_docs:
-            node_docs.write("# {name}\n".format(name=self.node_name))
-
-            icon_name = "default.svg"
-            if has_icon:
-                logger.info("Writing icon to docs.")
-                icon_name = "{name}.svg".format(name=self.node_name)
-                shutil.copyfile(icon_path, os.path.join(docs_path, icon_name))
-
-            node_docs.write(
-                "<img src={path} width=\"50\" height=\"50\">".format(
-                    path=icon_name,
-                )
-            )
-
-            node_docs.write(
-                "**Category**: {category} **Namespace**: {namespace}\n".format(
-                    category=definition.nodeTypeCategory().name(),
-                    namespace=definition.nodeTypeName(),
-                )
-            )
-
-            if has_description:
-                node_docs.write("## Description\n")
-                with open(description_path, "r") as description:
-                    node_docs.write(description.read())
-                node_docs.write("\n")
-
-            if parm_help:
-                node_docs.write("## Parameters\n")
-                node_docs.write("| Name | Help |\n")
-                node_docs.write("| --- | --- |\n")
-            for parm in parm_help:
-                node_docs.write(
-                    "| {name} | {help} |\n".format(
-                        name=parm["name"],
-                        help=parm["help"],
-                    )
-                )
-
-        # Commit and push
-        self._git_repo().git.add(A=True)
-        self._git_repo().git.commit(m="Adding docs")
-        self._git_repo().git.push()
-
-        # Increment version in config
-        repo_conf_data["version"] = self.release_version
-        os.makedirs(os.path.dirname(config_path), exist_ok=True)
-        with open(config_path, "w") as repo_conf:
-            json.dump(repo_conf_data, repo_conf)
-
-        # Commit and push
-        self._git_repo().git.add(A=True)
-        self._git_repo().git.commit(config_path, m="Version up")
-        self._git_repo().git.push()
 
         # Push tag to repo
         new_tag = self._git_repo().create_tag(
@@ -320,6 +219,154 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
 
         return True
 
+    def _update_docs(self, definition, hda_path, comment):
+        """Update the documentation for the released node.
+
+        Args:
+            definition(hou.HDADefinition): The definition to update the docs for.
+            hda_path(str): The path to the expanded HDA.
+            comment(str): The release comment.
+        """
+        logger.info("Updating docs for {node}".format(node=self.node_name))
+        definition_subdirectory = nodetypeutils.definition_subdir(
+            self._node_type_name,
+            definition.nodeTypeCategory().name(),
+        )
+
+        # Node Icon
+        icon_path = os.path.join(hda_path, definition_subdirectory, "IconSVG")
+        has_icon = False
+        if os.path.isfile(icon_path):
+            has_icon = True
+
+        # Node Help
+        help_path = os.path.join(hda_path, definition_subdirectory, "Help")
+        node_help = None
+        if os.path.isfile(help_path):
+            with open(help_path, "r") as help_file:
+                node_help = help_file.read()
+
+        # Node Help (fallback from userData)
+        if not node_help:
+            node_help = definition.userData("help")
+
+        # Node Description (fallback if no Help)
+        if not node_help:
+            description_path = os.path.join(hda_path, definition_subdirectory, "Description")
+            if os.path.isfile(description_path):
+                with open(description_path, "r") as description_file:
+                    node_help = description_file.read()
+
+        # PythonModule
+        python_module_path = os.path.join(hda_path, definition_subdirectory, "PythonModule")
+        python_help = None
+        if os.path.isfile(python_module_path):
+             with open(python_module_path, "r") as python_module_file:
+                 content = python_module_file.read()
+                 # Try to extract docstring - very simple check for now
+                 match = re.search(r'(""".*?"""|\'\'\'.*?\'\'\')', content, re.DOTALL)
+                 if match:
+                     python_help = match.group(1)[3:-3].strip()
+
+        # Parm Help
+        parm_templates_group = definition.parmTemplateGroup()
+        parms_with_help = []
+        if parm_templates_group:
+            for parm_template in parm_templates_group.parmTemplates():
+                help_text = parm_template.help()
+                if help_text:
+                    parms_with_help.append(
+                        {
+                            "name": parm_template.name(),
+                            "help": help_text,
+                        }
+                    )
+
+        # Update the docs.
+        docs_path = self._docs_root()
+        if not os.path.exists(docs_path):
+            os.makedirs(docs_path, exist_ok=True)
+
+        node_docs_path = os.path.join(docs_path, "{name}.md".format(name=self.node_name))
+        
+        # Read existing docs to preserve release notes
+        existing_content = ""
+        if os.path.isfile(node_docs_path):
+            with open(node_docs_path, "r") as node_docs:
+                existing_content = node_docs.read()
+
+        # Build the new content
+        new_content = []
+        new_content.append("# {name}\n".format(name=self.node_name))
+
+        icon_name = "default.svg"
+        if has_icon:
+            icon_name = "{name}.svg".format(name=self.node_name)
+            shutil.copyfile(icon_path, os.path.join(docs_path, icon_name))
+
+        new_content.append(
+            "<img src={path} width=\"50\" height=\"50\">".format(
+                path=icon_name,
+            )
+        )
+
+        new_content.append(
+            "**Category**: {category} **Namespace**: {namespace}\n".format(
+                category=definition.nodeTypeCategory().name(),
+                namespace=definition.nodeTypeName(),
+            )
+        )
+
+        if node_help:
+            new_content.append("## Description\n")
+            new_content.append(node_help)
+            new_content.append("\n")
+
+        if python_help:
+            new_content.append("## Python Module\n")
+            new_content.append(python_help)
+            new_content.append("\n")
+
+        if parms_with_help:
+            new_content.append("## Parameters\n")
+            new_content.append("| Name | Help |\n")
+            new_content.append("| --- | --- |\n")
+            for parm in parms_with_help:
+                new_content.append(
+                    "| {name} | {help} |\n".format(
+                        name=parm["name"],
+                        help=parm["help"],
+                    )
+                )
+            new_content.append("\n")
+
+        # Release Notes
+        new_content.append("## Release Notes\n")
+        
+        # Add current release note
+        version = self.release_version
+        if not version:
+            version = "Unknown"
+        
+        new_content.append("### {version}\n".format(version=version))
+        if comment:
+            new_content.append("{comment}\n".format(comment=comment))
+        else:
+            new_content.append("No release notes for this version.\n")
+        new_content.append("\n")
+
+        # Append existing release notes if they exist
+        if "## Release Notes" in existing_content:
+            release_notes_part = existing_content.split("## Release Notes")[1].strip()
+            # Remove the version we just added if it's already there (though it shouldn't be for a new release)
+            if release_notes_part:
+                new_content.append(release_notes_part)
+                new_content.append("\n")
+
+        with open(node_docs_path, "w") as node_docs:
+            node_docs.writelines(new_content)
+
+
     def release(self, current_node, release_comment=None):
         """
         Publish a definition being edited by the Node manager.
@@ -336,7 +383,7 @@ class NodeManagerPlugin(release.NodeManagerPlugin):
         """
         logger.info("Beginning HDA release.")
 
-        # Get the release definitionq
+        # Get the release definition
         definition = self.get_release_definition(current_node)
 
         node_file_path = definition.libraryFilePath()
