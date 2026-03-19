@@ -28,6 +28,10 @@ class NodeManagerPlugin(object):
         ]
         if self.repo and self.repo.context:
             self.repo.context["repo_load_path"] = self.repo.context.get("repo_path")
+            self.repo.context["config_path"] = os.path.join(
+                self.repo.context.get("repo_load_path"),
+                "config.json",
+            )
         logger.debug("Initialise DefaultLoad.")
 
     def get_node_definition_files(self):

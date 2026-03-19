@@ -59,26 +59,27 @@ class NodeType(object):
         else:
             return self.name
 
-    def add_version(self, version, definition, force=False):
+    def add_version(self, version, definition, hidden=False):
         """
         Add a new NodeType version to the manager.
 
         Args:
             version(str): The version to add the definition under.
             definition(hou.HDADefinition): The definition to add.
-            force(:obj:`bool`,optional): Force the version to be added irrespective of
-                the load depth.
+            hidden(bool, optional): Should the definition be hidden?
         """
         logger.info(
-            "Adding version {version} for {name}".format(
-                version=version, name=self.get_name()
-            )
+            f"Adding version {version} for {self.get_name()}"
+            f"{' <hidden>' if hidden else ''}"
         )
         install = True
         path = definition.libraryFilePath()
 
         node_type_version = nodetypeversion.NodeTypeVersion(
-            path, definition=definition, install=install
+            path,
+            definition=definition,
+            install=install,
+            hidden=hidden,
         )
 
         if version is None:

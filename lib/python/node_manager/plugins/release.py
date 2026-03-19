@@ -105,7 +105,7 @@ class NodeManagerPlugin(object):
         logger.debug("Definition copied to {path}".format(path=release_path))
 
         # Add newly released .hda
-        self.repo.process_node_definition_file(release_path, force=True)
+        self.repo.process_node_definition_file(release_path)
 
         # Uninstall the old definition
         definitionutils.uninstall_definition(definition)
